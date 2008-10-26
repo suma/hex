@@ -1,0 +1,4 @@
+rm -r hex.pro
+qmake -project -o hex.pro
+qmake -spec macx-g++
+make -j3
