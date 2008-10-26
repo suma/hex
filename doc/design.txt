@@ -1,0 +1,21 @@
+
+View/Controller
+	View
+	Cursor
+		Position(inDocument)
+		VPosition(visible document position)
+		MouseInput
+		KeyInput
+	Scrollbar
+		Lensbar
+
+	ColorHilighting
+	OverlayView
+
+Document
+	+PieceTree
+	+
+	Event
+	BackupThread
+
+
