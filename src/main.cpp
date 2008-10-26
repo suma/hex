@@ -1,11 +1,13 @@
 #include <QApplication>
-#include "mywidgets.h"
+#include <QLabel>
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
-	Mywidgets wid;
-	wid.show();
+	//List wid;
+	//wid.show();
+	QLabel *label = new QLabel("Hello Qt!");
+	label->show();
 	return app.exec();
 }
 

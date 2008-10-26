@@ -4,7 +4,7 @@
 
 class Document
 {
-public;
+public:
 	Document();
 	virtual ~Document();
 

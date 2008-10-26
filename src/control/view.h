@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class Document;
+class Cursor;
 
 class View : public QWidget
 {
@@ -11,12 +12,14 @@ class View : public QWidget
 
 protected:
 	Document *doc_;
+	Cursor *cur_;
 
 public:
-	View(QWidget *parent = 0, Document *doc);
+	View(QWidget *parent = 0, Document *doc = 0);
 
 
 };
+
 
 
 #endif

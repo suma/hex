@@ -1,7 +1,6 @@
 #ifndef CONTROL_H_INC
 #define CONTROL_H_INC
 
-#include <QVector>
 #include <QMap>
 
 class Document;
@@ -10,7 +9,7 @@ class View;
 
 class Control
 {
-rotected:
+protected:
 	Document *doc_;
 	typedef QMap<int, Cursor*> CursorMap;
 	CursorMap curs_;

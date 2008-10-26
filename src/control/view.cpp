@@ -6,6 +6,8 @@
 View::View(QWidget *parent, Document *doc)
 	: QWidget(parent)
 	, doc_(doc)
+	, cur_(NULL)
 {
 }
+
 
