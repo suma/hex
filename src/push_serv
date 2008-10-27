@@ -1,0 +1,3 @@
+#!/bin/sh
+hg push ssh://hg@beautiful.homelinux.net:5001/repo-hex
+
