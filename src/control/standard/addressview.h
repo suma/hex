@@ -13,6 +13,8 @@ namespace Standard {
 		public:
 			AddressView(QWidget *parent = NULL, Document *doc = NULL);
 
+		protected:
+			void refreshPixmap();
 	};
 
 }

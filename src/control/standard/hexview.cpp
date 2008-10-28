@@ -9,6 +9,13 @@ HexView::HexView(QWidget *parent, Document *doc)
 {
 }
 
+void HexView::refreshPixmap()
+{
+	pix_.fill(QColor(0,255,255));
+	QPainter painter(&pix_);
+	//painter.initFrom(this);
 
+	update();
+}
 
 }	// namespace

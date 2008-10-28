@@ -2,6 +2,7 @@
 #define STDHEXVIEW_H_INC
 
 #include "../view.h"
+
 namespace Standard {
 
 
@@ -11,6 +12,9 @@ namespace Standard {
 
 		public:
 			HexView(QWidget *parent = NULL, Document *doc = NULL);
+
+		protected:
+			void refreshPixmap();
 	};
 
 }

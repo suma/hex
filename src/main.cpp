@@ -1,13 +1,16 @@
 #include <QApplication>
 #include <QLabel>
+#include "editor.h"
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
-	//List wid;
-	//wid.show();
-	QLabel *label = new QLabel("Hello Qt!");
-	label->show();
+	//Standard::HexView *hview = new Standard::HexView();
+	//hview->show();
+	//QLabel *label = new QLabel("Hello Qt!");
+	//label->show();
+	Editor *editor = new Editor();
+	editor->show();
 	return app.exec();
 }
 
