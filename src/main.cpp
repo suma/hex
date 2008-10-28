@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <QLabel>
 #include "editor.h"
 
 int main(int argc, char *argv[])
