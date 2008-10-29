@@ -7,13 +7,6 @@
 
 namespace Standard {
 
-	namespace Color {
-		enum color {
-			Background = 0,
-			Text,
-		};
-	}
-
 	class HexConfig
 	{
 	public:

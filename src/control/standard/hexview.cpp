@@ -4,6 +4,15 @@
 
 namespace Standard {
 
+	namespace Color {
+		enum color {
+			Background = 0,
+			Text,
+		};
+	}
+
+
+////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
 	: Margin(10, 10, 10, 10)
@@ -21,6 +30,7 @@ void HexConfig::calculate()
 {
 }
 
+////////////////////////////////////////
 // View
 HexView::HexView(QWidget *parent, Document *doc)
 	: ::View(parent, doc)
@@ -33,6 +43,8 @@ void HexView::refreshPixmap()
 
 	QPainter painter(&pix_);
 	//painter.initFrom(this);
+
+	// draw lines
 
 	update();
 }
