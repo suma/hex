@@ -10,11 +10,11 @@ namespace Standard {
 	{
 		Q_OBJECT
 
-		public:
-			AddressView(QWidget *parent = NULL, Document *doc = NULL);
+	public:
+		AddressView(QWidget *parent = NULL, Document *doc = NULL);
 
-		protected:
-			void refreshPixmap();
+	protected:
+		void refreshPixmap();
 	};
 
 }
