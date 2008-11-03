@@ -1,6 +1,9 @@
 
 #include <QtGui>
+#include <algorithm>
 #include "hexview.h"
+
+using namespace std;
 
 namespace Standard {
 
@@ -26,7 +29,7 @@ HexConfig::HexConfig()
 	for (int i = 1; i < Num; i++) {
 		Spaces[i] = FontMetrics.maxWidth();
 	}
-	Spaces[0] = 0;
+	Spaces[0] = Spaces[Num] = 0;
 	Spaces[Num / 2] *= 2;
 
 	calculate();
@@ -34,12 +37,43 @@ HexConfig::HexConfig()
 
 void HexConfig::calculate()
 {
+	// Pos
 	x_[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
 		x_[i] = x_[i-1] + byteWidth() + Spaces[i];
 	}
 
+	// Area
+	xarea_[0] = Margin.left();
+	for (int i = 1; i < Num; i++) {
+		xarea_[i] = xarea_[i-1] + byteWidth() + Spaces[i];
+	}
+	for (int i = 1; i < Num; i++) {
+		xarea_[i] -= Spaces[i] / 2;
+	}
+
 	top_ = Margin.top() + ByteMargin.top();
+}
+
+int HexConfig::toPos(int x)
+{
+	if (x < Margin.left()) {
+		return -1;
+	}
+
+	int a = (int)distance(xarea_, lower_bound(xarea_, xarea_ + Num + 1, x));
+	if (a == Num + 1) {
+		return 32;
+	}
+
+	if (x <= xarea_[a] + FontMetrics.maxWidth()) {
+		return x * 2 + 1;
+	}
+	return x * 2;
+}
+
+int HexConfig::toLine(int y)
+{
 }
 
 ////////////////////////////////////////
@@ -69,6 +103,18 @@ void HexView::refreshPixmap()
 	}
 
 	update();
+}
+
+void HexView::mousePressEvent(QMouseEvent*)
+{
+}
+
+void HexView::mouseMoveEvent(QMouseEvent*)
+{
+}
+
+void HexView::mouseReleaseEvent(QMouseEvent*)
+{
 }
 
 

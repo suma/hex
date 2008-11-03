@@ -17,12 +17,13 @@ namespace Standard {
 		QRect ByteMargin;
 		QFont Font;
 		QColor Colors[16];
-		int Spaces[Num];
+		int Spaces[Num+1]; // last is yoyuu
 
 	private:
 		QFontMetrics FontMetrics;
 		int top_;
-		int x_[Num];
+		int x_[Num];	// pos of value
+		int xarea_[Num];
 	
 	public:
 		HexConfig();
@@ -33,7 +34,7 @@ namespace Standard {
 		}
 		inline int byteWidth() const
 		{
-			return ByteMargin.left() + FontMetrics.maxWidth() + ByteMargin.right();
+			return ByteMargin.left() + (FontMetrics.maxWidth() * 2) + ByteMargin.right();
 		}
 		inline int byteHeight() const
 		{
@@ -48,6 +49,8 @@ namespace Standard {
 			Q_ASSERT(0 <= i && i < Num);
 			return x_[i];
 		}
+		int toPos(int x);	// -1, 0..31, 32:: 32 + 2 = 34
+		int toLine(int y);	// [0, N]
 		void calculate();
 	};
 
@@ -63,6 +66,10 @@ namespace Standard {
 	protected:
 
 		void refreshPixmap();
+
+		void mousePressEvent(QMouseEvent*);
+		void mouseMoveEvent(QMouseEvent*);
+		void mouseReleaseEvent(QMouseEvent*);
 
 	protected:
 		HexConfig config_;
