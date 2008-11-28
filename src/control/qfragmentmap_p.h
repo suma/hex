@@ -56,7 +56,7 @@ QT_BEGIN_NAMESPACE
 
 template <class T> class QFragmentMap;
 
-#define ulint quint64
+typedef quint64 ulint;
 
 class QFragment
 {
@@ -86,7 +86,7 @@ public:
         quint32 root; // this relies on being at the same position as parent in the fragment struct for now.
         quint32 unused1;
         quint32 unused2;
-        quint32 size; // 64*allocated
+        quint32 size; // 32*allocated
         quint32 freelist;
         quint32 node_count;
         quint32 allocated;
@@ -134,9 +134,9 @@ public:
         return fragment(node)->size_left;
     }
 
-    inline ulint index(uint node) const {
+    inline uint index(uint node) const {
         const QFragment *f = fragment(node);
-        ulint offset = f->weight_left;
+        uint offset = f->weight_left;
         while (f->parent) {
             uint p = f->parent;
             f = fragment(p);
@@ -177,14 +177,14 @@ public:
     }
 
 
-    uint findNode(int k) const;
-    uint findNodeByIndex(int k) const;
+    uint findNode(ulint k) const;
+    uint findNodeByIndex(ulint k) const;
 
-    uint insert_single(int key, ulint length);
+    uint insert_single(ulint key, ulint length);
     uint erase_single(uint f);
 
-//#ifdef QT_QMAP_DEBUG
-#if 0
+#ifdef QT_QMAP_DEBUG
+//#if 0
     void inorder() {
         std::cout << ">>>> inorder >>>>" << std::endl;
         uint x = head->root;
@@ -262,7 +262,7 @@ public:
         T *operator->() { Q_ASSERT(!atEnd()); return pt->fragment(n); }
         const T *operator->() const { Q_ASSERT(!atEnd()); return pt->fragment(n); }
 
-        int position() const { Q_ASSERT(!atEnd()); return pt->data.position(n); }
+        ulint position() const { Q_ASSERT(!atEnd()); return pt->data.position(n); }
         const T *value() const { Q_ASSERT(!atEnd()); return pt->fragment(n); }
         T *value() { Q_ASSERT(!atEnd()); return pt->fragment(n); }
 
@@ -301,7 +301,7 @@ public:
         const T *operator*()  const { Q_ASSERT(!atEnd()); return pt->fragment(n); }
         const T *operator->()  const { Q_ASSERT(!atEnd()); return pt->fragment(n); }
 
-        int position() const { Q_ASSERT(!atEnd()); return pt->data.position(n); }
+        ulint position() const { Q_ASSERT(!atEnd()); return pt->data.position(n); }
         ulint size() const { Q_ASSERT(!atEnd()); return pt->data.size(n); }
         const T *value() const { Q_ASSERT(!atEnd()); return pt->fragment(n); }
 
@@ -341,13 +341,13 @@ public:
     inline int numNodes() const { return data.head->node_count; }
     ulint length() const { return data.length(); }
 
-    Iterator find(int k) { return Iterator(this, data.findNode(k)); }
-    ConstIterator find(int k) const { return ConstIterator(this, data.findNode(k)); }
+    Iterator find(ulint k) { return Iterator(this, data.findNode(k)); }
+    ConstIterator find(ulint k) const { return ConstIterator(this, data.findNode(k)); }
 
-    uint findNode(int k) const { return data.findNode(k); }
-    uint findNodeByIndex(int k) const { return data.findNodeByIndex(k); }
+    uint findNode(ulint k) const { return data.findNode(k); }
+    uint findNodeByIndex(ulint k) const { return data.findNodeByIndex(k); }
 
-    uint insert_single(int key, ulint length)
+    uint insert_single(ulint key, ulint length)
     {
         uint f = data.insert_single(key, length);
         if (f != 0) {
@@ -375,7 +375,7 @@ public:
         Q_ASSERT(index != 0);
         return static_cast<const T *>(data.fragment(index));
     }
-    inline uint position(uint node) const { return data.position(node); }
+    inline ulint position(uint node) const { return data.position(node); }
     inline ulint index(uint node) const { return data.index(node); }
     inline uint next(uint n) const { return data.next(n); }
     inline uint previous(uint n) const { return data.previous(n); }
@@ -401,7 +401,6 @@ private:
     QFragmentMap& operator= (const QFragmentMap& m);
 };
 
-#undef quint
 
 QT_END_NAMESPACE
 

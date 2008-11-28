@@ -54,7 +54,6 @@
 
 QT_BEGIN_NAMESPACE
 
-#define ulint quint64
 
 static int qAllocMore(int alloc, int extra)
 {
@@ -75,9 +74,8 @@ static int qAllocMore(int alloc, int extra)
 }
 
 
-//#ifdef //QT_QMAP_DEBUG
-#if 0
-#define PMDEBUG qDebug
+#ifdef QT_QMAP_DEBUG
+//#define PMDEBUG qDebug
 void QFragmentMap::inorder(uint x, int level) {
     if (X.left)
         inorder(X.left, level + 1);
@@ -556,11 +554,11 @@ uint QFragmentMapData::erase_single(uint z)
     return w;
 }
 
-uint QFragmentMapData::findNode(int k) const
+uint QFragmentMapData::findNode(ulint k) const
 {
     uint x = root();
 
-    uint s = k;
+    ulint s = k;
     while (x) {
         if (sizeLeft(x) <= s) {
             if (s < sizeLeft(x) + size(x))
@@ -574,11 +572,11 @@ uint QFragmentMapData::findNode(int k) const
     return 0;
 }
 
-uint QFragmentMapData::findNodeByIndex(int k) const
+uint QFragmentMapData::findNodeByIndex(ulint k) const
 {
     uint x = root();
 
-    uint s = k;
+    ulint s = k;
     while (x) {
         if (weightLeft(x) <= s) {
             if (s <= weightLeft(x))
@@ -592,9 +590,9 @@ uint QFragmentMapData::findNodeByIndex(int k) const
     return 0;
 }
 
-uint QFragmentMapData::insert_single(int key, ulint length)
+uint QFragmentMapData::insert_single(ulint key, ulint length)
 {
-    Q_ASSERT(!findNode(key) || (int)this->position(findNode(key)) == key);
+    Q_ASSERT(!findNode(key) || (ulint)this->position(findNode(key)) == key);
 
     uint z = createFragment();
 
@@ -610,7 +608,7 @@ uint QFragmentMapData::insert_single(int key, ulint length)
 
     Q_ASSERT(!x || X.parent == 0);
 
-    uint s = key;
+    ulint s = key;
 //     inorder();
     bool right = false;
     while (x) {
@@ -664,6 +662,5 @@ ulint QFragmentMapData::length() const {
     return root ? sizeLeft(root) + size(root) + sizeRight(root) : 0;
 }
 
-#undef uint
 
 QT_END_NAMESPACE
