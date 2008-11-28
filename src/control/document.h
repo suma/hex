@@ -9,6 +9,8 @@ public:
 	Document();
 	virtual ~Document();
 
+protected:
+
 };
 
 
