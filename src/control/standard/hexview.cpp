@@ -81,9 +81,15 @@ int HexConfig::toLine(int y)
 HexView::HexView(QWidget *parent, Document *doc)
 	: ::View(parent, doc)
 {
+	setWindowOpacity(0.5);
 }
 
 void HexView::refreshPixmap()
+{
+	refreshPixmap(0);
+}
+
+void HexView::refreshPixmap(int)
 {
 	pix_.fill(config_.Colors[Color::Background]);
 

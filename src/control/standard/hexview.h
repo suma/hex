@@ -66,6 +66,7 @@ namespace Standard {
 	protected:
 
 		void refreshPixmap();
+		void refreshPixmap(int);
 
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
