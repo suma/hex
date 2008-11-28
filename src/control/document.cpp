@@ -1,14 +1,6 @@
 
 #include "document.h"
 
-/*
-static bool isValidBlockSeparator(const QChar &ch)
-{
-    return ch == QChar::ParagraphSeparator
-        || ch == QTextBeginningOfFrame
-        || ch == QTextEndOfFrame;
-}
-*/
 
 Document::Document()
 {
@@ -27,23 +19,9 @@ uint Document::insert_data(ulint pos, uint bufPos, uint length, quint8 type)
     X->bufferPosition = bufPos;
 
     uint w = documents_.previous(x);
-    if (w)
+    if (w) {
         unite(w);
-
-	/*
-    int b = blocks.findNode(pos);
-    blocks.setSize(b, blocks.size(b)+length);
-
-    Q_ASSERT(blocks.length() == fragments.length());
-
-    QTextFrame *frame = qobject_cast<QTextFrame *>(objectForFormat(format));
-    if (frame) {
-        frame->d_func()->fragmentAdded(text.at(strPos), x);
-        framesDirty = true;
-    }
-
-    adjustDocumentChangesAndCursors(pos, length, op);
-	*/
+	}
 	return w;
 }
 
@@ -65,18 +43,9 @@ uint Document::remove_data(ulint pos, ulint length)
 	}
 
     uint w = documents_.previous(documents_.findNode(pos));
-    if (w)
+    if (w) {
         unite(w);
-
-
-	/*
-    QTextFrame *frame = qobject_cast<QTextFrame *>(objectForFormat(fragments.fragment(x)->format));
-    if (frame) {
-        frame->d_func()->fragmentRemoved(text.at(fragments.fragment(x)->stringPosition), x);
-        framesDirty = true;
-    }
-	*/
-	// collect erase data
+	}
 	return w;
 }
 
