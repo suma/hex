@@ -11,15 +11,15 @@ DocumentImpl::~DocumentImpl()
 {
 }
 
-uint DocumentImpl::insert_data(ulint pos, ulint bufPos, uint length, quint8 type)
+uint DocumentImpl::insert_data(ulint pos, ulint bufPos, uint len, quint8 type)
 {
     split(pos);
-    uint x = documents_.insert_single(pos, length);
+    uint x = documents_.insert_single(pos, len);
     DocumentData *X = documents_.fragment(x);
     X->type = type;
     X->bufferPosition = bufPos;
 
-	length_ += length;
+	length_ += len;
 
     uint w = documents_.previous(x);
     if (w) {
@@ -28,25 +28,44 @@ uint DocumentImpl::insert_data(ulint pos, ulint bufPos, uint length, quint8 type
 	return w;
 }
 
-uint DocumentImpl::remove_data(ulint pos, ulint length)
+uint DocumentImpl::remove_data(ulint pos, ulint len)
 {
+	Q_ASSERT(pos < length_);
     split(pos);
 	uint x = documents_.findNode(pos);
     uint w = documents_.previous(x);
-	while (x && 0 < length) {
-		ulint size = documents_.size(x);
-		if (length <= size) {
-			length -= size;
+
+	ulint diff = pos - documents_.position(x);
+	if (diff) {
+		ulint size = documents_.size(x) - diff;
+		if (size < len) {
+			len -= size;
 			length_ -= size;
 			x = documents_.erase_single(x);
-			x = documents_.next(x);	// which is more fast next or find?
+			x = documents_.next(x);
 		} else {
 			length_ -= size;
-			documents_.setSize(x, size - length);
+			documents_.setSize(x, size - len);
+			goto END;
+		}
+	}
+
+	Q_ASSERT(x != 0);
+	while (0 < len) {
+		ulint size = documents_.size(x);
+		if (size < len) {
+			len -= size;
+			length_ -= size;
+			x = documents_.erase_single(x);
+			x = documents_.next(x);
+		} else {
+			length_ -= size;
+			documents_.setSize(x, size - len);
 			break;
 		}
 	}
 
+END:
     if (w) {
         unite(w);
 	}

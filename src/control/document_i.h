@@ -10,12 +10,13 @@ public:
 	inline void invalidate() const {}
 	inline void free() {}
 	quint64 bufferPosition;
-	quint8 type;
+	uint type;
 };
 
 
 class DocumentImpl
 {
+	friend class Document;
 public:
 
 	typedef QFragmentMap<DocumentData> DocumentMap;
