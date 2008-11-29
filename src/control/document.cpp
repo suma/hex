@@ -3,7 +3,7 @@
 #include "document.h"
 #include "document_i.h"
 
-
+#define DEFAULT_BUFFER_SIZE (1024 * 256)
 
 enum {
 	DOCTYPE_BUFFER = 0,
@@ -13,6 +13,7 @@ Document::Document()
 	: doc_(new DocumentImpl())
 	, file_(NULL)
 {
+	buffer_.reserve(DEFAULT_BUFFER_SIZE);
 }
 
 Document::~Document()
@@ -94,9 +95,9 @@ void Document::insert(quint64 pos, const uchar *buf, uint len)
 
 void Document::remove(quint64 pos, quint64 len)
 {
-	Q_ASSERT(pos < length());
-	Q_ASSERT(len < length());
-	Q_ASSERT(pos < length() - len);
+	Q_ASSERT(pos <= length());
+	Q_ASSERT(len <= length());
+	Q_ASSERT(pos <= length() - len);
 	doc_->remove_data(pos, len);
 }
 

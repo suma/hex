@@ -30,7 +30,6 @@ uint DocumentImpl::insert_data(ulint pos, ulint bufPos, uint len, quint8 type)
 
 uint DocumentImpl::remove_data(ulint pos, ulint len)
 {
-	Q_ASSERT(pos <= length_ + len);
     split(pos);
     split(pos+len);
 	uint x = documents_.findNode(pos);
