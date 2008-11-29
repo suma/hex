@@ -6,9 +6,9 @@
 class DocumentData : public QFragment
 {
 public:
-	void initialize() {}
-	void invalidate() const {}
-	void free() {}
+	inline void initialize() {}
+	inline void invalidate() const {}
+	inline void free() {}
 	quint64 bufferPosition;
 	quint8 type;
 };
