@@ -18,8 +18,9 @@ public:
 
 	quint64 length() const;
 
-	void get(quint64 pos, uint len, uchar *buf);
+	void get(quint64 pos, uchar *buf, uint len);
 	void insert(quint64 pos, const uchar *buf, uint len);
+	void remove(quint64 pos, quint64 len);
 
 private:
 	void copy(uint type, quint64 pos, quint64 len, uchar *buf);

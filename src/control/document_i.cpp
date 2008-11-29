@@ -27,28 +27,14 @@ uint DocumentImpl::insert_data(ulint pos, ulint bufPos, uint len, quint8 type)
 	}
 	return w;
 }
-
+#include <stdio.h>
 uint DocumentImpl::remove_data(ulint pos, ulint len)
 {
-	Q_ASSERT(pos < length_);
+	Q_ASSERT(pos + len <= length_);
     split(pos);
+    split(pos+len);
 	uint x = documents_.findNode(pos);
     uint w = documents_.previous(x);
-
-	ulint diff = pos - documents_.position(x);
-	if (diff) {
-		ulint size = documents_.size(x) - diff;
-		if (size < len) {
-			len -= size;
-			length_ -= size;
-			x = documents_.erase_single(x);
-			x = documents_.next(x);
-		} else {
-			length_ -= size;
-			documents_.setSize(x, size - len);
-			goto END;
-		}
-	}
 
 	Q_ASSERT(x != 0);
 	while (0 < len) {
@@ -59,13 +45,12 @@ uint DocumentImpl::remove_data(ulint pos, ulint len)
 			x = documents_.erase_single(x);
 			x = documents_.next(x);
 		} else {
-			length_ -= size;
+			length_ -= len;
 			documents_.setSize(x, size - len);
 			break;
 		}
 	}
 
-END:
     if (w) {
         unite(w);
 	}
