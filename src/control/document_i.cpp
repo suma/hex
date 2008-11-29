@@ -27,7 +27,7 @@ uint DocumentImpl::insert_data(ulint pos, ulint bufPos, uint len, quint8 type)
 	}
 	return w;
 }
-#include <stdio.h>
+
 uint DocumentImpl::remove_data(ulint pos, ulint len)
 {
 	Q_ASSERT(pos + len <= length_);
