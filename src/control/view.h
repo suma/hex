@@ -4,7 +4,6 @@
 #include <QWidget>
 
 class Document;
-class Cursor;
 
 class View : public QWidget
 {
@@ -12,7 +11,6 @@ class View : public QWidget
 
 protected:
 	Document *doc_;
-	Cursor *cur_;
 	QPixmap pix_;
 
 public:

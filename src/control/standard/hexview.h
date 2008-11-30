@@ -7,6 +7,8 @@
 
 namespace Standard {
 
+	class Cursor;
+
 	class HexConfig
 	{
 	public:
@@ -59,7 +61,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		HexView(QWidget *parent = NULL, Document *doc = NULL);
+		HexView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL);
 
 		HexConfig & getConfig() { return config_; }
 
@@ -74,6 +76,7 @@ namespace Standard {
 
 	protected:
 		HexConfig config_;
+		Cursor *cur_;
 	};
 
 }

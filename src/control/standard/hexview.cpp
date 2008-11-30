@@ -2,6 +2,7 @@
 #include <QtGui>
 #include <algorithm>
 #include "hexview.h"
+#include "scursor.h"
 
 using namespace std;
 
@@ -78,8 +79,9 @@ int HexConfig::toLine(int y)
 
 ////////////////////////////////////////
 // View
-HexView::HexView(QWidget *parent, Document *doc)
+HexView::HexView(QWidget *parent, Document *doc, Cursor *cur)
 	: ::View(parent, doc)
+	, cur_(cur)
 {
 	setWindowOpacity(0.5);
 }
@@ -100,13 +102,19 @@ void HexView::refreshPixmap(int)
 	painter.drawText(20, 20, QString("abcdefg"));
 
 	// draw lines
-	int yCount = 5;
 	int y = config_.top();
-	for (int i = 0; i < yCount; i++) {
-		//drawLine
-		const int x = config_.x(i);
-		// draw hex
-		y += config_.byteHeight();
+	int yMax = height();
+	// split: CursorPos/Selected(Begin/End) => 1 - 3
+	if (cur_->Selected) {
+		/*
+		for (int i = 0; i < yMax; i++) {
+			//drawLine
+			const int x = config_.x(i);
+			// draw hex
+			y += config_.byteHeight();
+		}
+		*/
+	} else {
 	}
 
 	update();

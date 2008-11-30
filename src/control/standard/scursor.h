@@ -2,7 +2,6 @@
 #define STDCURSOR_H_INC
 
 #include <QtGlobal>
-#include "../cursor.h"
 
 namespace Standard {
 
@@ -10,14 +9,15 @@ namespace Standard {
 		quint64 X, Y;
 	};
 
-	class CCursor : public ::Cursor
+	class Cursor
 	{
 	public:
-		CCursor();
+		Cursor();
 
 	public:
 
 		quint64 Position;
+		bool Selected;
 
 	};
 
