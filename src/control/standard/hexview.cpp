@@ -97,6 +97,7 @@ void HexView::refreshPixmap(int)
 	//painter.initFrom(this);
 
 	// TODO: Optimizing drawing
+	painter.drawText(20, 20, QString("abcdefg"));
 
 	// draw lines
 	int yCount = 5;
