@@ -16,7 +16,10 @@ namespace Standard {
 
 	public:
 
-		quint64 Position;
+		quint64 Top;		// Number of Line
+		quint64 Position;	// pos(not line)
+		quint64 SelBegin;	// pos(not line)
+		quint64 SelEnd;		// pos(not line)
 		bool Selected;
 
 	};

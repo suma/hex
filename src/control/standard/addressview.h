@@ -6,15 +6,21 @@
 
 namespace Standard {
 
+	class Cursor;
+
 	class AddressView : public ::View
 	{
 		Q_OBJECT
 
 	public:
-		AddressView(QWidget *parent = NULL, Document *doc = NULL);
+		AddressView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL);
 
 	protected:
 		void refreshPixmap();
+
+	protected:
+		Cursor *cur_;
+	
 	};
 
 }

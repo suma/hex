@@ -4,7 +4,8 @@
 namespace Standard {
 
 Cursor::Cursor()
-	: Position(0)
+	: Top(0)
+	, Position(0)
 	, Selected(false)
 {
 }

@@ -1,11 +1,13 @@
 
 #include <QtGui>
 #include "addressview.h"
+#include "scursor.h"
 
 namespace Standard {
 
-AddressView::AddressView(QWidget *parent, Document *doc)
+AddressView::AddressView(QWidget *parent, Document *doc, Cursor *cur)
 	: ::View(parent, doc)
+	, cur_(cur)
 {
 }
 

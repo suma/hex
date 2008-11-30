@@ -1,8 +1,10 @@
 
 #include <QtGui>
 #include <algorithm>
+#include <vector>
 #include "hexview.h"
 #include "scursor.h"
+#include "../document.h"
 
 using namespace std;
 
@@ -93,31 +95,102 @@ void HexView::refreshPixmap()
 
 void HexView::refreshPixmap(int)
 {
-	pix_.fill(config_.Colors[Color::Background]);
+	//
+	// TODO: Optimizing drawing
 
+	pix_.fill(config_.Colors[Color::Background]);
 	QPainter painter(&pix_);
 	//painter.initFrom(this);
 
-	// TODO: Optimizing drawing
 	painter.drawText(20, 20, QString("abcdefg"));
 
-	// draw lines
-	int y = config_.top();
-	int yMax = height();
-	// split: CursorPos/Selected(Begin/End) => 1 - 3
-	if (cur_->Selected) {
-		/*
-		for (int i = 0; i < yMax; i++) {
-			//drawLine
-			const int x = config_.x(i);
-			// draw hex
-			y += config_.byteHeight();
-		}
-		*/
-	} else {
+	/* sel.end < vpostop => not selected
+	 * vposend < sel.begin => not selected
+	 *
+	 * 4 patterns
+	 * begin >= top  :: 最初から
+	 * begin != top  :: 途中から
+	 * end <= bottom :: 最後まで
+	 * end != bottom :: 途中まで
+	 *
+	 */
+
+	if (!doc_->length()) {
+		return;
 	}
 
+	int y = config_.top();
+	const int yMax = height();
+	const int yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
+	quint64 top = cur_->Top * 16;
+	const int xb = 0, xe = width();
+	const uint size = min(doc_->length() - top, 16ULL * yCount);
+	bool selected = false;
+	quint64 sb, se;
+	if (cur_->Selected) {
+		if (cur_->SelEnd < cur_->SelBegin) {
+			sb = cur_->SelBegin;
+			se = cur_->SelEnd;
+		} else {
+			sb = cur_->SelEnd;
+			se = cur_->SelBegin;
+		}
+		if (top <= se) {
+			quint64 a = 16ULL;
+			const quint64 vpos_end = max(top + (16ULL * yCount), top + size);
+			if (sb <= vpos_end) {
+				selected = true;
+			}
+		}
+	}
+	DrawInfo di(y, top, yCount, xb, xe, sb, se, size);
+	if (selected) {
+		drawSelected(di);
+	} else {
+		drawNoSelected(di);
+	}
+
+	// ALL
+	// LINE
+	// AFTER, line
+
+	// draw lines
+	/*
+	int y = config_.top();
+	const int yMax = height();
+	const int yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
+	Q_ASSERT(doc_->length() >= (cur_->Top * 16));
+	const quint64 top = cur_->Top * 16;
+	const uint size = min(doc_->length() - top, 16ULL * yCount);
+	vector<uchar> buff(size);
+	doc_->get(top, &buff[0], size);
+	*/
+
+
 	update();
+}
+
+// x: [xb, xe)
+// y: [line, line_e)
+// line: line begin
+// line_e: line end
+// xb: x begin
+// xe: x end
+void HexView::drawSelected(const DrawInfo &di)
+{
+}
+
+void HexView::drawNoSelected(const DrawInfo &di)
+{
+	/*
+	Q_ASSERT(doc_->length() >= (top * 16));
+	const uint size = min(doc_->length() - top, 16ULL * count);
+	vector<uchar> buff(size);
+	doc_->get(top, &buff[0], size);
+	*/
+
+	//for (int i = 0; i < count; i++) {
+	//}
 }
 
 void HexView::mousePressEvent(QMouseEvent*)

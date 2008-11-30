@@ -74,6 +74,36 @@ namespace Standard {
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
 
+		struct DrawInfo {
+			int y;
+			int count;
+			int xb;
+			int xe;
+			uint size;
+			quint64 top;
+			quint64 sb;
+			quint64 se;
+			std::vector<uchar> buff;
+			DrawInfo(int Y, quint64 Top, int Count, int Xb, int Xe, quint64 Sb, quint64 Se, uint Size)
+				: buff(size)
+			{
+				y = Y;
+				count = Count;
+				xb = Xb;
+				Xe = Xe;
+				size = Size;
+				top = Top;
+				sb = Sb;
+				se = Se;
+			}
+			DrawInfo() {}
+			~DrawInfo() {}
+		};
+
+
+		void drawSelected(const DrawInfo &di);
+		void drawNoSelected(const DrawInfo &di);
+
 	protected:
 		HexConfig config_;
 		Cursor *cur_;
