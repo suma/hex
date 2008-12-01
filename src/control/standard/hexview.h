@@ -102,7 +102,7 @@ namespace Standard {
 
 
 		void drawSelected(const DrawInfo &di);
-		void drawNoSelected(const DrawInfo &di);
+		void drawNonSelected(const DrawInfo &di);
 
 	protected:
 		HexConfig config_;

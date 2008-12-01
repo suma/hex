@@ -125,6 +125,7 @@ void HexView::refreshPixmap(int)
 	quint64 top = cur_->Top * 16;
 	const int xb = 0, xe = width();
 	const uint size = min(doc_->length() - top, 16ULL * yCount);
+
 	bool selected = false;
 	quint64 sb, se;
 	if (cur_->Selected) {
@@ -136,18 +137,19 @@ void HexView::refreshPixmap(int)
 			se = cur_->SelBegin;
 		}
 		if (top <= se) {
-			quint64 a = 16ULL;
 			const quint64 vpos_end = max(top + (16ULL * yCount), top + size);
 			if (sb <= vpos_end) {
 				selected = true;
 			}
 		}
 	}
+
+	// Draw
 	DrawInfo di(y, top, yCount, xb, xe, sb, se, size);
 	if (selected) {
 		drawSelected(di);
 	} else {
-		drawNoSelected(di);
+		drawNonSelected(di);
 	}
 
 	// ALL
@@ -176,11 +178,71 @@ void HexView::refreshPixmap(int)
 // line_e: line end
 // xb: x begin
 // xe: x end
+/*
+int y;
+int count;
+int xb;
+int xe;
+uint size;
+quint64 top;
+quint64 sb;
+quint64 se;
+std::vector<uchar> buff;
+*/
 void HexView::drawSelected(const DrawInfo &di)
 {
+	// -: nonselected
+	// o: selected
+	// case:
+	// a [-------]
+	// b [ooooooo]
+	// c [oooo---]
+	// d [---oooo]
+	// e [--ooo--]
+	/*
+	bool sel = false;
+	st = case()
+	swich (st) {
+	case a:
+		push(A)
+		if (sel) {
+			RENZOKU
+		} else {
+			A/D/E
+		}
+	case b: sel = true
+		// CHECK RENZOKU
+		// else A/C/D/E
+	case c: sel = true
+		// CHECK A
+	case d: sel = true
+		// CHECK B/C
+	case e: sel = true
+		// CHECK A
+	}
+*/
+
+	// o: selected
+	// -: nonselected
+	// case Y
+	//  [ooooooo]
+	//  [oooo---]
+	//  [---oooo]
+	//  [--ooo--]
+	// case X
+	//  [ooooooo] on
+	//  [oooo---] on + non
+	//  [---oooo] non + on
+	//  [--ooo--] non + on + non
+	//  [-------] nonselected
+
+
+
+
+
 }
 
-void HexView::drawNoSelected(const DrawInfo &di)
+void HexView::drawNonSelected(const DrawInfo &di)
 {
 	/*
 	Q_ASSERT(doc_->length() >= (top * 16));
