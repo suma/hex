@@ -163,10 +163,14 @@ void HexView::refreshPixmap(int)
 			// Draw background
 			painter.fillRect(config_.x(j), yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
 			printf("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
-		} /*else if (j < HexConfig::Num - 1) {
-			painter.fillRect(config_.x(j), yt, config_.X(j+1), yt + config_.byteHeight() - config_.x(j), br);
-			printf("#x:%d, x2:%d\n", config_.x(j), config_.X(j+1));
-		} */
+		} else {
+			int begin = config_.x(j);
+			int width = config_.fontMetrics().maxWidth() * 2;
+			if (j == HexConfig::Num - 1) {
+				+ config_.Spaces[j+1] / 2;
+			}
+			painter.fillRect(begin, yt, width, config_.byteHeight(), br);
+		}
 
 		// Draw
 		for (int k = 0; k < cont; k++, i++, j++) {
