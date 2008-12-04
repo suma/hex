@@ -9,6 +9,16 @@ namespace Standard {
 
 	class Cursor;
 
+	namespace Color {
+		enum color {
+			Background = 0,
+			Text,
+			HiBackground,	// hilighted
+			HiSelText,
+			ColorCount,
+		};
+	}
+
 	class HexConfig
 	{
 	public:
@@ -18,7 +28,7 @@ namespace Standard {
 		QRect Margin;
 		QRect ByteMargin;
 		QFont Font;
-		QColor Colors[16];
+		QColor Colors[ColorCount];
 		int Spaces[Num+1]; // last is yoyuu
 
 	private:
@@ -83,7 +93,6 @@ namespace Standard {
 			quint64 top;
 			quint64 sb;
 			quint64 se;
-			std::vector<uchar> buff;
 			DrawInfo(int Y, quint64 Top, int Count, int Xb, int Xe, quint64 Sb, quint64 Se, uint Size)
 				: buff(size)
 			{
@@ -107,6 +116,7 @@ namespace Standard {
 	protected:
 		HexConfig config_;
 		Cursor *cur_;
+		std::vector<uchar> buff_;
 	};
 
 }

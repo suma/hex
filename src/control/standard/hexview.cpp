@@ -10,14 +10,6 @@ using namespace std;
 
 namespace Standard {
 
-	namespace Color {
-		enum color {
-			Background = 0,
-			Text,
-		};
-	}
-
-
 ////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
@@ -26,8 +18,8 @@ HexConfig::HexConfig()
 	, Font("times", 24)
 	, FontMetrics(Font)
 {
-	Colors[0] = QColor(255,0,0);
-	Colors[1] = QColor(0,0,255);
+	Colors[Color::Background] = QColor(255,0,0);
+	Colors[Color::Text] = QColor(0,0,255);
 
 	for (int i = 1; i < Num; i++) {
 		Spaces[i] = FontMetrics.maxWidth();
@@ -116,6 +108,7 @@ void HexView::refreshPixmap(int)
 	 */
 
 	if (!doc_->length()) {
+		// draw Empty Background only
 		return;
 	}
 
@@ -233,11 +226,62 @@ void HexView::drawSelected(const DrawInfo &di)
 	//  [--ooo--] non + on + non
 	//  [-------] nonselected
 
-
-
-
-
 }
+
+#ifdef HOGEHOGE_DEBUG
+struct ColorInfo {
+	quint64 Length;
+	Color[ColorCount]
+};
+
+struct DrawInfo {
+	// type: all, piece
+	int line;
+	int size;
+	QColor color[2];	// text and background
+}
+
+struct DrawHilightInfo {
+	// type: all, piece
+	int line;
+	int size;
+	bool continuous;	// front of line
+	QColor color;
+};
+
+{
+	int y = config_.top();
+	const int yMax = height();
+	const int yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
+	quint64 top = cur_->Top * 16;
+	const int xb = 0, xe = width();
+	const uint size = min(doc_->length() - top, 16ULL * yCount);
+
+	bool selected = false;
+	quint64 sb = 0, se = 0;
+	if (cur_->Selected) {
+		sb = max(cur_->SelBegin, cur_->SelEnd);
+		se = min(cur_->SelBegin, cur_->SelEnd);
+		if (top <= se) {
+			const quint64 vpos_end = max(top + (16ULL * yCount), top + size);
+			if (sb <= vpos_end) {
+				selected = true;
+			}
+		}
+	}
+
+	//std::vector<ColorInfo> colors_;
+	GetPosColor(pos, len, colors_);
+	if (!selected) {
+		// non selected
+		DrawHilightInfo hi(ALL, y, lines, width_count);
+		DrawInfo di(ALL, y, lines, width_count);
+		return;
+	} else {
+		//selected
+	}
+}
+#endif
 
 void HexView::drawNonSelected(const DrawInfo &di)
 {
