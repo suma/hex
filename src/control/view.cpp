@@ -81,7 +81,6 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 				bool sel = sb <= index && index <= se;
 				int x = sel ? 2 : 0;
 				if (itr == end || i < itr->Index || itr->Index + itr->Length < i) {
-					printf("i: %d sel: %d\n", i, sel);
 					// out of itr
 					if (last == defColors + x) {
 						// continues same color

@@ -26,6 +26,7 @@ namespace Standard {
 		QFontMetrics FontMetrics;
 		int top_;
 		int x_[Num];	// pos of value
+		int X_[Num];	// pos of end
 		int xarea_[Num];
 	
 	public:
@@ -67,7 +68,7 @@ namespace Standard {
 		inline int X(int i) const
 		{
 			Q_ASSERT(0 <= i && i < Num);
-			return x_[i] - ByteMargin.left();
+			return X_[i];
 		}
 		int toPos(int x);	// -1, 0..31, 32:: 32 + 2 = 34
 		int toLine(int y);	// [0, N]

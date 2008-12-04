@@ -41,6 +41,12 @@ void HexConfig::calculate()
 		x_[i] = x_[i-1] + byteWidth() + Spaces[i];
 	}
 
+	// Pos of end
+	for (int i = 0; i < Num; i++) {
+		X_[i] = x_[i] + (FontMetrics.maxWidth() * 2);
+		printf("i:%d x: %d X: %d\n", i, x_[i], X_[i]);
+	}
+
 	// Area
 	xarea_[0] = Margin.left();
 	for (int i = 1; i < Num; i++) {
@@ -138,7 +144,6 @@ void HexView::refreshPixmap(int)
 	getDrawColors(di, dcolors_, config_.Colors);
 
 	// draw
-	printf("y: %d , yt:%d\n", y, yt);
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
 	QBrush br;
 	for (int i = 0, j = 0, m = 0, cont = 0; itr != end;) {
@@ -156,21 +161,20 @@ void HexView::refreshPixmap(int)
 		printf("m:%d j:%d cont:%d\n", m, j, cont);
 		if (2 <= cont) {
 			// Draw background
-			Q_ASSERT(0 <= j && j < HexConfig::Num);
-			Q_ASSERT(0 <= j+cont-1 && j+cont-1 < HexConfig::Num);
-			painter.fillRect(config_.x(j), yt, config_.byteEnd(j+cont-1), yt + config_.byteHeight(), br);
-		} else if (j < 15) { //(j < HexConfig::Num - 1) {
-			Q_ASSERT(0 <= j && j < HexConfig::Num);
-			Q_ASSERT(0 <= j+1 && j+1 < HexConfig::Num);
+			painter.fillRect(config_.x(j), yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
+			printf("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
+		} else if (j < HexConfig::Num - 1) {
 			painter.fillRect(config_.x(j), yt, config_.X(j+1), yt + config_.byteHeight(), br);
+			printf("#x:%d, x2:%d\n", config_.x(j), config_.X(j+1));
 		}
 
 		// Draw
 		for (int k = 0; k < cont; k++, i++, j++) {
 			QString hex;
 			byteToHex(buff_[i], hex);
-			painter.drawText(config_.x(j), y, hex);
+			painter.drawText(config_.x(j), y, config_.byteWidth(), config_.byteHeight(), Qt::AlignTop | Qt::AlignLeft, hex);
 		}
+		printf("y: %d, yt:%d\n", y, yt);
 
 		m -= cont;
 		j = j & 0xF;
