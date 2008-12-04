@@ -4,21 +4,12 @@
 #include <QFont>
 #include <QFontMetrics>
 #include "../view.h"
+#include "../highlight.h"
+
 
 namespace Standard {
 
 	class Cursor;
-
-	namespace Color {
-		enum color {
-			Background = 0,
-			Text,
-			HiBackground,	// hilighted
-			HiSelText,
-			ColorCount,
-		};
-	}
-
 	class HexConfig
 	{
 	public:
@@ -71,7 +62,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		HexView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL);
+		HexView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL, Highlight *hi = NULL);
 
 		HexConfig & getConfig() { return config_; }
 
@@ -113,9 +104,14 @@ namespace Standard {
 		void drawNonSelected(const DrawInfo &di);
 
 	protected:
+		// Main components
 		HexConfig config_;
 		Cursor *cur_;
+		Highlight *high_;
+	
+		// Temporary buffer
 		std::vector<uchar> buff_;
+		std::vector<ColorInfo> colors_;
 	};
 
 }

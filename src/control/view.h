@@ -5,6 +5,17 @@
 
 class Document;
 
+namespace Color {
+	enum color {
+		Background = 0,
+		Text,
+		HiBackground,	// hilighted
+		HiSelText,
+		ColorCount,
+	};
+}
+
+
 class View : public QWidget
 {
 	Q_OBJECT

@@ -5,6 +5,7 @@
 #include "hexview.h"
 #include "scursor.h"
 #include "../document.h"
+#include "../highlight.h"
 
 using namespace std;
 
@@ -73,9 +74,10 @@ int HexConfig::toLine(int y)
 
 ////////////////////////////////////////
 // View
-HexView::HexView(QWidget *parent, Document *doc, Cursor *cur)
+HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
 	: ::View(parent, doc)
 	, cur_(cur)
+	, high_(hi)
 {
 	setWindowOpacity(0.5);
 }
@@ -132,6 +134,11 @@ void HexView::refreshPixmap(int)
 		}
 	}
 
+	if (buff_.capacity() < size) {
+		buff_.reserve(size);
+	}
+	doc_->get(top, &buff_[0], size);
+
 	// Draw
 	DrawInfo di(y, top, yCount, xb, xe, sb, se, size);
 	if (selected) {
@@ -151,7 +158,6 @@ void HexView::refreshPixmap(int)
 	const quint64 top = cur_->Top * 16;
 	const uint size = min(doc_->length() - top, 16ULL * yCount);
 	vector<uchar> buff(size);
-	doc_->get(top, &buff[0], size);
 	*/
 
 
@@ -241,7 +247,7 @@ struct DrawInfo {
 	QColor color[2];	// text and background
 }
 
-struct DrawHilightInfo {
+struct DrawHighlightInfo {
 	// type: all, piece
 	int line;
 	int size;
@@ -276,22 +282,25 @@ struct DrawHilightInfo {
 		return;
 	} else {
 		// selected
-		//std::vector<ColorInfo> colors_;
-		//GetPosColor(top, len, colors_);
 		quint64 index = top;
-		for (int i = 0, j = 0; i < lines; i++, j = (j+1) & 0xF, index++) {
-			// x range: 0 - 15
-			qint64 dif = sb - index;
-			qint64 left = se - index;
-			if (sb <= index && index <= se) {
-				// in range
-			} else if (0 <= dif && dif < 16) {
-				// begin
-			} else if (0 <= left && left < 16) {
-				// end
-			} else {
-				// normal
+		vector<ColorInfo> colors_;
+		if (high_ == NULL || !high_->GetPosColor(buff_, top, len, colors_)) {
+			for (int i = 0, j = 0; i < lines; i++, j = (j+1) & 0xF, index++) {
+				// x range: 0 - 15
+				qint64 dif = sb - index;
+				qint64 left = se - index;
+				if (sb <= index && index <= se) {
+					// in range
+				} else if (0 <= dif && dif < 16) {
+					// begin
+				} else if (0 <= left && left < 16) {
+					// end
+				} else {
+					// normal
+				}
 			}
+		} else {
+			// check colors
 		}
 	}
 }
