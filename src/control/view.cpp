@@ -42,10 +42,10 @@ void View::getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci)
 		quint64 index = top;
 		if (high_ == NULL || !high_->GetColor(buff_, top, size, colors_)) {
 			// case:
-			// B only
-			// B and W
-			// W and B
-			// W and B and W
+			// 4.B only
+			// 2.B and W
+			// 3.W and B
+			// 1.W and B and W
 			qint64 diff = sb - index;
 			qint64 left = se - index;
 		} else {
@@ -67,25 +67,6 @@ void View::getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci)
 		}
 	}
 }
-#ifdef HOGEHOGE_DEBUG
-struct ColorInfo {
-	quint64 Length;
-	Color[ColorCount]
-};
 
-struct DrawInfo {
-	// type: all, piece
-	int line;
-	int size;
-	QColor color[2];	// text and background
-}
 
-struct DrawHighlightInfo {
-	// type: all, piece
-	int line;
-	int size;
-	bool continuous;	// front of line
-	QColor color;
-};
 
-#endif

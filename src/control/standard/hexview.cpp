@@ -113,13 +113,15 @@ void HexView::refreshPixmap(int)
 		return;
 	}
 
+	// Calculate drawing area
 	int y = config_.top();
 	const int yMax = height();
 	const int yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
 	quint64 top = cur_->Top * 16;
-	const int xb = 0, xe = width();
 	const uint size = min(doc_->length() - top, 16ULL * yCount);
 
+	// Calculate selectead area
+	const int xb = 0, xe = width();
 	bool selected = false;
 	quint64 sb = 0, se = 0;
 	if (cur_->Selected) {
@@ -133,32 +135,17 @@ void HexView::refreshPixmap(int)
 		}
 	}
 
+	// Copy data
 	if (buff_.capacity() < size) {
 		buff_.reserve(size);
 	}
 	doc_->get(top, &buff_[0], size);
 
-	// Draw
+	// TODO: Adding cache class for calculated values if these processing is bottle neck
 	::DrawInfo di(y, top, yCount, xb, xe, sb, se, size, selected);
-	if (selected) {
-	} else {
-	}
+	getDrawColors(di, colors_);
 
-	// ALL
-	// LINE
-	// AFTER, line
-
-	// draw lines
-	/*
-	int y = config_.top();
-	const int yMax = height();
-	const int yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
-	Q_ASSERT(doc_->length() >= (cur_->Top * 16));
-	const quint64 top = cur_->Top * 16;
-	const uint size = min(doc_->length() - top, 16ULL * yCount);
-	vector<uchar> buff(size);
-	*/
-
+	// draw
 
 	update();
 }
