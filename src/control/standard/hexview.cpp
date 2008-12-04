@@ -143,7 +143,7 @@ void HexView::refreshPixmap(int)
 
 	// TODO: Adding cache class for calculated values if these processing is bottle neck
 	::DrawInfo di(y, top, yCount, xb, xe, sb, se, size, selected);
-	getDrawColors(di, colors_);
+	getDrawColors(di, colors_, config_.Colors);
 
 	// draw
 

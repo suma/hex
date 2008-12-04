@@ -53,7 +53,7 @@ public:
 protected:
 	void paintEvent(QPaintEvent*);
 	void resizeEvent(QResizeEvent*);
-	void getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci);
+	void getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci, QColor *defaultColors);
 
 protected:
 	virtual void refreshPixmap() = 0;

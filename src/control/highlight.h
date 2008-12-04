@@ -9,7 +9,11 @@ class Document;
 
 struct ColorInfo {
 	uint Length;
-	QColor colors[Color::ColorCount];
+	QColor *Colors;
+	ColorInfo(uint length, QColor *col) {
+		Length = length;
+		Colors = col;
+	}
 };
 
 typedef std::vector<ColorInfo> CIList;

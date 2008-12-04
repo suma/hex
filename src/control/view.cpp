@@ -23,24 +23,32 @@ void View::resizeEvent(QResizeEvent *)
 }
 
 
-void View::getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci)
+void View::getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci, QColor *defColors)
 {
-	int y = di.y;
+	Q_ASSERT(defColors != NULL);
+
 	quint64 top = di.top;
 	const int sb = di.sb, se = di.se;
 	const uint size = di.size;
 
+	bool high = false;
+	if (high_ != NULL && high_->GetColor(buff_, top, size, colors_)) {
+		high = true;
+	}
+
+	// clear
+	ci.clear();
 	if (!di.selected) {
-		// non selected
-		if (high_ == NULL || !high_->GetColor(buff_, top, size, colors_)) {
-			//DrawInfo di(ALL, y, lines, width_count);
+		// not selected
+		if (high) {
 		} else {
+			ci.push_back(ColorInfo(size, defColors));
 		}
 		return;
 	} else {
 		// selected
 		quint64 index = top;
-		if (high_ == NULL || !high_->GetColor(buff_, top, size, colors_)) {
+		if (high) {
 			// case:
 			// 4.B only
 			// 2.B and W
