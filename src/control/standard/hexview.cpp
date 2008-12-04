@@ -138,6 +138,7 @@ void HexView::refreshPixmap(int)
 	getDrawColors(di, dcolors_, config_.Colors);
 
 	// draw
+	printf("y: %d , yt:%d\n", y, yt);
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
 	QBrush br;
 	for (int i = 0, j = 0, m = 0, cont = 0; itr != end;) {
