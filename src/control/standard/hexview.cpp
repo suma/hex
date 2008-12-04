@@ -48,7 +48,7 @@ void HexConfig::calculate()
 		xarea_[i] -= Spaces[i] / 2;
 	}
 
-	top_ = Margin.top() + ByteMargin.top();
+	top_ = Margin.top();
 }
 
 int HexConfig::toPos(int x)
@@ -97,16 +97,6 @@ void HexView::refreshPixmap(int)
 
 	painter.drawText(20, 20, QString("abcdefg"));
 
-	/* sel.end < vpostop => not selected
-	 * vposend < sel.begin => not selected
-	 *
-	 * 4 patterns
-	 * begin >= top  :: 最初から
-	 * begin != top  :: 途中から
-	 * end <= bottom :: 最後まで
-	 * end != bottom :: 途中まで
-	 *
-	 */
 
 	if (!doc_->length()) {
 		// draw Empty Background only
@@ -114,7 +104,8 @@ void HexView::refreshPixmap(int)
 	}
 
 	// Calculate drawing area
-	int y = config_.top();
+	int yt = config_.top();
+	int y = config_.top() + config_.byteMargin().top();
 	const int yMax = height();
 	const int yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
 	quint64 top = cur_->Top * 16;
@@ -141,11 +132,32 @@ void HexView::refreshPixmap(int)
 	}
 	doc_->get(top, &buff_[0], size);
 
-	// TODO: Adding cache class for calculated values if these processing is bottle neck
+	// TODO: Adding cache class for calculated values if this function is bottle neck
 	::DrawInfo di(y, top, yCount, xb, xe, sb, se, size, selected);
 	getDrawColors(di, dcolors_, config_.Colors);
 
 	// draw
+	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
+	for (int i = 0, j = 0, x = 0; itr != end; i++) {
+		if (!x) {
+			QBrush br(itr->Colors[Color::Background]);
+			x = itr->Length;
+			// Continuous area
+			int cont = min(x, 16 - (j + 1));
+			if (2 <= cont) {
+				painter.fillRect(config_.x(j), yt, config_.x(j+cont-1) + config_.fontMetrics().maxWidth() + config_.byteMargin().right(), yt + config_.byteHeight(), br);
+			}
+
+			// Set background
+			painter.setBackground(br);
+			// Set pen
+			painter.setPen(itr->Colors[Color::Text]);
+		} else {
+		}
+		if (j == 0) {
+			y += config_.byteHeight();
+		}
+	}
 
 	update();
 }

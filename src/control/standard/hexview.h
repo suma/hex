@@ -43,6 +43,14 @@ namespace Standard {
 		{
 			return ByteMargin.top() + FontMetrics.height() + ByteMargin.bottom();
 		}
+		inline const QRect &byteMargin() const
+		{
+			return ByteMargin;
+		}
+		inline const QFontMetrics &fontMetrics() const
+		{
+			return FontMetrics;
+		}
 		inline int top() const
 		{
 			return top_;
@@ -75,29 +83,6 @@ namespace Standard {
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
 
-		struct DrawInfo {
-			int y;
-			int count;
-			int xb;
-			int xe;
-			uint size;
-			quint64 top;
-			quint64 sb;
-			quint64 se;
-			DrawInfo(int Y, quint64 Top, int Count, int Xb, int Xe, quint64 Sb, quint64 Se, uint Size)
-			{
-				y = Y;
-				count = Count;
-				xb = Xb;
-				Xe = Xe;
-				size = Size;
-				top = Top;
-				sb = Sb;
-				se = Se;
-			}
-			DrawInfo() {}
-			~DrawInfo() {}
-		};
 
 
 	protected:
