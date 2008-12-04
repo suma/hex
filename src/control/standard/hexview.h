@@ -47,6 +47,10 @@ namespace Standard {
 		{
 			return ByteMargin;
 		}
+		inline int byteEnd(int i) const
+		{
+			return x(i) + (FontMetrics.maxWidth() * 2) + ByteMargin.right();
+		}
 		inline const QFontMetrics &fontMetrics() const
 		{
 			return FontMetrics;
@@ -83,7 +87,7 @@ namespace Standard {
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
 
-
+		void byteToHex(uchar c, QString &h, QString &l);
 
 	protected:
 		// Main components

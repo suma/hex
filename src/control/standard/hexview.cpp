@@ -138,28 +138,61 @@ void HexView::refreshPixmap(int)
 
 	// draw
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
-	for (int i = 0, j = 0, x = 0; itr != end; i++) {
+	QBrush br;
+	for (int i = 0, j = 0, x = 0, cont = 0; itr != end; i++) {
 		if (!x) {
-			QBrush br(itr->Colors[Color::Background]);
+			br = QBrush(itr->Colors[Color::Background]);
 			x = itr->Length;
-			// Continuous area
-			int cont = min(x, 16 - (j + 1));
-			if (2 <= cont) {
-				painter.fillRect(config_.x(j), yt, config_.x(j+cont-1) + config_.fontMetrics().maxWidth() + config_.byteMargin().right(), yt + config_.byteHeight(), br);
-			}
 
-			// Set background
+			// Set color
 			painter.setBackground(br);
-			// Set pen
 			painter.setPen(itr->Colors[Color::Text]);
 		} else {
+			++itr;
 		}
+
+		// Continuous size
+		cont = min(x, 16 - j);
+		if (2 <= cont) {
+			// Draw background
+			painter.fillRect(config_.x(j), yt, config_.byteEnd(j+cont), yt + config_.byteHeight(), br);
+		}
+
+		// Draw
+		for (int k = 0; i < cont; i++) {
+			QString h,l;
+			byteToHex(buff_[i], h, l);
+			painter.drawText(config_.x(j), y, h);
+			painter.drawText(config_.x(j) + config_.fontMetrics().maxWidth(), y, l);
+		}
+
+		x -= cont;
+		x += cont;
+		j += cont & 0xF;
+
 		if (j == 0) {
 			y += config_.byteHeight();
+			yt += config_.byteHeight();
 		}
 	}
 
 	update();
+}
+
+void HexView::byteToHex(uchar c, QString &h, QString &l)
+{
+	const uchar H = (c >> 4) & 0xF;
+	if (H <= 9) {
+		h = '0' + H;
+	} else {
+		h = 'A' + H;
+	}
+	const uchar L = c & 0xF;
+	if (L <= 9) {
+		l = '0' + L;
+	} else {
+		l = 'A' + L;
+	}
 }
 
 void HexView::mousePressEvent(QMouseEvent*)
