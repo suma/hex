@@ -166,9 +166,6 @@ void HexView::refreshPixmap(int)
 		} else {
 			int begin = config_.x(j);
 			int width = config_.fontMetrics().maxWidth() * 2;
-			if (j == HexConfig::Num - 1) {
-				+ config_.Spaces[j+1] / 2;
-			}
 			painter.fillRect(begin, yt, width, config_.byteHeight(), br);
 		}
 
