@@ -69,7 +69,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 	} else {
 		// case: Selected
 		quint64 index = top;
-		if (high) {
+		//if (high) {
 			// case: Highlight on
 			// check colors
 			qint64 diff = sb - index;
@@ -79,7 +79,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size; i++, index++, diff--, left--) {
 				bool sel = sb <= index && index <= se;
 				int x = sel ? 2 : 0;
-				if (i < itr->Index || itr->Index + itr->Length < i || itr == end) {
+				if (itr == end || i < itr->Index || itr->Index + itr->Length < i) {
 					// out of itr
 					if (last == defColors + x) {
 						// continues same color
@@ -103,16 +103,16 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 					}
 				}
 			}
-		} else {
+		//} else {
 			// case Highlight off
 			// case:
 			// 4.B only
 			// 2.B and W
 			// 3.W and B
 			// 1.W and B and W
-			qint64 diff = sb - index;
-			qint64 left = se - index;
-		}
+		//	qint64 diff = sb - index;
+		//	qint64 left = se - index;
+		//}
 	}
 }
 
