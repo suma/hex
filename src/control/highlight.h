@@ -7,16 +7,18 @@
 
 class Document;
 
-struct ColorInfo {
-	uint Length;
-	QColor *Colors;
-	ColorInfo(uint length, QColor *col) {
+struct HighlightColorInfo {
+	uint Index, Length;
+	QColor Colors[Color::ColorCount];
+	HighlightColorInfo(uint index, uint length, QColor *col)
+	{
+		Index = index;
 		Length = length;
-		Colors = col;
+		memcpy(Colors, col, sizeof(Colors));
 	}
 };
 
-typedef std::vector<ColorInfo> CIList;
+typedef std::vector<HighlightColorInfo> HCIList;
 
 class Highlight
 {
@@ -28,7 +30,7 @@ public:
 	~Highlight();
 
 	virtual void refresh();
-	virtual bool GetColor(std::vector<uchar> &buf, quint64 pos, uint size, CIList &list);	// return Do or Do not highlighting
+	virtual bool GetColor(std::vector<uchar> &buf, quint64 pos, uint size, HCIList &list);	// return Do or Do not highlighting
 
 };
 

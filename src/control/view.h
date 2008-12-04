@@ -34,6 +34,18 @@ struct DrawInfo {
 	~DrawInfo() {}
 };
 
+struct DrawColorInfo {
+	uint Length;
+	QColor Colors[Color::ColorCount];
+	DrawColorInfo(uint length, QColor *col)
+	{
+		Length = length;
+		memcpy(Colors, col, sizeof(Colors));
+	}
+};
+
+typedef std::vector<DrawColorInfo> DCIList;
+
 class View : public QWidget
 {
 	Q_OBJECT
@@ -45,7 +57,8 @@ protected:
 
 	// Temporary buffer
 	std::vector<uchar> buff_;
-	std::vector<ColorInfo> colors_;
+	HCIList hcolors_;
+	DCIList dcolors_;
 
 public:
 	View(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
@@ -53,7 +66,7 @@ public:
 protected:
 	void paintEvent(QPaintEvent*);
 	void resizeEvent(QResizeEvent*);
-	void getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci, QColor *defaultColors);
+	void getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defaultColors);
 
 protected:
 	virtual void refreshPixmap() = 0;

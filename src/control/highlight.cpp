@@ -17,7 +17,7 @@ void Highlight::refresh()
 {
 }
 
-bool Highlight::GetColor(vector<uchar> &buf, quint64 pos, uint size, CIList &list)
+bool Highlight::GetColor(vector<uchar> &buf, quint64 pos, uint size, HCIList &list)
 {
 	return false;
 }

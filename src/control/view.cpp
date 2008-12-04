@@ -23,7 +23,7 @@ void View::resizeEvent(QResizeEvent *)
 }
 
 
-void View::getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci, QColor *defColors)
+void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 {
 	Q_ASSERT(defColors != NULL);
 
@@ -32,7 +32,7 @@ void View::getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci, QColor 
 	const uint size = di.size;
 
 	bool high = false;
-	if (high_ != NULL && high_->GetColor(buff_, top, size, colors_)) {
+	if (high_ != NULL && high_->GetColor(buff_, top, size, hcolors_)) {
 		high = true;
 	}
 
@@ -41,8 +41,11 @@ void View::getDrawColors(const DrawInfo &di, std::vector<ColorInfo> &ci, QColor 
 	if (!di.selected) {
 		// not selected
 		if (high) {
+			for (int i = 0; i < size; i++) {
+				//if (size < 
+			}
 		} else {
-			ci.push_back(ColorInfo(size, defColors));
+			ci.push_back(DrawColorInfo(size, defColors));
 		}
 		return;
 	} else {
