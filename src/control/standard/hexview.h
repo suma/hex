@@ -28,7 +28,7 @@ namespace Standard {
 		QRect Margin;
 		QRect ByteMargin;
 		QFont Font;
-		QColor Colors[ColorCount];
+		QColor Colors[Color::ColorCount];
 		int Spaces[Num+1]; // last is yoyuu
 
 	private:
@@ -94,7 +94,6 @@ namespace Standard {
 			quint64 sb;
 			quint64 se;
 			DrawInfo(int Y, quint64 Top, int Count, int Xb, int Xe, quint64 Sb, quint64 Se, uint Size)
-				: buff(size)
 			{
 				y = Y;
 				count = Count;

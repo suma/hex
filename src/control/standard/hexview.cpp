@@ -14,7 +14,7 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: Margin(10, 10, 10, 10)
-	, ByteMargin(0, 0, 5, 5)
+	, ByteMargin(0, 4, 5, 1)
 	, Font("times", 24)
 	, FontMetrics(Font)
 {
@@ -270,15 +270,29 @@ struct DrawHilightInfo {
 		}
 	}
 
-	//std::vector<ColorInfo> colors_;
-	GetPosColor(pos, len, colors_);
 	if (!selected) {
 		// non selected
-		DrawHilightInfo hi(ALL, y, lines, width_count);
 		DrawInfo di(ALL, y, lines, width_count);
 		return;
 	} else {
-		//selected
+		// selected
+		//std::vector<ColorInfo> colors_;
+		//GetPosColor(top, len, colors_);
+		quint64 index = top;
+		for (int i = 0, j = 0; i < lines; i++, j = (j+1) & 0xF, index++) {
+			// x range: 0 - 15
+			qint64 dif = sb - index;
+			qint64 left = se - index;
+			if (sb <= index && index <= se) {
+				// in range
+			} else if (0 <= dif && dif < 16) {
+				// begin
+			} else if (0 <= left && left < 16) {
+				// end
+			} else {
+				// normal
+			}
+		}
 	}
 }
 #endif
