@@ -74,12 +74,14 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 			// check colors
 			qint64 diff = sb - index;
 			qint64 left = se - index;
+			printf("sb: %d, se: %d\n", sb, se);
 			int i = 0;
 			QColor *last = NULL;
 			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size; i++, index++, diff--, left--) {
 				bool sel = sb <= index && index <= se;
 				int x = sel ? 2 : 0;
 				if (itr == end || i < itr->Index || itr->Index + itr->Length < i) {
+					printf("i: %d sel: %d\n", i, sel);
 					// out of itr
 					if (last == defColors + x) {
 						// continues same color

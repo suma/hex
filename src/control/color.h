@@ -5,8 +5,8 @@ namespace Color {
 	enum color {
 		Background = 0,
 		Text,
-		HiBackground,	// hilighted
-		HiSelText,
+		SelBackground,	// hilighted
+		SelText,
 		ColorCount,
 	};
 }

@@ -15,12 +15,14 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: Margin(10, 10, 10, 10)
-	, ByteMargin(0, 4, 5, 1)
-	, Font("times", 24)
+	, ByteMargin(0, 2, 2, 1)
+	, Font("Monaco", 13)
 	, FontMetrics(Font)
 {
-	Colors[Color::Background] = QColor(255,0,0);
-	Colors[Color::Text] = QColor(0,0,255);
+	Colors[Color::Background] = QColor(255,255,255);
+	Colors[Color::Text] = QColor(0,0,0);
+	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0);
+	Colors[Color::SelText] = QColor(0,0xCC,0xCC);
 
 	for (int i = 1; i < Num; i++) {
 		Spaces[i] = FontMetrics.maxWidth();
@@ -95,8 +97,7 @@ void HexView::refreshPixmap(int)
 	QPainter painter(&pix_);
 	//painter.initFrom(this);
 
-	painter.drawText(20, 20, QString("abcdefg"));
-
+	//painter.drawText(220, 20, QString("abcdefg"));
 
 	if (!doc_->length()) {
 		// draw Empty Background only
@@ -116,8 +117,8 @@ void HexView::refreshPixmap(int)
 	bool selected = false;
 	quint64 sb = 0, se = 0;
 	if (cur_->Selected) {
-		sb = max(cur_->SelBegin, cur_->SelEnd);
-		se = min(cur_->SelBegin, cur_->SelEnd);
+		sb = min(cur_->SelBegin, cur_->SelEnd);
+		se = max(cur_->SelBegin, cur_->SelEnd);
 		if (top <= se) {
 			const quint64 vpos_end = max(top + (16ULL * yCount), top + size);
 			if (sb <= vpos_end) {
@@ -139,37 +140,42 @@ void HexView::refreshPixmap(int)
 	// draw
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
 	QBrush br;
-	for (int i = 0, j = 0, x = 0, cont = 0; itr != end; i++) {
-		if (!x) {
+	for (int i = 0, j = 0, m = 0, cont = 0; itr != end;) {
+		if (m == 0) {
 			br = QBrush(itr->Colors[Color::Background]);
-			x = itr->Length;
+			m = itr->Length;
 
 			// Set color
 			painter.setBackground(br);
 			painter.setPen(itr->Colors[Color::Text]);
-		} else {
-			++itr;
 		}
 
 		// Continuous size
-		cont = min(x, 16 - j);
+		cont = min(m, HexConfig::Num - j);
+		printf("m:%d j:%d cont:%d\n", m, j, cont);
 		if (2 <= cont) {
 			// Draw background
-			painter.fillRect(config_.x(j), yt, config_.byteEnd(j+cont), yt + config_.byteHeight(), br);
+			Q_ASSERT(0 <= j && j < HexConfig::Num);
+			Q_ASSERT(0 <= j+cont-1 && j+cont-1 < HexConfig::Num);
+			painter.fillRect(config_.x(j), yt, config_.byteEnd(j+cont-1), yt + config_.byteHeight(), br);
+		} else if (j < 15) { //(j < HexConfig::Num - 1) {
+			Q_ASSERT(0 <= j && j < HexConfig::Num);
+			Q_ASSERT(0 <= j+1 && j+1 < HexConfig::Num);
+			painter.fillRect(config_.x(j), yt, config_.X(j+1), yt + config_.byteHeight(), br);
 		}
 
 		// Draw
-		for (int k = 0; i < cont; i++) {
-			QString h,l;
-			byteToHex(buff_[i], h, l);
-			painter.drawText(config_.x(j), y, h);
-			painter.drawText(config_.x(j) + config_.fontMetrics().maxWidth(), y, l);
+		for (int k = 0; k < cont; k++, i++, j++) {
+			QString hex;
+			byteToHex(buff_[i], hex);
+			painter.drawText(config_.x(j), y, hex);
 		}
 
-		x -= cont;
-		x += cont;
-		j += cont & 0xF;
-
+		m -= cont;
+		j = j & 0xF;
+		if (m == 0) {
+			++itr;
+		}
 		if (j == 0) {
 			y += config_.byteHeight();
 			yt += config_.byteHeight();
@@ -179,7 +185,7 @@ void HexView::refreshPixmap(int)
 	update();
 }
 
-void HexView::byteToHex(uchar c, QString &h, QString &l)
+void HexView::byteToHex(uchar c, QString &h)
 {
 	const uchar H = (c >> 4) & 0xF;
 	if (H <= 9) {
@@ -189,9 +195,9 @@ void HexView::byteToHex(uchar c, QString &h, QString &l)
 	}
 	const uchar L = c & 0xF;
 	if (L <= 9) {
-		l = '0' + L;
+		h += '0' + L;
 	} else {
-		l = 'A' + L;
+		h += 'A' + L;
 	}
 }
 

@@ -64,6 +64,11 @@ namespace Standard {
 			Q_ASSERT(0 <= i && i < Num);
 			return x_[i];
 		}
+		inline int X(int i) const
+		{
+			Q_ASSERT(0 <= i && i < Num);
+			return x_[i] - ByteMargin.left();
+		}
 		int toPos(int x);	// -1, 0..31, 32:: 32 + 2 = 34
 		int toLine(int y);	// [0, N]
 		void calculate();
@@ -87,7 +92,7 @@ namespace Standard {
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
 
-		void byteToHex(uchar c, QString &h, QString &l);
+		void byteToHex(uchar c, QString &h);
 
 	protected:
 		// Main components
