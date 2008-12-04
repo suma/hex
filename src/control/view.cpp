@@ -76,10 +76,10 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 			qint64 left = se - index;
 			int i = 0;
 			QColor *last = NULL;
-			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size && itr != end; i++, index++) {
+			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size; i++, index++, diff--, left--) {
 				bool sel = sb <= index && index <= se;
 				int x = sel ? 2 : 0;
-				if (i < itr->Index || itr->Index + itr->Length < i) {
+				if (i < itr->Index || itr->Index + itr->Length < i || itr == end) {
 					// out of itr
 					if (last == defColors + x) {
 						// continues same color
@@ -97,12 +97,11 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 						last = itr->Colors + x;
 						ci.push_back(DrawColorInfo(1, last));
 					}
+					itr->Length--;
+					if (itr->Length == 0) {
+						++itr;
+					}
 				}
-				diff--;
-				left--;
-			}
-			// Left
-			if (i < size) {
 			}
 		} else {
 			// case Highlight off
