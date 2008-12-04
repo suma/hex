@@ -19,6 +19,7 @@ void Highlight::refresh()
 
 bool Highlight::GetColor(vector<uchar> &buf, quint64 pos, uint size, HCIList &list)
 {
+	// sum(list[0].length, ..., list[N].length) = size となる
 	return false;
 }
 

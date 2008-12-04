@@ -1,7 +1,10 @@
 
 #include <QtGui>
+#include <algorithm>
 #include "view.h"
 #include "document.h"
+
+using namespace std;
 
 View::View(QWidget *parent, Document *doc, Highlight *hi)
 	: QWidget(parent)
@@ -22,7 +25,6 @@ void View::resizeEvent(QResizeEvent *)
 	refreshPixmap();
 }
 
-
 void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 {
 	Q_ASSERT(defColors != NULL);
@@ -38,12 +40,14 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 
 	// clear
 	ci.clear();
+
 	if (!di.selected) {
-		// not selected
+		// case: Not selected
 		if (high) {
-			// highlight off
+			// case: Highlight off
+			// Scanning highlighted colors
 			int i = 0;
-			for (HCIList::iterator itr = hcolors_.begin(); i < size && itr != hcolors_.end(); ++itr) {
+			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size && itr != end; ) {
 				if (i < itr->Index) {
 					int left = itr->Index - size;
 					ci.push_back(DrawColorInfo(left, defColors));
@@ -51,37 +55,57 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 				} else {
 					ci.push_back(DrawColorInfo(itr->Length, itr->Colors));
 					i += itr->Length;
+					++itr;
 				}
 			}
+			// Left
 			if (i < size) {
 				ci.push_back(DrawColorInfo(size - i, defColors));
 			}
 		} else {
-			// highlight off
+			// case: Highlight off
 			ci.push_back(DrawColorInfo(size, defColors));
 		}
 	} else {
-		// selected
+		// case: Selected
 		quint64 index = top;
 		if (high) {
-			// highlight on
+			// case: Highlight on
 			// check colors
-			for (int i = 0; i < size; i++, index++) {
-				qint64 diff = sb - index;
-				qint64 left = se - index;
-				if (0 < diff && diff < 16) {
-					// begin after
-				} else if (0 < left && left < 16) {
-					// end after
-				} else if (diff <= 0 && left <= 0) {
-					// equal (sb <= index && index <= se)
-					// inner selected
+			qint64 diff = sb - index;
+			qint64 left = se - index;
+			int i = 0;
+			QColor *last = NULL;
+			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size && itr != end; i++, index++) {
+				bool sel = sb <= index && index <= se;
+				int x = sel ? 2 : 0;
+				if (i < itr->Index || itr->Index + itr->Length < i) {
+					// out of itr
+					if (last == defColors + x) {
+						// continues same color
+						ci.back().Length++;
+					} else {
+						last = defColors + x;
+						ci.push_back(DrawColorInfo(1, last));
+					}
 				} else {
-					// normal
+					// inner itr
+					if (last == itr->Colors + x) {
+						// continues same color
+						ci.back().Length++;
+					} else {
+						last = itr->Colors + x;
+						ci.push_back(DrawColorInfo(1, last));
+					}
 				}
+				diff--;
+				left--;
+			}
+			// Left
+			if (i < size) {
 			}
 		} else {
-			// highlight off
+			// case Highlight off
 			// case:
 			// 4.B only
 			// 2.B and W

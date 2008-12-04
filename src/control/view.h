@@ -36,7 +36,7 @@ struct DrawInfo {
 
 struct DrawColorInfo {
 	uint Length;
-	QColor Colors[Color::ColorCount];
+	QColor Colors[2];
 	DrawColorInfo(uint length, QColor *col)
 	{
 		Length = length;
