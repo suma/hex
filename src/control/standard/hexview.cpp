@@ -14,8 +14,8 @@ namespace Standard {
 ////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
-	: Margin(10, 10, 10, 10)
-	, ByteMargin(0, 2, 2, 1)
+	: Margin(8, 4, 10, 10)
+	, ByteMargin(1, 1, 2, 2)
 	, Font("Monaco", 13)
 	, FontMetrics(Font)
 {
@@ -163,10 +163,10 @@ void HexView::refreshPixmap(int)
 			// Draw background
 			painter.fillRect(config_.x(j), yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
 			printf("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
-		} else if (j < HexConfig::Num - 1) {
-			painter.fillRect(config_.x(j), yt, config_.X(j+1), yt + config_.byteHeight(), br);
+		} /*else if (j < HexConfig::Num - 1) {
+			painter.fillRect(config_.x(j), yt, config_.X(j+1), yt + config_.byteHeight() - config_.x(j), br);
 			printf("#x:%d, x2:%d\n", config_.x(j), config_.X(j+1));
-		}
+		} */
 
 		// Draw
 		for (int k = 0; k < cont; k++, i++, j++) {
@@ -192,17 +192,18 @@ void HexView::refreshPixmap(int)
 
 void HexView::byteToHex(uchar c, QString &h)
 {
+	h.resize(2);
 	const uchar H = (c >> 4) & 0xF;
 	if (H <= 9) {
-		h = '0' + H;
+		h[0] = QChar('0' + H);
 	} else {
-		h = 'A' + H;
+		h[0] = QChar('A' + H - 10);
 	}
 	const uchar L = c & 0xF;
 	if (L <= 9) {
-		h += '0' + L;
+		h[1] = QChar('0' + L);
 	} else {
-		h += 'A' + L;
+		h[1] = QChar('A' + L - 10);
 	}
 }
 
