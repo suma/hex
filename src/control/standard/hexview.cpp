@@ -75,9 +75,8 @@ int HexConfig::toLine(int y)
 ////////////////////////////////////////
 // View
 HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
-	: ::View(parent, doc)
+	: ::View(parent, doc, hi)
 	, cur_(cur)
-	, high_(hi)
 {
 	setWindowOpacity(0.5);
 }
@@ -140,7 +139,7 @@ void HexView::refreshPixmap(int)
 	doc_->get(top, &buff_[0], size);
 
 	// Draw
-	DrawInfo di(y, top, yCount, xb, xe, sb, se, size);
+	::DrawInfo di(y, top, yCount, xb, xe, sb, se, size, selected);
 	if (selected) {
 	} else {
 	}
@@ -162,170 +161,6 @@ void HexView::refreshPixmap(int)
 
 
 	update();
-}
-
-// x: [xb, xe)
-// y: [line, line_e)
-// line: line begin
-// line_e: line end
-// xb: x begin
-// xe: x end
-/*
-int y;
-int count;
-int xb;
-int xe;
-uint size;
-quint64 top;
-quint64 sb;
-quint64 se;
-std::vector<uchar> buff;
-*/
-void HexView::drawSelected(const DrawInfo &di)
-{
-	// 1. draw bakcground: selected/nonselected/hilighted
-
-	// 2. draw hex 
-
-	// -: nonselected
-	// o: selected
-	// case:
-	// a [-------]
-	// b [ooooooo]
-	// c [oooo---]
-	// d [---oooo]
-	// e [--ooo--]
-	/*
-	bool sel = false;
-	st = case()
-	swich (st) {
-	case a:
-		push(A)
-		if (sel) {
-			RENZOKU
-		} else {
-			A/D/E
-		}
-	case b: sel = true
-		// CHECK RENZOKU
-		// else A/C/D/E
-	case c: sel = true
-		// CHECK A
-	case d: sel = true
-		// CHECK B/C
-	case e: sel = true
-		// CHECK A
-	}
-*/
-
-	// o: selected
-	// -: nonselected
-	// case Y
-	//  [ooooooo]
-	//  [oooo---]
-	//  [---oooo]
-	//  [--ooo--]
-	// case X
-	//  [ooooooo] on
-	//  [oooo---] on + non
-	//  [---oooo] non + on
-	//  [--ooo--] non + on + non
-	//  [-------] nonselected
-
-}
-
-#ifdef HOGEHOGE_DEBUG
-struct ColorInfo {
-	quint64 Length;
-	Color[ColorCount]
-};
-
-struct DrawInfo {
-	// type: all, piece
-	int line;
-	int size;
-	QColor color[2];	// text and background
-}
-
-struct DrawHighlightInfo {
-	// type: all, piece
-	int line;
-	int size;
-	bool continuous;	// front of line
-	QColor color;
-};
-
-{
-	int y = config_.top();
-	const int yMax = height();
-	const int yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
-	quint64 top = cur_->Top * 16;
-	const int xb = 0, xe = width();
-	const uint size = min(doc_->length() - top, 16ULL * yCount);
-
-	bool selected = false;
-	quint64 sb = 0, se = 0;
-	if (cur_->Selected) {
-		sb = max(cur_->SelBegin, cur_->SelEnd);
-		se = min(cur_->SelBegin, cur_->SelEnd);
-		if (top <= se) {
-			const quint64 vpos_end = max(top + (16ULL * yCount), top + size);
-			if (sb <= vpos_end) {
-				selected = true;
-			}
-		}
-	}
-
-	if (!selected) {
-		// non selected
-		if (!high_->GetPosColor(buff_, top, size, colors_)) {
-			DrawInfo di(ALL, y, lines, width_count);
-		} else {
-		}
-		return;
-	} else {
-		// selected
-		quint64 index = top;
-		if (high_ == NULL || !high_->GetPosColor(buff_, top, size, colors_)) {
-			// case:
-			// B only
-			// B and W
-			// W and B
-			// W and B and W
-			qint64 diff = sb - index;
-			qint64 left = se - index;
-		} else {
-			// check colors
-			for (int i = 0, j = 0; i < lines; i++, j = (j+1) & 0xF, index++) {
-				qint64 diff = sb - index;
-				qint64 left = se - index;
-				if (0 < diff && diff < 16) {
-					// begin after
-				} else if (0 < left && left < 16) {
-					// end after
-				} else if (diff <= 0 && left <= 0) {
-					// equal (sb <= index && index <= se)
-					// inner selected
-				} else {
-					// normal
-				}
-			}
-		}
-	}
-}
-#endif
-
-void HexView::drawNonSelected(const DrawInfo &di)
-{
-	/*
-	Q_ASSERT(doc_->length() >= (top * 16));
-	const uint size = min(doc_->length() - top, 16ULL * count);
-	vector<uchar> buff(size);
-	doc_->get(top, &buff[0], size);
-	*/
-
-	//for (int i = 0; i < count; i++) {
-	//}
 }
 
 void HexView::mousePressEvent(QMouseEvent*)

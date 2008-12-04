@@ -100,18 +100,10 @@ namespace Standard {
 		};
 
 
-		void drawSelected(const DrawInfo &di);
-		void drawNonSelected(const DrawInfo &di);
-
 	protected:
 		// Main components
 		HexConfig config_;
 		Cursor *cur_;
-		Highlight *high_;
-	
-		// Temporary buffer
-		std::vector<uchar> buff_;
-		std::vector<ColorInfo> colors_;
 	};
 
 }

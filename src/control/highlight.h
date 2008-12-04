@@ -3,7 +3,7 @@
 
 #include <QColor>
 #include <vector>
-#include "view.h"
+#include "color.h"
 
 class Document;
 
