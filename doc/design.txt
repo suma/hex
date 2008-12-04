@@ -6,6 +6,7 @@ View/Controller
 		VPosition(visible document position)
 		MouseInput
 		KeyInput
+		Selected(Change Bacgkround/Text colors)
 	Scrollbar
 		Lensbar
 
@@ -17,5 +18,11 @@ Document
 	+
 	Event
 	BackupThread
+	Undo/Redo with Tree
 
+
+Color Hilighting
+	Hilight Background(like selected)
+	Text Color
+	
 

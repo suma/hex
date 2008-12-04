@@ -127,15 +127,10 @@ void HexView::refreshPixmap(int)
 	const uint size = min(doc_->length() - top, 16ULL * yCount);
 
 	bool selected = false;
-	quint64 sb, se;
+	quint64 sb = 0, se = 0;
 	if (cur_->Selected) {
-		if (cur_->SelEnd < cur_->SelBegin) {
-			sb = cur_->SelBegin;
-			se = cur_->SelEnd;
-		} else {
-			sb = cur_->SelEnd;
-			se = cur_->SelBegin;
-		}
+		sb = max(cur_->SelBegin, cur_->SelEnd);
+		se = min(cur_->SelBegin, cur_->SelEnd);
 		if (top <= se) {
 			const quint64 vpos_end = max(top + (16ULL * yCount), top + size);
 			if (sb <= vpos_end) {
@@ -147,9 +142,7 @@ void HexView::refreshPixmap(int)
 	// Draw
 	DrawInfo di(y, top, yCount, xb, xe, sb, se, size);
 	if (selected) {
-		drawSelected(di);
 	} else {
-		drawNonSelected(di);
 	}
 
 	// ALL
@@ -191,6 +184,10 @@ std::vector<uchar> buff;
 */
 void HexView::drawSelected(const DrawInfo &di)
 {
+	// 1. draw bakcground: selected/nonselected/hilighted
+
+	// 2. draw hex 
+
 	// -: nonselected
 	// o: selected
 	// case:
