@@ -41,25 +41,30 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 	if (!di.selected) {
 		// not selected
 		if (high) {
-			for (int i = 0; i < size; i++) {
-				//if (size < 
+			// highlight off
+			int i = 0;
+			for (HCIList::iterator itr = hcolors_.begin(); i < size && itr != hcolors_.end(); ++itr) {
+				if (i < itr->Index) {
+					int left = itr->Index - size;
+					ci.push_back(DrawColorInfo(left, defColors));
+					i += left;
+				} else {
+					ci.push_back(DrawColorInfo(itr->Length, itr->Colors));
+					i += itr->Length;
+				}
+			}
+			if (i < size) {
+				ci.push_back(DrawColorInfo(size - i, defColors));
 			}
 		} else {
+			// highlight off
 			ci.push_back(DrawColorInfo(size, defColors));
 		}
-		return;
 	} else {
 		// selected
 		quint64 index = top;
 		if (high) {
-			// case:
-			// 4.B only
-			// 2.B and W
-			// 3.W and B
-			// 1.W and B and W
-			qint64 diff = sb - index;
-			qint64 left = se - index;
-		} else {
+			// highlight on
 			// check colors
 			for (int i = 0; i < size; i++, index++) {
 				qint64 diff = sb - index;
@@ -75,6 +80,15 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 					// normal
 				}
 			}
+		} else {
+			// highlight off
+			// case:
+			// 4.B only
+			// 2.B and W
+			// 3.W and B
+			// 1.W and B and W
+			qint64 diff = sb - index;
+			qint64 left = se - index;
 		}
 	}
 }
