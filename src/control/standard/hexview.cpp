@@ -278,29 +278,38 @@ struct DrawHighlightInfo {
 
 	if (!selected) {
 		// non selected
-		DrawInfo di(ALL, y, lines, width_count);
+		if (!high_->GetPosColor(buff_, top, size, colors_)) {
+			DrawInfo di(ALL, y, lines, width_count);
+		} else {
+		}
 		return;
 	} else {
 		// selected
 		quint64 index = top;
-		vector<ColorInfo> colors_;
-		if (high_ == NULL || !high_->GetPosColor(buff_, top, len, colors_)) {
+		if (high_ == NULL || !high_->GetPosColor(buff_, top, size, colors_)) {
+			// case:
+			// B only
+			// B and W
+			// W and B
+			// W and B and W
+			qint64 diff = sb - index;
+			qint64 left = se - index;
+		} else {
+			// check colors
 			for (int i = 0, j = 0; i < lines; i++, j = (j+1) & 0xF, index++) {
-				// x range: 0 - 15
-				qint64 dif = sb - index;
+				qint64 diff = sb - index;
 				qint64 left = se - index;
-				if (sb <= index && index <= se) {
-					// in range
-				} else if (0 <= dif && dif < 16) {
-					// begin
-				} else if (0 <= left && left < 16) {
-					// end
+				if (0 < diff && diff < 16) {
+					// begin after
+				} else if (0 < left && left < 16) {
+					// end after
+				} else if (diff <= 0 && left <= 0) {
+					// equal (sb <= index && index <= se)
+					// inner selected
 				} else {
 					// normal
 				}
 			}
-		} else {
-			// check colors
 		}
 	}
 }
