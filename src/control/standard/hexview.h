@@ -27,7 +27,7 @@ namespace Standard {
 		int top_;
 		int x_[Num];	// pos of value
 		int X_[Num];	// pos of end
-		int xarea_[Num];
+		int xarea_[Num+1];
 	
 	public:
 		HexConfig();
@@ -70,7 +70,7 @@ namespace Standard {
 			Q_ASSERT(0 <= i && i < Num);
 			return X_[i];
 		}
-		int toPos(int x);	// -1, 0..31, 32:: 32 + 2 = 34
+		int toPos(int x);	// -1, 0..15, 16 => 18 patterns
 		int toLine(int y);	// [0, N]
 		void calculate();
 	};

@@ -55,6 +55,7 @@ void HexConfig::calculate()
 	for (int i = 1; i < Num; i++) {
 		xarea_[i] -= Spaces[i] / 2;
 	}
+	xarea_[Num] = xarea_[Num-1] + byteWidth();
 
 	top_ = Margin.top();
 }
@@ -65,15 +66,7 @@ int HexConfig::toPos(int x)
 		return -1;
 	}
 
-	int a = (int)distance(xarea_, lower_bound(xarea_, xarea_ + Num + 1, x));
-	if (a == Num + 1) {
-		return 32;
-	}
-
-	if (x <= xarea_[a] + FontMetrics.maxWidth()) {
-		return x * 2 + 1;
-	}
-	return x * 2;
+	return (int)distance(xarea_, lower_bound(xarea_, xarea_ + Num + 2, x)) - 1;
 }
 
 int HexConfig::toLine(int y)
@@ -212,8 +205,9 @@ void HexView::mousePressEvent(QMouseEvent*)
 {
 }
 
-void HexView::mouseMoveEvent(QMouseEvent*)
+void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
+	printf("move - x:%d xpos: %d\n", ev->pos().x(), config_.toPos(ev->pos().x()));
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent*)
