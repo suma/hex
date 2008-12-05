@@ -98,12 +98,9 @@ void HexView::refreshPixmap(int)
 
 	pix_.fill(config_.Colors[Color::Background]);
 	QPainter painter(&pix_);
-	//painter.initFrom(this);
-
-	//painter.drawText(220, 20, QString("abcdefg"));
 
 	if (!doc_->length()) {
-		// draw Empty Background only
+		// TODO: draw Empty Background only
 		return;
 	}
 
@@ -140,7 +137,7 @@ void HexView::refreshPixmap(int)
 	::DrawInfo di(y, top, yCount, xb, xe, sb, se, size, selected);
 	getDrawColors(di, dcolors_, config_.Colors);
 
-	// draw
+	// Draw lines
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
 	QBrush br;
 	for (int i = 0, j = 0, m = 0, cont = 0; itr != end;) {
@@ -156,8 +153,8 @@ void HexView::refreshPixmap(int)
 		// Continuous size
 		cont = min(m, HexConfig::Num - j);
 		qDebug("m:%d j:%d cont:%d\n", m, j, cont);
+		// Draw background
 		if (2 <= cont) {
-			// Draw background
 			int begin = config_.x(j);
 			painter.fillRect(begin, yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
 			qDebug("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
@@ -167,7 +164,7 @@ void HexView::refreshPixmap(int)
 			painter.fillRect(begin, yt, width, config_.byteHeight(), br);
 		}
 
-		// Draw
+		// Draw text
 		for (int k = 0; k < cont; k++, i++, j++) {
 			QString hex;
 			byteToHex(buff_[i], hex);
