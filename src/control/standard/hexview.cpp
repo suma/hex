@@ -67,6 +67,12 @@ void HexConfig::calculate()
 	top_ = Margin.top();
 }
 
+int HexConfig::drawableLines(int height)
+{
+	const int y = top() + byteMargin().top();
+	return (height - y + byteHeight()) / byteHeight();
+}
+
 int HexConfig::XToPos(int x) const
 {
 	if (x < Margin.left()) {
@@ -111,15 +117,15 @@ void HexView::refreshPixmap(int)
 		return;
 	}
 
-	// Calculate drawing area
+	// Compute drawing area
 	int yt = config_.top();
 	int y = config_.top() + config_.byteMargin().top();
 	const int yMax = height();
-	const int yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
+	const int yCount = config_.drawableLines(height());
 	quint64 top = cur_->Top * 16;
 	const uint size = min(doc_->length() - top, 16ULL * yCount);
 
-	// Calculate selectead area
+	// Compute selectead area
 	const int xb = 0, xe = width();
 	bool selected = false;
 	quint64 sb = 0, se = 0;
@@ -140,7 +146,7 @@ void HexView::refreshPixmap(int)
 	}
 	doc_->get(top, &buff_[0], size);
 
-	// TODO: Adding cache class for calculated values if this function is bottle neck
+	// TODO: Adding cache class for computed values if this function is bottle neck
 	::DrawInfo di(y, top, yCount, xb, xe, sb, se, size, selected);
 	getDrawColors(di, dcolors_, config_.Colors);
 
@@ -165,15 +171,15 @@ void HexView::refreshPixmap(int)
 		cont = min((int)(itr->Length), HexConfig::Num - j);
 		qDebug("itr->Length:%d j:%d cont:%d\n", itr->Length, j, cont);
 		// Draw background
+		int begin, width;
 		if (2 <= cont) {
-			const int begin = config_.x(j);
-			painter.fillRect(begin, yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
-			qDebug("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
+			begin = config_.x(j);
+			width = config_.X(j + cont - 1) - begin;
 		} else {
-			const int begin = config_.x(j);
-			const int width = config_.charWidth(2);
-			painter.fillRect(begin, yt, width, config_.byteHeight(), br);
+			begin = config_.x(j);
+			width = config_.charWidth(2);
 		}
+		painter.fillRect(begin, yt, width, config_.byteHeight(), br);
 
 		// Draw text
 		for (int k = 0; k < cont; k++, i++, j++) {
@@ -216,19 +222,23 @@ void HexView::byteToHex(uchar c, QString &h)
 	}
 }
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
-	int x = ev->pos().x();
-	int y = ev->pos().y();
-
-	const uint yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
+	int x = config_.XToPos(ev->pos().x());
+	int y = config_.YToLine(ev->pos().y());
+	qDebug("press x:%d y:%d\n", x, y);
+	
+	const uint yCount = config_.drawableLines(height());
 	quint64 top = cur_->Top;
-	//const uint minLine = min(doc_->length() / 16ULL - top, yCount);
-	uint minLine = 0;
+	const uint minLine = MIN(doc_->length() / 16 - top, yCount);
 	if (0 <= x && x < HexConfig::Num && 0 <= y && y <= minLine) {
-		//cur_->Position = top + x + y * 16;
+		qDebug("press - pos:%lld\n", cur_->Position);
+		Q_ASSERT(top + x + y * 16 <= doc_->length());
+		cur_->Position = top + x + y * 16;
 	}
 }
+#undef MIN
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {

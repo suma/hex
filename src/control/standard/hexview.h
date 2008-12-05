@@ -69,6 +69,7 @@ namespace Standard {
 			Q_ASSERT(0 <= i && i < Num);
 			return X_[i];
 		}
+		int drawableLines(int height);
 		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void calculate();
