@@ -15,7 +15,7 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: Margin(8, 4, 10, 10)
-	, ByteMargin(1, 1, 2, 2)
+	, ByteMargin(1, 1, 1, 2)
 	//, Font("Courier", 13)
 	, Font("Monaco", 13)
 	, FontMetrics(Font)
@@ -27,7 +27,6 @@ HexConfig::HexConfig()
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
 
 	// Font
-	//Font.setStyleHint(QFont::TypeWriter);
 	Font.setFixedPitch(true);
 	qDebug("isFixed: %d\n", Font.fixedPitch());
 
@@ -148,27 +147,31 @@ void HexView::refreshPixmap(int)
 	// Draw lines
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
 	QBrush br;
-	for (int i = 0, j = 0, m = 0, cont = 0; itr != end;) {
-		if (m == 0) {
+	bool init_itr = false;
+	for (int i = 0, j = 0, cont; itr != end;) {
+		if (!init_itr) {
+			// Create brush
 			br = QBrush(itr->Colors[Color::Background]);
-			m = itr->Length;
 
 			// Set color
 			painter.setBackground(br);
 			painter.setPen(itr->Colors[Color::Text]);
+
+			// ok
+			init_itr = true;
 		}
 
 		// Continuous size
-		cont = min(m, HexConfig::Num - j);
-		qDebug("m:%d j:%d cont:%d\n", m, j, cont);
+		cont = min((int)(itr->Length), HexConfig::Num - j);
+		qDebug("itr->Length:%d j:%d cont:%d\n", itr->Length, j, cont);
 		// Draw background
 		if (2 <= cont) {
-			int begin = config_.x(j);
+			const int begin = config_.x(j);
 			painter.fillRect(begin, yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
 			qDebug("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
 		} else {
-			int begin = config_.x(j);
-			int width = config_.charWidth(2);
+			const int begin = config_.x(j);
+			const int width = config_.charWidth(2);
 			painter.fillRect(begin, yt, width, config_.byteHeight(), br);
 		}
 
@@ -176,15 +179,16 @@ void HexView::refreshPixmap(int)
 		for (int k = 0; k < cont; k++, i++, j++) {
 			QString hex;
 			byteToHex(buff_[i], hex);
-			int width = config_.charWidth(2);
+			const int width = config_.charWidth(2);
 			painter.drawText(config_.x(j), y, width, config_.byteHeight(), Qt::AlignCenter, hex);
 		}
 		qDebug("y: %d, yt:%d\n", y, yt);
 
-		m -= cont;
+		itr->Length -= cont;
 		j = j & 0xF;
-		if (m == 0) {
+		if (itr->Length == 0) {
 			++itr;
+			init_itr = false;
 		}
 		if (j == 0) {
 			y += config_.byteHeight();
