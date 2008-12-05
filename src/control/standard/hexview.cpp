@@ -21,8 +21,8 @@ HexConfig::HexConfig()
 {
 	Colors[Color::Background] = QColor(255,255,255);
 	Colors[Color::Text] = QColor(0,0,0);
-	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0);
-	Colors[Color::SelText] = QColor(0,0xCC,0xCC);
+	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
+	Colors[Color::SelText] = QColor(0,0x40,0x40);
 
 	for (int i = 1; i < Num; i++) {
 		Spaces[i] = FontMetrics.maxWidth();
@@ -83,7 +83,7 @@ HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cur_(cur)
 {
-	setWindowOpacity(0.5);
+	//setWindowOpacity(0.5);
 }
 
 void HexView::refreshPixmap()
@@ -158,7 +158,8 @@ void HexView::refreshPixmap(int)
 		qDebug("m:%d j:%d cont:%d\n", m, j, cont);
 		if (2 <= cont) {
 			// Draw background
-			painter.fillRect(config_.x(j), yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
+			int begin = config_.x(j);
+			painter.fillRect(begin, yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
 			qDebug("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
 		} else {
 			int begin = config_.x(j);
@@ -170,7 +171,7 @@ void HexView::refreshPixmap(int)
 		for (int k = 0; k < cont; k++, i++, j++) {
 			QString hex;
 			byteToHex(buff_[i], hex);
-			painter.drawText(config_.x(j), y, config_.byteWidth(), config_.byteHeight(), Qt::AlignTop | Qt::AlignLeft, hex);
+			painter.drawText(config_.x(j), y, config_.byteWidth(), config_.byteHeight(), Qt::AlignVCenter | Qt::AlignLeft, hex);
 		}
 		qDebug("y: %d, yt:%d\n", y, yt);
 
