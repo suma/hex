@@ -16,25 +16,33 @@ namespace Standard {
 HexConfig::HexConfig()
 	: Margin(8, 4, 10, 10)
 	, ByteMargin(1, 1, 2, 2)
+	//, Font("Courier", 13)
 	, Font("Monaco", 13)
 	, FontMetrics(Font)
 {
+	// Coloring
 	Colors[Color::Background] = QColor(255,255,255);
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
 
-	for (int i = 1; i < Num; i++) {
-		Spaces[i] = FontMetrics.maxWidth();
-	}
-	Spaces[0] = Spaces[Num] = 0;
-	Spaces[Num / 2] *= 2;
+	// Font
+	//Font.setStyleHint(QFont::TypeWriter);
+	Font.setFixedPitch(true);
+	qDebug("isFixed: %d\n", Font.fixedPitch());
 
 	calculate();
 }
 
 void HexConfig::calculate()
 {
+	// Spaces
+	for (int i = 1; i < Num; i++) {
+		Spaces[i] = FontMetrics.maxWidth();
+	}
+	Spaces[0] = Spaces[Num] = 0;
+	Spaces[Num / 2] *= 2;
+
 	// Pos
 	x_[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
@@ -43,7 +51,7 @@ void HexConfig::calculate()
 
 	// Pos of end
 	for (int i = 0; i < Num; i++) {
-		X_[i] = x_[i] + (FontMetrics.maxWidth() * 2);
+		X_[i] = x_[i] + charWidth(2);
 		qDebug("i:%d x: %d X: %d\n", i, x_[i], X_[i]);
 	}
 
@@ -60,7 +68,7 @@ void HexConfig::calculate()
 	top_ = Margin.top();
 }
 
-int HexConfig::toPos(int x)
+int HexConfig::XToPos(int x) const
 {
 	if (x < Margin.left()) {
 		return -1;
@@ -69,7 +77,7 @@ int HexConfig::toPos(int x)
 	return (int)distance(xarea_, lower_bound(xarea_, xarea_ + Num + 2, x)) - 1;
 }
 
-int HexConfig::toLine(int y)
+int HexConfig::YToLine(int y) const
 {
 	if (y < Margin.top()) {
 		return -1;
@@ -160,7 +168,7 @@ void HexView::refreshPixmap(int)
 			qDebug("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
 		} else {
 			int begin = config_.x(j);
-			int width = config_.fontMetrics().maxWidth() * 2;
+			int width = config_.charWidth(2);
 			painter.fillRect(begin, yt, width, config_.byteHeight(), br);
 		}
 
@@ -168,7 +176,8 @@ void HexView::refreshPixmap(int)
 		for (int k = 0; k < cont; k++, i++, j++) {
 			QString hex;
 			byteToHex(buff_[i], hex);
-			painter.drawText(config_.x(j), y, config_.byteWidth(), config_.byteHeight(), Qt::AlignVCenter | Qt::AlignLeft, hex);
+			int width = config_.charWidth(2);
+			painter.drawText(config_.x(j), y, width, config_.byteHeight(), Qt::AlignCenter, hex);
 		}
 		qDebug("y: %d, yt:%d\n", y, yt);
 
@@ -203,14 +212,24 @@ void HexView::byteToHex(uchar c, QString &h)
 	}
 }
 
-void HexView::mousePressEvent(QMouseEvent*)
+void HexView::mousePressEvent(QMouseEvent *ev)
 {
+	int x = ev->pos().x();
+	int y = ev->pos().y();
+
+	const uint yCount = (height() - y + config_.byteHeight()) / config_.byteHeight();
+	quint64 top = cur_->Top;
+	//const uint minLine = min(doc_->length() / 16ULL - top, yCount);
+	uint minLine = 0;
+	if (0 <= x && x < HexConfig::Num && 0 <= y && y <= minLine) {
+		//cur_->Position = top + x + y * 16;
+	}
 }
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	qDebug("move - x:%d xpos: %d\n", ev->pos().x(), config_.toPos(ev->pos().x()));
-	qDebug("move - y:%d ypos: %d\n", ev->pos().y(), config_.toLine(ev->pos().y()));
+	qDebug("move - x:%d xpos: %d\n", ev->pos().x(), config_.XToPos(ev->pos().x()));
+	qDebug("move - y:%d ypos: %d\n", ev->pos().y(), config_.YToLine(ev->pos().y()));
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent*)

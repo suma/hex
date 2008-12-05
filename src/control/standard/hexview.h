@@ -36,6 +36,9 @@ namespace Standard {
 		{
 			FontMetrics = QFontMetrics(Font);
 		}
+		inline int charWidth(int num = 1) {
+			return FontMetrics.maxWidth() * num;
+		}
 		inline int byteWidth() const
 		{
 			return ByteMargin.left() + (FontMetrics.maxWidth() * 2) + ByteMargin.right();
@@ -47,10 +50,6 @@ namespace Standard {
 		inline const QRect &byteMargin() const
 		{
 			return ByteMargin;
-		}
-		inline int byteEnd(int i) const
-		{
-			return x(i) + (FontMetrics.maxWidth() * 2) + ByteMargin.right();
 		}
 		inline const QFontMetrics &fontMetrics() const
 		{
@@ -70,8 +69,8 @@ namespace Standard {
 			Q_ASSERT(0 <= i && i < Num);
 			return X_[i];
 		}
-		int toPos(int x);	// -1, 0..15, 16 => 18 patterns
-		int toLine(int y);	// -1, 0..N
+		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
+		int YToLine(int y) const;	// -1, 0..N
 		void calculate();
 	};
 
