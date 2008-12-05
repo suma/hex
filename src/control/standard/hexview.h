@@ -71,7 +71,7 @@ namespace Standard {
 			return X_[i];
 		}
 		int toPos(int x);	// -1, 0..15, 16 => 18 patterns
-		int toLine(int y);	// [0, N]
+		int toLine(int y);	// -1, 0..N
 		void calculate();
 	};
 

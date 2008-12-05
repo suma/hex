@@ -44,7 +44,7 @@ void HexConfig::calculate()
 	// Pos of end
 	for (int i = 0; i < Num; i++) {
 		X_[i] = x_[i] + (FontMetrics.maxWidth() * 2);
-		printf("i:%d x: %d X: %d\n", i, x_[i], X_[i]);
+		qDebug("i:%d x: %d X: %d\n", i, x_[i], X_[i]);
 	}
 
 	// Area
@@ -71,6 +71,10 @@ int HexConfig::toPos(int x)
 
 int HexConfig::toLine(int y)
 {
+	if (y < Margin.top()) {
+		return -1;
+	}
+	return (y - Margin.top()) / byteHeight();
 }
 
 ////////////////////////////////////////
@@ -151,11 +155,11 @@ void HexView::refreshPixmap(int)
 
 		// Continuous size
 		cont = min(m, HexConfig::Num - j);
-		printf("m:%d j:%d cont:%d\n", m, j, cont);
+		qDebug("m:%d j:%d cont:%d\n", m, j, cont);
 		if (2 <= cont) {
 			// Draw background
 			painter.fillRect(config_.x(j), yt, config_.X(j+cont-1) - config_.x(j), config_.byteHeight(), br);
-			printf("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
+			qDebug("x:%d, x2:%d\n", config_.x(j), config_.X(j+cont-1));
 		} else {
 			int begin = config_.x(j);
 			int width = config_.fontMetrics().maxWidth() * 2;
@@ -168,7 +172,7 @@ void HexView::refreshPixmap(int)
 			byteToHex(buff_[i], hex);
 			painter.drawText(config_.x(j), y, config_.byteWidth(), config_.byteHeight(), Qt::AlignTop | Qt::AlignLeft, hex);
 		}
-		printf("y: %d, yt:%d\n", y, yt);
+		qDebug("y: %d, yt:%d\n", y, yt);
 
 		m -= cont;
 		j = j & 0xF;
@@ -207,7 +211,8 @@ void HexView::mousePressEvent(QMouseEvent*)
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	printf("move - x:%d xpos: %d\n", ev->pos().x(), config_.toPos(ev->pos().x()));
+	qDebug("move - x:%d xpos: %d\n", ev->pos().x(), config_.toPos(ev->pos().x()));
+	qDebug("move - y:%d ypos: %d\n", ev->pos().y(), config_.toLine(ev->pos().y()));
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent*)

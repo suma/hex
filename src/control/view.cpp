@@ -41,6 +41,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 	// clear
 	ci.clear();
 
+	qDebug("selected: %d, highligh on: %d\n", di.selected, high);
 	if (!di.selected) {
 		// case: Not selected
 		if (high) {
@@ -74,7 +75,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 			// check colors
 			qint64 diff = sb - index;
 			qint64 left = se - index;
-			printf("sb: %d, se: %d\n", sb, se);
+			qDebug("sb: %d, se: %d\n", sb, se);
 			int i = 0;
 			QColor *last = NULL;
 			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size; i++, index++, diff--, left--) {
