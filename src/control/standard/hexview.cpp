@@ -226,13 +226,14 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
 		cur_->SelBegin = cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+		cur_->Toggle = true;
 		qDebug("mouse down begin:%lld", cur_->SelBegin);
 	}
 }
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	if (ev->button() == Qt::LeftButton) {
+	if (cur_->Toggle) {
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 
@@ -242,12 +243,13 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 
 void HexView::mouseReleaseEvent(QMouseEvent *ev)
 {
-	if (ev->button() == Qt::LeftButton) {
+	if (cur_->Toggle) {
 		quint64 oldBegin = cur_->SelBegin;
 		quint64 oldEnd = cur_->SelEnd;
 
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
+		cur_->Toggle = false;
 		qDebug("mouse release begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
 
 		refreshPixmap();
@@ -274,6 +276,13 @@ quint64 HexView::moveByMouse(int xx, int yy)
 	return cur_->Position;
 }
 #undef MIN
+void HexView::keyPressEvent(QKeyEvent *)
+{
+}
+
+void HexView::keyReleaseEvent(QKeyEvent *)
+{
+}
 
 
 }	// namespace
