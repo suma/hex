@@ -35,14 +35,14 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 
 	bool high = false;
 	if (high_ != NULL && high_->GetColor(buff_, top, size, hcolors_)) {
-		qDebug("hcolors_.size(): %d\n", hcolors_.size());
+		qDebug("hcolors_.size(): %d", hcolors_.size());
 		high = true;
 	}
 
 	// clear
 	ci.clear();
 
-	qDebug("selected: %d, highligh on: %d\n", di.selected, high);
+	qDebug("selected: %d, highligh on: %d", di.selected, high);
 	if (!di.selected) {
 		// case: Not selected
 		if (high) {
@@ -69,41 +69,77 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 			ci.push_back(DrawColorInfo(size, defColors));
 		}
 	} else {
+
+		// buggy
+
 		// case: Selected
 		quint64 index = top;
 		// check colors
-		qint64 diff = sb - index;
-		qint64 left = se - index;
-		qDebug("sb: %d, se: %d\n", sb, se);
+		qDebug("sb: %d, se: %d", sb, se);
 		int i = 0;
-		QColor *last = NULL;
-		for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size; i++, index++, diff--, left--) {
-			bool sel = sb <= index && index <= se;
+		bool l_out = false;
+		int ilen = 0;
+		bool sel_last = sb <= index && index < se;
+		for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(), last = end; i < size; i++, index++) {
+			bool sel = sb <= index && index < se;
 			int x = sel ? 2 : 0;
-			if (itr == end || i < itr->Index || itr->Index + itr->Length < i) {
-				// out of itr
-				if (last == defColors + x) {
-					// continues same color
-					ci.back().Length++;
-				} else {
-					last = defColors + x;
-					ci.push_back(DrawColorInfo(1, last));
-				}
-			} else {
+			if (itr != end && itr->Index <= i && i < itr->Index + itr->Length) {
 				// inner itr
-				if (last == itr->Colors + x) {
+				if (itr == last && sel_last == sel) {
 					// continues same color
 					ci.back().Length++;
 				} else {
-					last = itr->Colors + x;
-					ci.push_back(DrawColorInfo(1, last));
+					ilen = itr->Length;
+					last = itr;
+					ci.push_back(DrawColorInfo(1, itr->Colors + x));
+				}
+				sel_last = sel;
+				ilen--;
+				if (ilen == 0) {
+					++itr;
+				}
+				l_out = false;
+			} else {
+				if (l_out) {
+					// continues same color
+					ci.back().Length++;
+				} else {
+					ci.push_back(DrawColorInfo(1, defColors + x));
+					l_out = true;
+				}
+			}
+		}
+		/*
+		bool l_out = false;
+		for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(), last = end; i < size; i++, index++) {
+			bool sel = sb <= index && index < se;
+			int x = sel ? 2 : 0;
+			if (itr != end && itr->Index <= i && i < itr->Index + itr->Length) {
+				// inner itr
+				if (itr == last) {
+					// continues same color
+					ci.back().Length++;
+				} else {
+					qDebug("i:%d index:%d len:%d\n", i, itr->Index, itr->Length);
+					ci.push_back(DrawColorInfo(1, itr->Colors + x));
 				}
 				itr->Length--;
 				if (itr->Length == 0) {
 					++itr;
 				}
+				l_out = false;
+			} else {
+				// out of itr
+				if (l_out) {
+					// continues same color
+					ci.back().Length++;
+				} else {
+					ci.push_back(DrawColorInfo(1, defColors + 2));
+					l_out = true;
+				}
 			}
 		}
+		*/
 	}
 }
 

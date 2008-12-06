@@ -22,7 +22,7 @@ namespace Standard {
 		// Selected: [SelBegin, SelEnd]
 		quint64 SelBegin;	// pos(not line)
 		quint64 SelEnd;		// pos(not line)
-		bool Selected;
+		bool Selected;		// Begin != End
 
 	};
 

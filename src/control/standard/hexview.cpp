@@ -28,7 +28,7 @@ HexConfig::HexConfig()
 
 	// Font
 	Font.setFixedPitch(true);
-	qDebug("isFixed: %d\n", Font.fixedPitch());
+	qDebug("isFixed: %d", Font.fixedPitch());
 
 	calculate();
 }
@@ -51,7 +51,7 @@ void HexConfig::calculate()
 	// Pos of end
 	for (int i = 0; i < Num; i++) {
 		X_[i] = x_[i] + charWidth(2);
-		qDebug("i:%d x: %d X: %d\n", i, x_[i], X_[i]);
+		qDebug("i:%d x: %d X: %d", i, x_[i], X_[i]);
 	}
 
 	// Area
@@ -169,7 +169,7 @@ void HexView::refreshPixmap(int)
 
 		// Continuous size
 		cont = min((int)(itr->Length), HexConfig::Num - j);
-		qDebug("itr->Length:%d j:%d cont:%d\n", itr->Length, j, cont);
+		qDebug("itr->Length:%d j:%d cont:%d", itr->Length, j, cont);
 		// Draw background
 		int begin, width;
 		if (2 <= cont) {
@@ -188,7 +188,7 @@ void HexView::refreshPixmap(int)
 			const int width = config_.charWidth(2);
 			painter.drawText(config_.x(j), y, width, config_.byteHeight(), Qt::AlignCenter, hex);
 		}
-		qDebug("y: %d, yt:%d\n", y, yt);
+		qDebug("y: %d, yt:%d", y, yt);
 
 		itr->Length -= cont;
 		j = j & 0xF;
@@ -227,13 +227,13 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	int x = config_.XToPos(ev->pos().x());
 	int y = config_.YToLine(ev->pos().y());
-	qDebug("press x:%d y:%d\n", x, y);
+	qDebug("press x:%d y:%d", x, y);
 	
 	const uint yCount = config_.drawableLines(height());
 	quint64 top = cur_->Top;
 	const uint minLine = MIN(doc_->length() / 16 - top, yCount);
 	if (0 <= x && x < HexConfig::Num && 0 <= y && y <= minLine) {
-		qDebug("press - pos:%lld\n", cur_->Position);
+		qDebug("press - pos:%lld", cur_->Position);
 		Q_ASSERT(top + x + y * 16 <= doc_->length());
 		cur_->Position = top + x + y * 16;
 	}
@@ -242,8 +242,8 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	qDebug("move - x:%d xpos: %d\n", ev->pos().x(), config_.XToPos(ev->pos().x()));
-	qDebug("move - y:%d ypos: %d\n", ev->pos().y(), config_.YToLine(ev->pos().y()));
+	qDebug("move - x:%d xpos: %d", ev->pos().x(), config_.XToPos(ev->pos().x()));
+	qDebug("move - y:%d ypos: %d", ev->pos().y(), config_.YToLine(ev->pos().y()));
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent*)
