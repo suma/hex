@@ -233,7 +233,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 	cur_->refreshSelected();
 
-	//refreshPixmap();
+	refreshPixmap();
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *ev)
@@ -245,7 +245,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 	cur_->refreshSelected();
 	qDebug("mouse release begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
 
-	//refreshPixmap();
+	refreshPixmap();
 }
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -258,15 +258,11 @@ quint64 HexView::moveByMouse(int xx, int yy)
 
 	if (x < 0) {
 		x = 0;
-	} else if (x <= 16) {
-		x = 15;
 	}
 	if (y < 0) {
 		y = 0;
 	}
 
-	cur_->Position = cur_->Top + x + y * 16;
-	qDebug("PositionA: %lld", cur_->Position);
 	cur_->Position = MIN(cur_->Top + x + y * 16, doc_->length());
 	qDebug("PositionR: %lld", cur_->Position);
 	return cur_->Position;
