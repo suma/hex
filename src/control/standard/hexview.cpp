@@ -126,11 +126,12 @@ void HexView::refreshPixmap()
 
 void HexView::refreshPixmap(int type, int line, int end)
 {
-	Q_ASSERT(0 <= line && line < doc_->length() / 16 + 1);
-	Q_ASSERT(0 <= end && end < doc_->length() / 16 + 1);
+	Q_ASSERT(0 <= line && line < doc_->length() / HexConfig::Num + 1);
+	Q_ASSERT(0 <= end && end < doc_->length() / HexConfig::Num + 1);
 	// TODO: Optimizing drawing
 
 	pix_.fill(config_.Colors[Color::Background]);
+
 	if (!doc_->length()) {
 		// TODO: draw Empty Background only
 		return;
@@ -166,8 +167,8 @@ void HexView::refreshPixmap(int type, int line, int end)
 		yCount = config_.drawableLines(yMax - y);
 		break;
 	}
-	quint64 top = (cur_->Top + line) * 16;
-	const uint size = min(doc_->length() - top, 16ULL * yCount);
+	quint64 top = (cur_->Top + line) * HexConfig::Num;
+	const uint size = min(doc_->length() - top, (quint64)HexConfig::Num * yCount);
 
 	// Compute selectead area
 	const int xb = 0, xe = width();
@@ -177,7 +178,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 		sb = min(cur_->SelBegin, cur_->SelEnd);
 		se = max(cur_->SelBegin, cur_->SelEnd);
 		if (top <= se) {
-			const quint64 vpos_end = max(top + (16ULL * yCount), top + size);
+			const quint64 vpos_end = max(top + (HexConfig::Num * yCount), top + size);
 			if (sb <= vpos_end) {
 				selected = true;
 			}
@@ -325,7 +326,7 @@ quint64 HexView::moveByMouse(int xx, int yy)
 		x = y = 0;
 	}
 
-	cur_->Position = MIN(cur_->Top + x + y * 16, doc_->length());
+	cur_->Position = MIN(cur_->Top + x + y * HexConfig::Num, doc_->length());
 	qDebug("Position: %lld", cur_->Position);
 	return cur_->Position;
 }
@@ -337,8 +338,8 @@ void HexView::drawSelected(bool reset)
 	if (reset) {
 		b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
 		e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
-		const int bL = b / 16 - cur_->Top;
-		const int eL = e / 16 - cur_->Top + 1;
+		const int bL = b / HexConfig::Num - cur_->Top;
+		const int eL = e / HexConfig::Num - cur_->Top + 1;
 		cur_->Selected = false;
 		qDebug("reset - bL:%d eL:%d", bL, eL);
 		qDebug("reset - begin:%lld end:%lld endO:%lld", cur_->SelBegin, cur_->SelEnd, cur_->SelEndO);
@@ -357,8 +358,8 @@ void HexView::drawSelected(bool reset)
 			qDebug("minimum end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
 		}
 
-		const int bL = b / 16 - cur_->Top;
-		const int eL = e / 16 - cur_->Top + 1;
+		const int bL = b / HexConfig::Num - cur_->Top;
+		const int eL = e / HexConfig::Num - cur_->Top + 1;
 		qDebug("bL:%d eL:%d", bL, eL);
 		refreshPixmap(DRAW_RANGE, bL, eL);
 	}
