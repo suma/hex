@@ -260,7 +260,7 @@ quint64 HexView::moveByMouse(int xx, int yy)
 		x = 0;
 	}
 	if (y < 0) {
-		y = 0;
+		x = y = 0;
 	}
 
 	cur_->Position = MIN(cur_->Top + x + y * 16, doc_->length());
