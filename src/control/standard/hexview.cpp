@@ -11,7 +11,6 @@ using namespace std;
 
 namespace Standard {
 #define qDebug
-
 ////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
@@ -152,12 +151,12 @@ void HexView::refreshPixmap(int type, int line, int end)
 	case DRAW_LINE:
 		yt += config_.byteHeight() * line;
 		y  += config_.byteHeight() * line;
-		yCount = 1;
+		yCount = 2;
 		break;
 	case DRAW_AFTER:
 		yt += config_.byteHeight() * line;
 		y  += config_.byteHeight() * line;
-		yMax = min(y + config_.byteHeight(), height());
+		yMax = max(y + config_.byteHeight(), height());
 		yCount = config_.drawableLines(yMax - y);
 		break;
 	case DRAW_RANGE:
@@ -165,6 +164,9 @@ void HexView::refreshPixmap(int type, int line, int end)
 		y  += config_.byteHeight() * line;
 		yMax = min(y + config_.byteHeight() * end, height());
 		yCount = config_.drawableLines(yMax - y);
+#undef qDebug
+		qDebug("ref  - beg:%d end:%d count:%d", line, end, yCount);
+#define qDebug
 		break;
 	}
 	quint64 top = (cur_->Top + line) * 16;
@@ -271,21 +273,17 @@ void HexView::byteToHex(uchar c, QString &h)
 		h[1] = QChar('A' + L - 10);
 	}
 }
+
 #undef qDebug
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
-		if (cur_->Selected) {
-			quint64 b = min(cur_->SelBegin, cur_->SelEnd);
-			quint64 e = max(cur_->SelBegin, cur_->SelEnd);
-			int bL = b / 16 - cur_->Top;
-			int eL = e / 16 - cur_->Top;
-			refreshPixmap(DRAW_RANGE, bL, eL);
-		}
+		grabMouse();
+		drawSelected(true);
 
-		cur_->SelBegin = cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+		cur_->SelBegin = cur_->SelEnd = cur_->SelEndO = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->Toggle = true;
-		qDebug("mouse down begin:%lld", cur_->SelBegin);
+		qDebug("press -  begin:%lld", cur_->SelBegin);
 	}
 }
 
@@ -303,13 +301,14 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 void HexView::mouseReleaseEvent(QMouseEvent *ev)
 {
 	if (cur_->Toggle) {
+		releaseMouse();
 		quint64 oldBegin = cur_->SelBegin;
 		quint64 oldEnd = cur_->SelEnd;
 
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 		cur_->Toggle = false;
-		qDebug("mouse release begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
+		qDebug("mouse release - begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
 
 		drawSelected();
 	}
@@ -321,7 +320,7 @@ quint64 HexView::moveByMouse(int xx, int yy)
 	int x = config_.XToPos(xx);
 	int y = config_.YToLine(yy);
 
-	qDebug("press x:%d y:%d top: %lld", x, y, cur_->Top);
+	qDebug("move x:%d y:%d top: %lld", x, y, cur_->Top);
 
 	if (x < 0) {
 		x = 0;
@@ -336,25 +335,36 @@ quint64 HexView::moveByMouse(int xx, int yy)
 }
 #undef MIN
 
-void HexView::drawSelected()
+void HexView::drawSelected(bool reset)
 {
-	if (cur_->selMoved()) {
-		quint64 b, e;
-		if (cur_->SelBegin < cur_->SelEndO && cur_->SelBegin >= cur_->SelEnd ||
-			cur_->SelBegin >= cur_->SelEndO && cur_->SelBegin < cur_->SelEnd) {
-			b = min(min(cur_->SelBegin, cur_->SelEnd), min(cur_->SelBegin, cur_->SelEndO));
-			e = max(max(cur_->SelBegin, cur_->SelEnd), max(cur_->SelBegin, cur_->SelEndO));
+	quint64 b, e;
+	if (reset) {
+		b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
+		e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
+		const int bL = b / 16 - cur_->Top;
+		const int eL = e / 16 - cur_->Top + 1;
+		cur_->Selected = false;
+		qDebug("reset - bL:%d eL:%d", bL, eL);
+		qDebug("reset - begin:%lld end:%lld endO:%lld", cur_->SelBegin, cur_->SelEnd, cur_->SelEndO);
+		refreshPixmap(DRAW_RANGE, bL, eL);
+	} else if (cur_->selMoved()) {
+		if ((cur_->SelBegin < cur_->SelEndO && cur_->SelBegin >= cur_->SelEnd ||
+			cur_->SelBegin >= cur_->SelEndO && cur_->SelBegin < cur_->SelEnd)) {
+			// Crossing between begin and end
+			b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
+			e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
 			qDebug("cross end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
 		} else {
+			// Minimum area
 			b = min(cur_->SelEnd, cur_->SelEndO);
 			e = max(cur_->SelEnd, cur_->SelEndO);
 			qDebug("minimum end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
 		}
+
 		const int bL = b / 16 - cur_->Top;
-		const int eL = e / 16 - cur_->Top;
+		const int eL = e / 16 - cur_->Top + 1;
 		qDebug("bL:%d eL:%d", bL, eL);
-		//refreshPixmap(DRAW_RANGE, bL, eL);
-		refreshPixmap(DRAW_ALL);
+		refreshPixmap(DRAW_RANGE, bL, eL);
 	}
 }
 

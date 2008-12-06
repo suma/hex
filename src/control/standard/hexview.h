@@ -100,7 +100,7 @@ namespace Standard {
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
-		void drawSelected();
+		void drawSelected(bool reset = false);
 
 		void byteToHex(uchar c, QString &h);
 		quint64 moveByMouse(int x, int y);
