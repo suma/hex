@@ -60,7 +60,8 @@ void HexConfig::calculate()
 		xarea_[i] = xarea_[i-1] + byteWidth() + Spaces[i];
 	}
 	for (int i = 1; i < Num; i++) {
-		xarea_[i] -= Spaces[i] / 2;
+		//xarea_[i] -= Spaces[i] / 2;
+		xarea_[i] -= Spaces[i];
 	}
 	xarea_[Num] = xarea_[Num-1] + byteWidth();
 
@@ -276,13 +277,6 @@ quint64 HexView::moveByMouse(int xx, int yy)
 	return cur_->Position;
 }
 #undef MIN
-void HexView::keyPressEvent(QKeyEvent *)
-{
-}
-
-void HexView::keyReleaseEvent(QKeyEvent *)
-{
-}
 
 
 }	// namespace

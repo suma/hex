@@ -93,8 +93,6 @@ namespace Standard {
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
-		void keyPressEvent(QKeyEvent *);
-		void keyReleaseEvent(QKeyEvent *);
 
 		void byteToHex(uchar c, QString &h);
 		quint64 moveByMouse(int x, int y);
