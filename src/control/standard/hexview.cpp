@@ -14,7 +14,7 @@ namespace Standard {
 ////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
-	: Margin(8, 4, 10, 10)
+	: Margin(3, 3, 3, 3)
 	, ByteMargin(1, 1, 1, 2)
 	//, Font("Courier", 13)
 	, Font("Monaco", 13)
@@ -45,7 +45,7 @@ void HexConfig::calculate()
 	// Pos
 	x_[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
-		x_[i] = x_[i-1] + byteWidth() + Spaces[i] - ByteMargin.left();
+		x_[i] = x_[i-1] + byteWidth() + Spaces[i];
 	}
 
 	// Pos of end
@@ -130,7 +130,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	Q_ASSERT(0 <= end && end < doc_->length() / 16 + 1);
 	// TODO: Optimizing drawing
 
-	//pix_.fill(config_.Colors[Color::Background]);
+	pix_.fill(config_.Colors[Color::Background]);
 	if (!doc_->length()) {
 		// TODO: draw Empty Background only
 		return;
