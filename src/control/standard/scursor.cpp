@@ -9,7 +9,7 @@ Cursor::Cursor()
 	, SelBegin(0)
 	, SelEnd(0)
 	, Selected(false)
-	, Drag(false)
+	, Toggle(false)
 {
 }
 
