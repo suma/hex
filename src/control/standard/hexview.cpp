@@ -222,33 +222,56 @@ void HexView::byteToHex(uchar c, QString &h)
 	}
 }
 
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
-	int x = config_.XToPos(ev->pos().x());
-	int y = config_.YToLine(ev->pos().y());
-	qDebug("press x:%d y:%d", x, y);
-	
-	const uint yCount = config_.drawableLines(height());
-	quint64 top = cur_->Top;
-	const uint minLine = MIN(doc_->length() / 16 - top, yCount);
-	if (0 <= x && x < HexConfig::Num && 0 <= y && y <= minLine) {
-		qDebug("press - pos:%lld", cur_->Position);
-		Q_ASSERT(top + x + y * 16 <= doc_->length());
-		cur_->Position = top + x + y * 16;
-	}
+	cur_->SelBegin = cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+	qDebug("mouse down begin:%lld", cur_->SelBegin);
 }
-#undef MIN
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	qDebug("move - x:%d xpos: %d", ev->pos().x(), config_.XToPos(ev->pos().x()));
-	qDebug("move - y:%d ypos: %d", ev->pos().y(), config_.YToLine(ev->pos().y()));
+	cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+	cur_->refreshSelected();
+
+	//refreshPixmap();
 }
 
-void HexView::mouseReleaseEvent(QMouseEvent*)
+void HexView::mouseReleaseEvent(QMouseEvent *ev)
 {
+	quint64 oldBegin = cur_->SelBegin;
+	quint64 oldEnd = cur_->SelEnd;
+
+	cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+	cur_->refreshSelected();
+	qDebug("mouse release begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
+
+	//refreshPixmap();
 }
+
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+quint64 HexView::moveByMouse(int xx, int yy)
+{
+	int x = config_.XToPos(xx);
+	int y = config_.YToLine(yy);
+
+	qDebug("press x:%d y:%d top: %lld", x, y, cur_->Top);
+
+	if (x < 0) {
+		x = 0;
+	} else if (x <= 16) {
+		x = 15;
+	}
+	if (y < 0) {
+		y = 0;
+	}
+
+	cur_->Position = cur_->Top + x + y * 16;
+	qDebug("PositionA: %lld", cur_->Position);
+	cur_->Position = MIN(cur_->Top + x + y * 16, doc_->length());
+	qDebug("PositionR: %lld", cur_->Position);
+	return cur_->Position;
+}
+#undef MIN
 
 
 }	// namespace

@@ -13,6 +13,7 @@ namespace Standard {
 	{
 	public:
 		Cursor();
+		void refreshSelected();
 
 	public:
 
@@ -23,6 +24,7 @@ namespace Standard {
 		quint64 SelBegin;	// pos(not line)
 		quint64 SelEnd;		// pos(not line)
 		bool Selected;		// Begin != End
+		bool Drag;
 
 	};
 

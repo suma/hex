@@ -70,7 +70,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 		}
 	} else {
 
-		// buggy
+		// buggy(highlight)
 
 		// case: Selected
 		quint64 index = top;

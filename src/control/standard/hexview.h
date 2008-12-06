@@ -94,6 +94,7 @@ namespace Standard {
 		void mouseReleaseEvent(QMouseEvent*);
 
 		void byteToHex(uchar c, QString &h);
+		quint64 moveByMouse(int x, int y);
 
 	protected:
 		// Main components
