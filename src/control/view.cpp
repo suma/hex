@@ -77,36 +77,16 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 		// check colors
 		qDebug("sb: %d, se: %d", sb, se);
 		int i = 0;
-		bool l_out = false;
-		int ilen = 0;
-		bool sel_last = sb <= index && index < se;
-		for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(), last = end; i < size; i++, index++) {
+		QColor *last = NULL;
+		for (; i < size; i++, index++) {
 			bool sel = sb <= index && index < se;
 			int x = sel ? 2 : 0;
-			if (itr != end && itr->Index <= i && i < itr->Index + itr->Length) {
-				// inner itr
-				if (itr == last && sel_last == sel) {
-					// continues same color
-					ci.back().Length++;
-				} else {
-					ilen = itr->Length;
-					last = itr;
-					ci.push_back(DrawColorInfo(1, itr->Colors + x));
-				}
-				sel_last = sel;
-				ilen--;
-				if (ilen == 0) {
-					++itr;
-				}
-				l_out = false;
+			if (last == defColors + x) {
+				// continues same color
+				ci.back().Length++;
 			} else {
-				if (l_out) {
-					// continues same color
-					ci.back().Length++;
-				} else {
-					ci.push_back(DrawColorInfo(1, defColors + x));
-					l_out = true;
-				}
+				last = defColors + x;
+				ci.push_back(DrawColorInfo(1, last));
 			}
 		}
 		/*
