@@ -134,10 +134,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	// Compute drawing area
 	int yt = config_.top();
 	int y = config_.top() + config_.byteMargin().top();
-	int yCount;
-	//const int yCount = config_.drawableLines(height());
-	//const uint size = min(doc_->length() - top, 16ULL * yCount);
-	int yMax;
+	int yCount, yMax;
 
 	switch (type) {
 	case DRAW_ALL:
@@ -189,6 +186,13 @@ void HexView::refreshPixmap(int type, int line, int end)
 	::DrawInfo di(y, top, yCount, xb, xe, sb, se, size, selected);
 	getDrawColors(di, dcolors_, config_.Colors);
 
+	// Draw
+	drawLines(painter, y, yt);
+	update();
+}
+
+void HexView::drawLines(QPainter &painter, int y, int yt)
+{
 	// Draw lines
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
 	QBrush br;
@@ -240,8 +244,6 @@ void HexView::refreshPixmap(int type, int line, int end)
 			yt += config_.byteHeight();
 		}
 	}
-
-	update();
 }
 
 void HexView::byteToHex(uchar c, QString &h)

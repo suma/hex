@@ -90,6 +90,7 @@ namespace Standard {
 
 		void refreshPixmap();
 		void refreshPixmap(int type, int = 0, int = 0);
+		void drawLines(QPainter &painter, int y, int yt);
 
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
