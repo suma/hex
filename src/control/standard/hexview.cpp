@@ -164,9 +164,6 @@ void HexView::refreshPixmap(int type, int line, int end)
 		y  += config_.byteHeight() * line;
 		yMax = min(y + config_.byteHeight() * end, height());
 		yCount = config_.drawableLines(yMax - y);
-#undef qDebug
-		qDebug("ref  - beg:%d end:%d count:%d", line, end, yCount);
-#define qDebug
 		break;
 	}
 	quint64 top = (cur_->Top + line) * 16;
