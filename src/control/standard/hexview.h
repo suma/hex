@@ -36,12 +36,13 @@ namespace Standard {
 		{
 			FontMetrics = QFontMetrics(Font);
 		}
-		inline int charWidth(int num = 1) {
+		inline int charWidth(int num = 1) const
+		{
 			return FontMetrics.maxWidth() * num;
 		}
 		inline int byteWidth() const
 		{
-			return ByteMargin.left() + (FontMetrics.maxWidth() * 2) + ByteMargin.right();
+			return ByteMargin.left() + charWidth(2) + ByteMargin.right();
 		}
 		inline int byteHeight() const
 		{

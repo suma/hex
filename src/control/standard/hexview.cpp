@@ -37,7 +37,7 @@ void HexConfig::calculate()
 {
 	// Spaces
 	for (int i = 1; i < Num; i++) {
-		Spaces[i] = FontMetrics.maxWidth();
+		Spaces[i] = charWidth();
 	}
 	Spaces[0] = Spaces[Num] = 0;
 	Spaces[Num / 2] *= 2;
@@ -96,7 +96,6 @@ HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cur_(cur)
 {
-	//setWindowOpacity(0.5);
 }
 
 void HexView::refreshPixmap()
@@ -111,6 +110,7 @@ void HexView::refreshPixmap(int)
 
 	pix_.fill(config_.Colors[Color::Background]);
 	QPainter painter(&pix_);
+	painter.setFont(config_.Font);
 
 	if (!doc_->length()) {
 		// TODO: draw Empty Background only
@@ -264,7 +264,7 @@ quint64 HexView::moveByMouse(int xx, int yy)
 	}
 
 	cur_->Position = MIN(cur_->Top + x + y * 16, doc_->length());
-	qDebug("PositionR: %lld", cur_->Position);
+	qDebug("Position: %lld", cur_->Position);
 	return cur_->Position;
 }
 #undef MIN
