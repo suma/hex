@@ -68,10 +68,15 @@ void HexConfig::calculate()
 	top_ = Margin.top();
 }
 
-int HexConfig::drawableLines(int height)
+int HexConfig::drawableLines(int height) const
 {
 	const int y = top() + byteMargin().top();
 	return (height - y + byteHeight()) / byteHeight();
+}
+
+int HexConfig::drawableLinesN(int height) const
+{
+	return height / byteHeight() + 1;
 }
 
 int HexConfig::XToPos(int x) const
@@ -93,6 +98,14 @@ int HexConfig::YToLine(int y) const
 
 ////////////////////////////////////////
 // View
+
+enum {
+	DRAW_ALL = 0,
+	DRAW_LINE,
+	DRAW_AFTER,
+	DRAW_RANGE,	// [begin, end)
+};
+
 HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cur_(cur)
@@ -101,28 +114,53 @@ HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
 
 void HexView::refreshPixmap()
 {
-	refreshPixmap(0);
+	refreshPixmap(DRAW_ALL);
 }
 
-void HexView::refreshPixmap(int)
+void HexView::refreshPixmap(int type, int line, int end)
 {
 	//
 	// TODO: Optimizing drawing
 
-	pix_.fill(config_.Colors[Color::Background]);
-	QPainter painter(&pix_);
-	painter.setFont(config_.Font);
-
+	//pix_.fill(config_.Colors[Color::Background]);
 	if (!doc_->length()) {
 		// TODO: draw Empty Background only
 		return;
 	}
 
+	QPainter painter(&pix_);
+	painter.setFont(config_.Font);
+
 	// Compute drawing area
 	int yt = config_.top();
 	int y = config_.top() + config_.byteMargin().top();
-	const int yMax = height();
-	const int yCount = config_.drawableLines(height());
+	int yCount;
+	//const int yCount = config_.drawableLines(height());
+	//const uint size = min(doc_->length() - top, 16ULL * yCount);
+	int yMax;
+
+	switch (type) {
+	case DRAW_ALL:
+		yCount = config_.drawableLines(height());
+		break;
+	case DRAW_LINE:
+		yt += config_.byteHeight() * line;
+		y  += config_.byteHeight() * line;
+		yCount = 1;
+		break;
+	case DRAW_AFTER:
+		yt += config_.byteHeight() * line;
+		y  += config_.byteHeight() * line;
+		yMax = min(y + config_.byteHeight(), height());
+		yCount = config_.drawableLines(yMax - y);
+		break;
+	case DRAW_RANGE:
+		yt += config_.byteHeight() * line;
+		y  += config_.byteHeight() * line;
+		yMax = min(y + config_.byteHeight() * end, height());
+		yCount = config_.drawableLines(yMax - y);
+		break;
+	}
 	quint64 top = cur_->Top * 16;
 	const uint size = min(doc_->length() - top, 16ULL * yCount);
 
