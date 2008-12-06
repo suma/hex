@@ -45,12 +45,12 @@ void HexConfig::calculate()
 	// Pos
 	x_[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
-		x_[i] = x_[i-1] + byteWidth() + Spaces[i];
+		x_[i] = x_[i-1] + byteWidth() + Spaces[i] - ByteMargin.left();
 	}
 
 	// Pos of end
 	for (int i = 0; i < Num; i++) {
-		X_[i] = x_[i] + charWidth(2);
+		X_[i] = x_[i] + charWidth(2) + ByteMargin.right();
 		qDebug("i:%d x: %d X: %d", i, x_[i], X_[i]);
 	}
 
@@ -222,13 +222,12 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 		cont = min((int)(itr->Length), HexConfig::Num - j);
 		qDebug("itr->Length:%d j:%d cont:%d", itr->Length, j, cont);
 		// Draw background
-		int begin, width;
+		int width;
+		int begin = config_.x(j) - config_.ByteMargin.left();
 		if (2 <= cont) {
-			begin = config_.x(j);
 			width = config_.X(j + cont - 1) - begin;
 		} else {
-			begin = config_.x(j);
-			width = config_.charWidth(2);
+			width = config_.byteWidth();
 		}
 		painter.fillRect(begin, yt, width, config_.byteHeight(), br);
 

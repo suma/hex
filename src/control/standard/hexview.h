@@ -62,7 +62,7 @@ namespace Standard {
 		}
 		inline int maxWidth() const
 		{
-			return X(15) + ByteMargin.right() + Margin.right();
+			return X(15) + Margin.right();
 		}
 		inline int x(int i) const
 		{
