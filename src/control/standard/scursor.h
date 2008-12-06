@@ -14,6 +14,7 @@ namespace Standard {
 	public:
 		Cursor();
 		void refreshSelected();
+		bool selMoved();
 
 	public:
 
@@ -23,6 +24,7 @@ namespace Standard {
 		// Selected: [SelBegin, SelEnd]
 		quint64 SelBegin;	// pos(not line)
 		quint64 SelEnd;		// pos(not line)
+		quint64 SelEndO;	// old
 		bool Selected;		// Begin != End
 		bool Toggle;
 

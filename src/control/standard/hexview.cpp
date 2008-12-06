@@ -10,6 +10,7 @@
 using namespace std;
 
 namespace Standard {
+#define qDebug
 
 ////////////////////////////////////////
 // Config
@@ -119,7 +120,8 @@ void HexView::refreshPixmap()
 
 void HexView::refreshPixmap(int type, int line, int end)
 {
-	//
+	Q_ASSERT(0 <= line && line < doc_->length() / 16 + 1);
+	Q_ASSERT(0 <= end && end < doc_->length() / 16 + 1);
 	// TODO: Optimizing drawing
 
 	//pix_.fill(config_.Colors[Color::Background]);
@@ -158,7 +160,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 		yCount = config_.drawableLines(yMax - y);
 		break;
 	}
-	quint64 top = cur_->Top * 16;
+	quint64 top = (cur_->Top + line) * 16;
 	const uint size = min(doc_->length() - top, 16ULL * yCount);
 
 	// Compute selectead area
@@ -188,7 +190,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw
 	drawLines(painter, y, yt);
-	update();
+	update(0, yt, width(), yCount * config_.byteHeight());
 }
 
 void HexView::drawLines(QPainter &painter, int y, int yt)
@@ -262,10 +264,18 @@ void HexView::byteToHex(uchar c, QString &h)
 		h[1] = QChar('A' + L - 10);
 	}
 }
-
+#undef qDebug
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
+		if (cur_->Selected) {
+			quint64 b = min(cur_->SelBegin, cur_->SelEnd);
+			quint64 e = max(cur_->SelBegin, cur_->SelEnd);
+			int bL = b / 16 - cur_->Top;
+			int eL = e / 16 - cur_->Top;
+			refreshPixmap(DRAW_RANGE, bL, eL);
+		}
+
 		cur_->SelBegin = cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->Toggle = true;
 		qDebug("mouse down begin:%lld", cur_->SelBegin);
@@ -275,10 +285,40 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
 	if (cur_->Toggle) {
+		cur_->SelEndO = cur_->SelEnd;
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 
-		refreshPixmap();
+		if (cur_->selMoved()) {
+			//cur_->SelBegin - cur_->SelEnd
+			//cur_->SelBegin - cur_->SelEndO
+			quint64 b, e;
+			if (cur_->SelBegin < cur_->SelEndO && cur_->SelBegin >= cur_->SelEnd ||
+				cur_->SelBegin >= cur_->SelEndO && cur_->SelBegin < cur_->SelEnd) {
+				qDebug("cross end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
+				b = min(min(cur_->SelBegin, cur_->SelEnd), min(cur_->SelBegin, cur_->SelEndO));
+				e = max(max(cur_->SelBegin, cur_->SelEnd), max(cur_->SelBegin, cur_->SelEndO));
+			} else {
+				/*
+				cur_->SelBegin - cur_->SelEnd
+				cur_->SelBegin - cur_->SelEndO
+				*/
+				qDebug("minimum end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
+				b = min(cur_->SelEnd, cur_->SelEndO);
+				e = max(cur_->SelEnd, cur_->SelEndO);
+			}
+			/*
+			const quint64 ob = min(cur_->SelBegin, cur_->SelEndO);
+			const quint64 oe = max(cur_->SelBegin, cur_->SelEndO);
+			const quint64 b = min(min(cur_->SelBegin, cur_->SelEnd), ob);
+			const quint64 e = max(max(cur_->SelBegin, cur_->SelEnd), oe);
+			*/
+			const int bL = b / 16 - cur_->Top;
+			const int eL = e / 16 - cur_->Top;
+			qDebug("bL:%d eL:%d", bL, eL);
+			//refreshPixmap(DRAW_RANGE, bL, eL);
+			refreshPixmap(DRAW_ALL);
+		}
 	}
 }
 
@@ -293,7 +333,13 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		cur_->Toggle = false;
 		qDebug("mouse release begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
 
-		refreshPixmap();
+		quint64 b = min(cur_->SelBegin, cur_->SelEnd);
+		quint64 e = max(cur_->SelBegin, cur_->SelEnd);
+		int bL = b / 16 - cur_->Top;
+		int eL = e / 16 - cur_->Top;
+		qDebug("bL:%d eL:%d", bL, eL);
+		refreshPixmap(DRAW_RANGE, bL, eL);
+		//refreshPixmap(DRAW_ALL);
 	}
 }
 
