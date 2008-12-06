@@ -19,9 +19,12 @@ void View::paintEvent(QPaintEvent*)
 	painter.drawPixmap(0, 0, pix_);
 }
 
-void View::resizeEvent(QResizeEvent *)
+void View::resizeEvent(QResizeEvent *rs)
 {
-	pix_ = QPixmap(size());
+	if (pix_.size().width() < rs->size().width() ||
+		pix_.size().height() < rs->size().height()) {
+		pix_ = QPixmap(rs->size());
+	}
 	refreshPixmap();
 }
 

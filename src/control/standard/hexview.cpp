@@ -113,6 +113,13 @@ HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
 {
 }
 
+void HexView::resizeEvent(QResizeEvent *rs)
+{
+	QSize size(min(rs->size().width(), config_.maxWidth()), rs->size().height());
+	QResizeEvent resize(size, rs->oldSize());
+	View::resizeEvent(&resize);
+}
+
 void HexView::refreshPixmap()
 {
 	refreshPixmap(DRAW_ALL);
@@ -190,7 +197,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw
 	drawLines(painter, y, yt);
-	update(0, yt, width(), yCount * config_.byteHeight());
+	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
 }
 
 void HexView::drawLines(QPainter &painter, int y, int yt)
@@ -289,36 +296,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 
-		if (cur_->selMoved()) {
-			//cur_->SelBegin - cur_->SelEnd
-			//cur_->SelBegin - cur_->SelEndO
-			quint64 b, e;
-			if (cur_->SelBegin < cur_->SelEndO && cur_->SelBegin >= cur_->SelEnd ||
-				cur_->SelBegin >= cur_->SelEndO && cur_->SelBegin < cur_->SelEnd) {
-				qDebug("cross end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
-				b = min(min(cur_->SelBegin, cur_->SelEnd), min(cur_->SelBegin, cur_->SelEndO));
-				e = max(max(cur_->SelBegin, cur_->SelEnd), max(cur_->SelBegin, cur_->SelEndO));
-			} else {
-				/*
-				cur_->SelBegin - cur_->SelEnd
-				cur_->SelBegin - cur_->SelEndO
-				*/
-				qDebug("minimum end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
-				b = min(cur_->SelEnd, cur_->SelEndO);
-				e = max(cur_->SelEnd, cur_->SelEndO);
-			}
-			/*
-			const quint64 ob = min(cur_->SelBegin, cur_->SelEndO);
-			const quint64 oe = max(cur_->SelBegin, cur_->SelEndO);
-			const quint64 b = min(min(cur_->SelBegin, cur_->SelEnd), ob);
-			const quint64 e = max(max(cur_->SelBegin, cur_->SelEnd), oe);
-			*/
-			const int bL = b / 16 - cur_->Top;
-			const int eL = e / 16 - cur_->Top;
-			qDebug("bL:%d eL:%d", bL, eL);
-			//refreshPixmap(DRAW_RANGE, bL, eL);
-			refreshPixmap(DRAW_ALL);
-		}
+		drawSelected();
 	}
 }
 
@@ -333,13 +311,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		cur_->Toggle = false;
 		qDebug("mouse release begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
 
-		quint64 b = min(cur_->SelBegin, cur_->SelEnd);
-		quint64 e = max(cur_->SelBegin, cur_->SelEnd);
-		int bL = b / 16 - cur_->Top;
-		int eL = e / 16 - cur_->Top;
-		qDebug("bL:%d eL:%d", bL, eL);
-		refreshPixmap(DRAW_RANGE, bL, eL);
-		//refreshPixmap(DRAW_ALL);
+		drawSelected();
 	}
 }
 
@@ -364,5 +336,26 @@ quint64 HexView::moveByMouse(int xx, int yy)
 }
 #undef MIN
 
+void HexView::drawSelected()
+{
+	if (cur_->selMoved()) {
+		quint64 b, e;
+		if (cur_->SelBegin < cur_->SelEndO && cur_->SelBegin >= cur_->SelEnd ||
+			cur_->SelBegin >= cur_->SelEndO && cur_->SelBegin < cur_->SelEnd) {
+			b = min(min(cur_->SelBegin, cur_->SelEnd), min(cur_->SelBegin, cur_->SelEndO));
+			e = max(max(cur_->SelBegin, cur_->SelEnd), max(cur_->SelBegin, cur_->SelEndO));
+			qDebug("cross end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
+		} else {
+			b = min(cur_->SelEnd, cur_->SelEndO);
+			e = max(cur_->SelEnd, cur_->SelEndO);
+			qDebug("minimum end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
+		}
+		const int bL = b / 16 - cur_->Top;
+		const int eL = e / 16 - cur_->Top;
+		qDebug("bL:%d eL:%d", bL, eL);
+		//refreshPixmap(DRAW_RANGE, bL, eL);
+		refreshPixmap(DRAW_ALL);
+	}
+}
 
 }	// namespace

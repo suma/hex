@@ -60,6 +60,10 @@ namespace Standard {
 		{
 			return top_;
 		}
+		inline int maxWidth() const
+		{
+			return X(15) + ByteMargin.right() + Margin.right();
+		}
 		inline int x(int i) const
 		{
 			Q_ASSERT(0 <= i && i < Num);
@@ -92,9 +96,11 @@ namespace Standard {
 		void refreshPixmap(int type, int = 0, int = 0);
 		void drawLines(QPainter &painter, int y, int yt);
 
+		void resizeEvent(QResizeEvent *);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
+		void drawSelected();
 
 		void byteToHex(uchar c, QString &h);
 		quint64 moveByMouse(int x, int y);
