@@ -271,6 +271,11 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 	}
 }
 
+inline void HexView::drawCaret(bool visible)
+{
+	drawCaret(visible, config_.top(), height());
+}
+
 void HexView::drawCaret(bool visible, int ytop, int ymax)
 {
 	qDebug("drawCaret visible:%d ytop:%d ymax:%d sel:%llu top:%llu", visible, ytop, ymax, cur_->Position, cur_->Top);
@@ -348,17 +353,14 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		grabMouse();
 		drawSelected(true);
-		bool enable = cur_->HexTimerId;
-		if (enable) {
-			setCaretBlink(false);
-			drawCaret(false, config_.top(), height());
+		if (cur_->HexTimerId) {
+			drawCaret(false);
 		}
 
 		cur_->SelBegin = cur_->SelEnd = cur_->SelEndO = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->Toggle = true;
-		if (enable) {
-			drawCaret(true, config_.top(), height());
-			setCaretBlink(true);
+		if (cur_->HexTimerId) {
+			drawCaret(true);
 		}
 		qDebug("press -  begin:%lld", cur_->SelBegin);
 	}
@@ -368,10 +370,21 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
 	if (cur_->Toggle) {
 		cur_->SelEndO = cur_->SelEnd;
+
+		if (cur_->HexTimerId) {
+			cur_->Position = cur_->SelEnd;
+			drawCaret(false);
+		}
+
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 
 		drawSelected();
+
+		if (cur_->HexTimerId) {
+			cur_->Position = cur_->SelEnd;
+			drawCaret(true);
+		}
 	}
 }
 
@@ -381,11 +394,6 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		releaseMouse();
 		quint64 oldBegin = cur_->SelBegin;
 		quint64 oldEnd = cur_->SelEnd;
-
-		if (cur_->HexTimerId) {
-			cur_->Position = cur_->SelEnd;
-			drawCaret(true, config_.top(), height());
-		}
 
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
@@ -467,7 +475,7 @@ void HexView::setCaretBlink(bool enable)
 void HexView::timerEvent(QTimerEvent *ev)
 {
 	if (cur_->HexTimerId == ev->timerId()) {
-		drawCaret(cur_->HexCaretVisible, config_.top(), height());
+		drawCaret(cur_->HexCaretVisible);
 		cur_->HexCaretVisible = !cur_->HexCaretVisible;
 	}
 }

@@ -33,6 +33,7 @@ namespace Standard {
 		int StrTimerId;		// for Caret
 		bool HexCaretVisible;
 		bool StrCaretVisible;
+
 	};
 
 }

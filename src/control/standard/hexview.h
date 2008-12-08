@@ -111,6 +111,7 @@ namespace Standard {
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		void drawSelected(bool reset = false);
+		void drawCaret(bool visible);
 		void drawCaret(bool visible, int ytop, int ymax);
 
 		void byteToHex(uchar c, QString &h);
