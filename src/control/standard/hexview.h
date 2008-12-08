@@ -105,6 +105,7 @@ namespace Standard {
 		void mouseReleaseEvent(QMouseEvent*);
 		void timerEvent(QTimerEvent *);
 
+		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		void drawSelected(bool reset = false);
 		void drawCaret(bool visible, int ytop, int ymax);
 

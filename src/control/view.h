@@ -10,20 +10,14 @@ class Document;
 
 struct DrawInfo {
 	int y;
-	int count;
-	int xb;
-	int xe;
 	uint size;
 	quint64 top;
 	quint64 sb;
 	quint64 se;
 	bool selected;
-	DrawInfo(int Y, quint64 Top, int Count, int Xb, int Xe, quint64 Sb, quint64 Se, uint Size, bool sel)
+	DrawInfo(int Y, quint64 Top, quint64 Sb, quint64 Se, uint Size, bool sel)
 	{
 		y = Y;
-		count = Count;
-		xb = Xb;
-		Xe = Xe;
 		size = Size;
 		top = Top;
 		sb = Sb;

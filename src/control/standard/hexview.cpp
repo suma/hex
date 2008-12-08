@@ -180,10 +180,30 @@ void HexView::refreshPixmap(int type, int line, int end)
 		painter.fillRect(rc, br);
 	}
 
+	// Copy data
+	qDebug("Document::get(%llu, .., %u)", top, size);
+	if (buff_.capacity() < size) {
+		buff_.reserve(size);
+	}
+	doc_->get(top, &buff_[0], size);
+
 	// Compute selectead area
-	const int xb = 0, xe = width();
 	bool selected = false;
 	quint64 sb = 0, se = 0;
+	isSelected(selected, sb, se, top, yCount, size);
+
+	// TODO: Adding cache class for computed values if this function is bottle neck
+	::DrawInfo di(y, top, sb, se, size, selected);
+	getDrawColors(di, dcolors_, config_.Colors);
+
+	// Draw
+	drawLines(painter, y, yt);
+	drawCaret(cur_->HexCaretVisible, yt, yMax);
+	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
+}
+
+inline void HexView::isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size)
+{
 	if (cur_->Selected) {
 		sb = min(cur_->SelBegin, cur_->SelEnd);
 		se = max(cur_->SelBegin, cur_->SelEnd);
@@ -194,22 +214,6 @@ void HexView::refreshPixmap(int type, int line, int end)
 			}
 		}
 	}
-
-	// Copy data
-	if (buff_.capacity() < size) {
-		buff_.reserve(size);
-	}
-	qDebug("Document::get(%lld, .., %lld)", top, size);
-	doc_->get(top, &buff_[0], size);
-
-	// TODO: Adding cache class for computed values if this function is bottle neck
-	::DrawInfo di(y, top, yCount, xb, xe, sb, se, size, selected);
-	getDrawColors(di, dcolors_, config_.Colors);
-
-	// Draw
-	drawLines(painter, y, yt);
-	drawCaret(cur_->HexCaretVisible, yt, yMax);
-	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
 }
 
 void HexView::drawLines(QPainter &painter, int y, int yt)
@@ -269,6 +273,7 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 
 void HexView::drawCaret(bool visible, int ytop, int ymax)
 {
+	return;
 	quint64 sel = cur_->SelEnd / HexConfig::Num;
 
 	if (cur_->Top < sel || sel <= config_.drawableLines(ymax - ytop)) {
@@ -280,6 +285,14 @@ void HexView::drawCaret(bool visible, int ytop, int ymax)
 	int x = pos % HexConfig::Num;
 	// TODO: caching data/dcolors
 
+	// Compute selectead area
+	bool selected = false;
+	quint64 sb = 0, se = 0;
+	isSelected(selected, sb, se, sel, 1, 1);
+	::DrawInfo di(ytop, sel, sb, se, 1, selected);
+
+	DCIList dlist;
+	getDrawColors(di, dlist, config_.Colors);
 	if (doc_->length() < pos) {
 	} else {
 		doc_->get(cur_->SelEnd, &buff_[0], 1);
