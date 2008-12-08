@@ -254,7 +254,7 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 		// Draw text
 		for (int k = 0; k < count; k++, i++, j++) {
 			byteToHex(buff_[i], hex);
-			painter.drawText(config_.x(j), y, config_.charWidth(2), config_.byteHeight(), Qt::AlignCenter, hex);
+			painter.drawText(config_.x(j), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
 		}
 		qDebug("y: %d, yt:%d", y, yt);
 
@@ -299,7 +299,7 @@ void HexView::drawCaret(bool visible, int ytop, int ymax)
 	} else {
 		bool selected = false;
 		quint64 sb = 0, se = 0;
-		isSelected(selected, sb, se, line, 1, 1);
+		isSelected(selected, sb, se, cur_->Position, 1, 1);
 		::DrawInfo di(ytop, cur_->Position, sb, se, 1, selected);
 
 		DCIList dlist;
@@ -316,7 +316,7 @@ void HexView::drawCaret(bool visible, int ytop, int ymax)
 		hex.resize(2);
 		doc_->get(cur_->Position, &buff_[0], 1);
 		byteToHex(buff_[0], hex);
-		painter.drawText(config_.x(x), y, config_.charWidth(2), config_.byteHeight(), Qt::AlignCenter, hex);
+		painter.drawText(config_.x(x), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
 	}
 
 
@@ -381,6 +381,11 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		releaseMouse();
 		quint64 oldBegin = cur_->SelBegin;
 		quint64 oldEnd = cur_->SelEnd;
+
+		if (cur_->HexTimerId) {
+			cur_->Position = cur_->SelEnd;
+			drawCaret(true, config_.top(), height());
+		}
 
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();

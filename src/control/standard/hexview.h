@@ -42,6 +42,10 @@ namespace Standard {
 		{
 			return FontMetrics.maxWidth() * num;
 		}
+		inline int charHeight() const
+		{
+			return FontMetrics.height();
+		}
 		inline int byteWidth() const
 		{
 			return ByteMargin.left() + charWidth(2) + ByteMargin.right();
