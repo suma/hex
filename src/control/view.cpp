@@ -25,7 +25,6 @@ void View::resizeEvent(QResizeEvent *rs)
 		pix_.size().height() < rs->size().height()) {
 		pix_ = QPixmap(rs->size());
 	}
-	refreshPixmap();
 }
 
 void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)

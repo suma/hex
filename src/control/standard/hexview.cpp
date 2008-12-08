@@ -60,7 +60,6 @@ void HexConfig::calculate()
 		xarea_[i] = xarea_[i-1] + byteWidth() + Spaces[i];
 	}
 	for (int i = 1; i < Num; i++) {
-		//xarea_[i] -= Spaces[i] / 2;
 		xarea_[i] -= Spaces[i];
 	}
 	xarea_[Num] = xarea_[Num-1] + byteWidth();
@@ -117,6 +116,8 @@ void HexView::resizeEvent(QResizeEvent *rs)
 	QSize size(min(rs->size().width(), config_.maxWidth()), rs->size().height());
 	QResizeEvent resize(size, rs->oldSize());
 	View::resizeEvent(&resize);
+	pix_.fill(config_.Colors[Color::Background]);
+	refreshPixmap();
 }
 
 void HexView::refreshPixmap()
@@ -129,9 +130,6 @@ void HexView::refreshPixmap(int type, int line, int end)
 	Q_ASSERT(0 <= line && line < doc_->length() / HexConfig::Num + 1);
 	Q_ASSERT(0 <= end && end < doc_->length() / HexConfig::Num + 1);
 	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
-	// TODO: Optimizing drawing
-
-	//pix_.fill(config_.Colors[Color::Background]);
 
 	if (!doc_->length()) {
 		// TODO: draw Empty Background only
