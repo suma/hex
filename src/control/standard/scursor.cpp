@@ -11,6 +11,11 @@ Cursor::Cursor()
 	, SelEndO(0)
 	, Selected(false)
 	, Toggle(false)
+	, CaretHigh(true)
+	, HexTimerId(0)
+	, StrTimerId(0)
+	, HexCaretVisible(true)
+	, StrCaretVisible(true)
 {
 }
 

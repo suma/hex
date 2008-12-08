@@ -22,6 +22,8 @@ namespace Standard {
 		QColor Colors[Color::ColorCount];
 		int Spaces[Num+1]; // last is yoyuu
 
+		int CaretBlinkTime;
+
 	private:
 		QFontMetrics FontMetrics;
 		int top_;
@@ -89,6 +91,7 @@ namespace Standard {
 		HexView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL, Highlight *hi = NULL);
 
 		HexConfig & getConfig() { return config_; }
+		void setCaretBlink(bool);
 
 	protected:
 
@@ -100,7 +103,10 @@ namespace Standard {
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
+		void timerEvent(QTimerEvent *);
+
 		void drawSelected(bool reset = false);
+		void drawCaret(bool visible, int ytop, int ymax);
 
 		void byteToHex(uchar c, QString &h);
 		quint64 moveByMouse(int x, int y);

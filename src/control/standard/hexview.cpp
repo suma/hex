@@ -18,10 +18,11 @@ HexConfig::HexConfig()
 	, ByteMargin(3, 1, 2, 2)
 	//, Font("Courier", 13)
 	, Font("Monaco", 13)
+	, CaretBlinkTime(500)
 	, FontMetrics(Font)
 {
 	// Coloring
-	Colors[Color::Background] = QColor(255,255,255);
+	Colors[Color::Background] = QColor(0xEE,0xFF,0xEE);
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
@@ -127,17 +128,20 @@ void HexView::refreshPixmap()
 
 void HexView::refreshPixmap(int type, int line, int end)
 {
-	Q_ASSERT(0 <= line && line < doc_->length() / HexConfig::Num + 1);
-	Q_ASSERT(0 <= end && end < doc_->length() / HexConfig::Num + 1);
 	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
-
-	if (!doc_->length()) {
-		// TODO: draw Empty Background only
-		return;
-	}
 
 	QPainter painter(&pix_);
 	painter.setFont(config_.Font);
+
+	if (!doc_->length()) {
+		// TODO: draw Empty Background only
+		QBrush br(config_.Colors[Color::Background]);
+		painter.fillRect(0, 0, width(), height(), br);
+		return;
+	}
+
+	Q_ASSERT(0 <= line && line <= doc_->length() / HexConfig::Num + 1);
+	Q_ASSERT(0 <= end && end <= doc_->length() / HexConfig::Num + 1);
 
 	// Compute drawing area
 	int yt = config_.top();
@@ -156,7 +160,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	case DRAW_AFTER:
 		yt += config_.byteHeight() * line;
 		y  += config_.byteHeight() * line;
-		yMax = max(y + config_.byteHeight(), height());
+		yMax = min(y + config_.byteHeight(), height());
 		yCount = config_.drawableLines(yMax - y);
 		break;
 	case DRAW_RANGE:
@@ -168,6 +172,13 @@ void HexView::refreshPixmap(int type, int line, int end)
 	}
 	quint64 top = (cur_->Top + line) * HexConfig::Num;
 	const uint size = min(doc_->length() - top, (quint64)HexConfig::Num * yCount);
+
+	// Draw empty area
+	if (size / HexConfig::Num < yMax) {
+		QBrush br(config_.Colors[Color::Background]);
+		QRect rc(0, y + (size / HexConfig::Num) * config_.byteHeight(), width(), yMax);
+		painter.fillRect(rc, br);
+	}
 
 	// Compute selectead area
 	const int xb = 0, xe = width();
@@ -188,6 +199,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	if (buff_.capacity() < size) {
 		buff_.reserve(size);
 	}
+	qDebug("Document::get(%lld, .., %lld)", top, size);
 	doc_->get(top, &buff_[0], size);
 
 	// TODO: Adding cache class for computed values if this function is bottle neck
@@ -196,6 +208,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw
 	drawLines(painter, y, yt);
+	drawCaret(cur_->HexCaretVisible, yt, yMax);
 	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
 }
 
@@ -242,7 +255,7 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 		qDebug("y: %d, yt:%d", y, yt);
 
 		itr->Length -= count;
-		j = j & 0xF;
+		j = j % HexConfig::Num;
 		if (itr->Length == 0) {
 			++itr;
 			init_itr = false;
@@ -252,6 +265,26 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 			yt += config_.byteHeight();
 		}
 	}
+}
+
+void HexView::drawCaret(bool visible, int ytop, int ymax)
+{
+	quint64 sel = cur_->SelEnd / HexConfig::Num;
+
+	if (cur_->Top < sel || sel <= config_.drawableLines(ymax - ytop)) {
+		return;
+	}
+
+	int pos = sel - cur_->Top;
+	int line = pos % HexConfig::Num;
+	int x = pos % HexConfig::Num;
+	// TODO: caching data/dcolors
+
+	if (doc_->length() < pos) {
+	} else {
+		doc_->get(cur_->SelEnd, &buff_[0], 1);
+	}
+
 }
 
 void HexView::byteToHex(uchar c, QString &h)
@@ -333,7 +366,7 @@ quint64 HexView::moveByMouse(int xx, int yy)
 void HexView::drawSelected(bool reset)
 {
 	quint64 b, e;
-	if (reset) {
+	if (reset && cur_->Selected) {
 		b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
 		e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
 		const int bL = b / HexConfig::Num - cur_->Top;
@@ -362,5 +395,27 @@ void HexView::drawSelected(bool reset)
 		refreshPixmap(DRAW_RANGE, bL, eL);
 	}
 }
+
+void HexView::setCaretBlink(bool enable)
+{
+	if (enable) {
+		if (cur_->HexTimerId == 0) {
+			cur_->HexTimerId = startTimer(config_.CaretBlinkTime);
+		}
+	} else {
+		if (cur_->HexTimerId != 0) {
+			killTimer(cur_->HexTimerId);
+		}
+	}
+}
+
+void HexView::timerEvent(QTimerEvent *ev)
+{
+	if (cur_->HexTimerId == ev->timerId()) {
+		drawCaret(cur_->HexCaretVisible, 0, height());
+		cur_->HexCaretVisible = !cur_->HexCaretVisible;
+	}
+}
+
 
 }	// namespace

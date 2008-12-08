@@ -27,7 +27,12 @@ namespace Standard {
 		quint64 SelEndO;	// old
 		bool Selected;		// Begin != End
 		bool Toggle;
+		bool CaretHigh;
 
+		int HexTimerId;		// for Caret
+		int StrTimerId;		// for Caret
+		bool HexCaretVisible;
+		bool StrCaretVisible;
 	};
 
 }
