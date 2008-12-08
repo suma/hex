@@ -15,7 +15,7 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: Margin(3, 3, 3, 3)
-	, ByteMargin(1, 1, 1, 2)
+	, ByteMargin(3, 1, 2, 2)
 	//, Font("Courier", 13)
 	, Font("Monaco", 13)
 	, FontMetrics(Font)
