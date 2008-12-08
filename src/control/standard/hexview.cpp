@@ -273,15 +273,20 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 
 inline void HexView::drawCaret(bool visible)
 {
-	drawCaret(visible, config_.top(), height());
+	drawCaret(visible, cur_->Position, config_.top(), height());
 }
 
-void HexView::drawCaret(bool visible, int ytop, int ymax)
+inline void HexView::drawCaret(bool visible, quint64 pos)
 {
-	qDebug("drawCaret visible:%d ytop:%d ymax:%d sel:%llu top:%llu", visible, ytop, ymax, cur_->Position, cur_->Top);
+	drawCaret(visible, pos, config_.top(), height());
+}
 
-	int line = cur_->Position / HexConfig::Num - cur_->Top;
-	const int x = cur_->Position % HexConfig::Num;
+void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
+{
+	qDebug("drawCaret visible:%d ytop:%d ymax:%d sel:%llu top:%llu", visible, ytop, ymax, position, cur_->Top);
+
+	int line = position / HexConfig::Num - cur_->Top;
+	const int x = position % HexConfig::Num;
 	const int yt = ytop + line * config_.byteHeight();
 	const int y = yt + config_.ByteMargin.top();
 	qDebug("caret (line:%d x:%d)", line, x);
@@ -292,20 +297,20 @@ void HexView::drawCaret(bool visible, int ytop, int ymax)
 
 	QPainter painter(&pix_);
 	painter.setFont(config_.Font);
-	qDebug("draw caret (%llu) => (%d, %d)", cur_->Position, x, y);
+	qDebug("draw caret (%llu) => (%d, %d)", position, x, y);
 
 	// TODO: caching data/dcolors
 
 
 	// Compute selectead area
-	if (doc_->length() <= cur_->Position) {
+	if (doc_->length() <= position) {
 		QBrush br(config_.Colors[Color::Background]);
 		painter.fillRect(config_.x(x), yt, config_.charWidth(2), config_.byteHeight(), br);
 	} else {
 		bool selected = false;
 		quint64 sb = 0, se = 0;
-		isSelected(selected, sb, se, cur_->Position, 1, 1);
-		::DrawInfo di(ytop, cur_->Position, sb, se, 1, selected);
+		isSelected(selected, sb, se, position, 1, 1);
+		::DrawInfo di(ytop, position, sb, se, 1, selected);
 
 		DCIList dlist;
 		getDrawColors(di, dlist, config_.Colors);
@@ -319,7 +324,7 @@ void HexView::drawCaret(bool visible, int ytop, int ymax)
 
 		QString hex;
 		hex.resize(2);
-		doc_->get(cur_->Position, &buff_[0], 1);
+		doc_->get(position, &buff_[0], 1);
 		byteToHex(buff_[0], hex);
 		painter.drawText(config_.x(x), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
 	}
@@ -327,7 +332,7 @@ void HexView::drawCaret(bool visible, int ytop, int ymax)
 
 	if (visible) {
 		QBrush br(config_.Colors[Color::SelText]);
-		painter.fillRect(config_.x(x), yt, config_.charWidth(1), config_.byteHeight(), br);
+		painter.fillRect(config_.x(x), yt, config_.caretWidth(), config_.caretHeight(), br);
 	}
 	update(config_.x(x), yt, config_.byteWidth(), config_.byteHeight());
 }
@@ -353,13 +358,13 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		grabMouse();
 		drawSelected(true);
-		if (cur_->HexTimerId) {
-			drawCaret(false);
-		}
 
-		cur_->SelBegin = cur_->SelEnd = cur_->SelEndO = moveByMouse(ev->pos().x(), ev->pos().y());
+		cur_->SelEndO = cur_->Position;
+		cur_->SelBegin = cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->Toggle = true;
-		if (cur_->HexTimerId) {
+
+		if (cur_->HexTimerId && cur_->SelEnd != cur_->SelEndO) {
+			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
 		}
 		qDebug("press -  begin:%lld", cur_->SelBegin);
@@ -371,18 +376,13 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	if (cur_->Toggle) {
 		cur_->SelEndO = cur_->SelEnd;
 
-		if (cur_->HexTimerId) {
-			cur_->Position = cur_->SelEnd;
-			drawCaret(false);
-		}
-
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 
 		drawSelected();
 
-		if (cur_->HexTimerId) {
-			cur_->Position = cur_->SelEnd;
+		if (cur_->HexTimerId && cur_->SelEnd != cur_->SelEndO) {
+			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
 		}
 	}
@@ -401,6 +401,11 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		qDebug("mouse release - begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
 
 		drawSelected();
+
+		if (cur_->HexTimerId && cur_->SelEnd != cur_->SelEndO) {
+			drawCaret(false, cur_->SelEndO);
+			drawCaret(true);
+		}
 	}
 }
 

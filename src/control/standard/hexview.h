@@ -80,6 +80,14 @@ namespace Standard {
 			Q_ASSERT(0 <= i && i < Num);
 			return X_[i];
 		}
+		inline int caretWidth() const
+		{
+			return charWidth();
+		}
+		inline int caretHeight() const
+		{
+			return charHeight();
+		}
 		int drawableLines(int height) const;
 		int drawableLinesN(int height) const;
 		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
@@ -112,7 +120,8 @@ namespace Standard {
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		void drawSelected(bool reset = false);
 		void drawCaret(bool visible);
-		void drawCaret(bool visible, int ytop, int ymax);
+		void drawCaret(bool visible, quint64 pos);
+		void drawCaret(bool visible, quint64 pos, int ytop, int ymax);
 
 		void byteToHex(uchar c, QString &h);
 		quint64 moveByMouse(int x, int y);
