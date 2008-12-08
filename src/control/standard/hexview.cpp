@@ -198,8 +198,8 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw
 	drawLines(painter, y, yt);
-	drawCaret(cur_->HexCaretVisible, yt, yMax);
 	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
+	drawCaret(cur_->HexCaretVisible, yt, yMax);
 }
 
 inline void HexView::isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size)
@@ -273,31 +273,58 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 
 void HexView::drawCaret(bool visible, int ytop, int ymax)
 {
-	return;
-	quint64 sel = cur_->SelEnd / HexConfig::Num;
+	qDebug("drawCaret visible:%d ytop:%d ymax:%d sel:%llu top:%llu", visible, ytop, ymax, cur_->Position, cur_->Top);
 
-	if (cur_->Top < sel || sel <= config_.drawableLines(ymax - ytop)) {
+	int line = cur_->Position / HexConfig::Num - cur_->Top;
+	const int x = cur_->Position % HexConfig::Num;
+	const int yt = ytop + line * config_.byteHeight();
+	const int y = yt + config_.ByteMargin.top();
+	qDebug("caret (line:%d x:%d)", line, x);
+
+	if (!(ytop <= yt && ytop + config_.byteHeight() < ymax)) {
 		return;
 	}
 
-	int pos = sel - cur_->Top;
-	int line = pos % HexConfig::Num;
-	int x = pos % HexConfig::Num;
+	QPainter painter(&pix_);
+	painter.setFont(config_.Font);
+	qDebug("draw caret (%llu) => (%d, %d)", cur_->Position, x, y);
+
 	// TODO: caching data/dcolors
 
-	// Compute selectead area
-	bool selected = false;
-	quint64 sb = 0, se = 0;
-	isSelected(selected, sb, se, sel, 1, 1);
-	::DrawInfo di(ytop, sel, sb, se, 1, selected);
 
-	DCIList dlist;
-	getDrawColors(di, dlist, config_.Colors);
-	if (doc_->length() < pos) {
+	// Compute selectead area
+	if (doc_->length() < cur_->Position) {
+		QBrush br(config_.Colors[Color::Background]);
+		painter.fillRect(config_.x(x), yt, config_.charWidth(2), config_.byteHeight(), br);
 	} else {
-		doc_->get(cur_->SelEnd, &buff_[0], 1);
+		bool selected = false;
+		quint64 sb = 0, se = 0;
+		isSelected(selected, sb, se, line, 1, 1);
+		::DrawInfo di(ytop, cur_->Position, sb, se, 1, selected);
+
+		DCIList dlist;
+		getDrawColors(di, dlist, config_.Colors);
+
+		QBrush br(dlist.back().Colors[Color::Background]);
+		painter.fillRect(config_.x(x), yt, config_.charWidth(2), config_.byteHeight(), br);
+
+		// Set color
+		painter.setBackground(br);
+		painter.setPen(dlist.back().Colors[Color::Text]);
+
+		QString hex;
+		hex.resize(2);
+		doc_->get(cur_->Position, &buff_[0], 1);
+		byteToHex(buff_[0], hex);
+		painter.drawText(config_.x(x), y, config_.charWidth(2), config_.byteHeight(), Qt::AlignCenter, hex);
 	}
 
+
+	if (visible) {
+		QBrush br(config_.Colors[Color::SelText]);
+		painter.fillRect(config_.x(x), yt, config_.charWidth(1), config_.byteHeight(), br);
+	}
+	update(config_.x(x), yt, config_.byteWidth(), config_.byteHeight());
 }
 
 void HexView::byteToHex(uchar c, QString &h)
@@ -321,9 +348,17 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		grabMouse();
 		drawSelected(true);
+		bool enable = cur_->HexTimerId;
+		if (enable) {
+			setCaretBlink(false);
+			drawCaret(false, config_.top(), height());
+		}
 
 		cur_->SelBegin = cur_->SelEnd = cur_->SelEndO = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->Toggle = true;
+		if (enable) {
+			setCaretBlink(true);
+		}
 		qDebug("press -  begin:%lld", cur_->SelBegin);
 	}
 }
@@ -418,6 +453,7 @@ void HexView::setCaretBlink(bool enable)
 	} else {
 		if (cur_->HexTimerId != 0) {
 			killTimer(cur_->HexTimerId);
+			cur_->HexTimerId = 0;
 		}
 	}
 }
@@ -425,7 +461,7 @@ void HexView::setCaretBlink(bool enable)
 void HexView::timerEvent(QTimerEvent *ev)
 {
 	if (cur_->HexTimerId == ev->timerId()) {
-		drawCaret(cur_->HexCaretVisible, 0, height());
+		drawCaret(cur_->HexCaretVisible, config_.top(), height());
 		cur_->HexCaretVisible = !cur_->HexCaretVisible;
 	}
 }
