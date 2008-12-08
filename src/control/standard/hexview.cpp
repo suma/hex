@@ -10,7 +10,7 @@
 using namespace std;
 
 namespace Standard {
-#define qDebug
+
 ////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
@@ -128,9 +128,10 @@ void HexView::refreshPixmap(int type, int line, int end)
 {
 	Q_ASSERT(0 <= line && line < doc_->length() / HexConfig::Num + 1);
 	Q_ASSERT(0 <= end && end < doc_->length() / HexConfig::Num + 1);
+	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
 	// TODO: Optimizing drawing
 
-	pix_.fill(config_.Colors[Color::Background]);
+	//pix_.fill(config_.Colors[Color::Background]);
 
 	if (!doc_->length()) {
 		// TODO: draw Empty Background only
@@ -152,7 +153,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	case DRAW_LINE:
 		yt += config_.byteHeight() * line;
 		y  += config_.byteHeight() * line;
-		yCount = 2;
+		yCount = 1;
 		break;
 	case DRAW_AFTER:
 		yt += config_.byteHeight() * line;
@@ -206,7 +207,10 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
 	QBrush br;
 	bool init_itr = false;
-	for (int i = 0, j = 0, cont; itr != end;) {
+	QString hex;
+	hex.resize(2);
+
+	for (int i = 0, j = 0, count = 0; itr != end;) {
 		if (!init_itr) {
 			// Create brush
 			br = QBrush(itr->Colors[Color::Background]);
@@ -220,28 +224,26 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 		}
 
 		// Continuous size
-		cont = min((int)(itr->Length), HexConfig::Num - j);
-		qDebug("itr->Length:%d j:%d cont:%d", itr->Length, j, cont);
+		count = min((int)(itr->Length), HexConfig::Num - j);
+		qDebug("itr->Length:%d j:%d count:%d", itr->Length, j, count);
 		// Draw background
 		int width;
 		int begin = config_.x(j) - config_.ByteMargin.left();
-		if (2 <= cont) {
-			width = config_.X(j + cont - 1) - begin;
+		if (2 <= count) {
+			width = config_.X(j + count - 1) - begin;
 		} else {
 			width = config_.byteWidth();
 		}
 		painter.fillRect(begin, yt, width, config_.byteHeight(), br);
 
 		// Draw text
-		for (int k = 0; k < cont; k++, i++, j++) {
-			QString hex;
+		for (int k = 0; k < count; k++, i++, j++) {
 			byteToHex(buff_[i], hex);
-			const int width = config_.charWidth(2);
-			painter.drawText(config_.x(j), y, width, config_.byteHeight(), Qt::AlignCenter, hex);
+			painter.drawText(config_.x(j), y, config_.charWidth(2), config_.byteHeight(), Qt::AlignCenter, hex);
 		}
 		qDebug("y: %d, yt:%d", y, yt);
 
-		itr->Length -= cont;
+		itr->Length -= count;
 		j = j & 0xF;
 		if (itr->Length == 0) {
 			++itr;
@@ -256,7 +258,6 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 
 void HexView::byteToHex(uchar c, QString &h)
 {
-	h.resize(2);
 	const uchar H = (c >> 4) & 0xF;
 	if (H <= 9) {
 		h[0] = QChar('0' + H);
@@ -271,7 +272,6 @@ void HexView::byteToHex(uchar c, QString &h)
 	}
 }
 
-#undef qDebug
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
