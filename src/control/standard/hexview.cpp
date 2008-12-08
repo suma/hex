@@ -199,7 +199,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	// Draw
 	drawLines(painter, y, yt);
 	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
-	drawCaret(cur_->HexCaretVisible, yt, yMax);
+	//drawCaret(painter, cur_->HexCaretVisible, yt, yMax);
 }
 
 inline void HexView::isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size)
@@ -293,7 +293,7 @@ void HexView::drawCaret(bool visible, int ytop, int ymax)
 
 
 	// Compute selectead area
-	if (doc_->length() < cur_->Position) {
+	if (doc_->length() <= cur_->Position) {
 		QBrush br(config_.Colors[Color::Background]);
 		painter.fillRect(config_.x(x), yt, config_.charWidth(2), config_.byteHeight(), br);
 	} else {
@@ -357,6 +357,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cur_->SelBegin = cur_->SelEnd = cur_->SelEndO = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->Toggle = true;
 		if (enable) {
+			drawCaret(true, config_.top(), height());
 			setCaretBlink(true);
 		}
 		qDebug("press -  begin:%lld", cur_->SelBegin);
