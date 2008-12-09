@@ -16,8 +16,10 @@ namespace Standard {
 HexConfig::HexConfig()
 	: Margin(3, 3, 3, 3)
 	, ByteMargin(3, 1, 2, 2)
+	//, ByteMargin(1, 1, 1, 0)
 	//, Font("Courier", 13)
 	, Font("Monaco", 13)
+	, EnableCaret(true)
 	, CaretBlinkTime(500)
 	, FontMetrics(Font)
 {
@@ -233,6 +235,7 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 	QString hex;
 	hex.resize(2);
 
+	// Draw text each lines and colors
 	for (int i = 0, j = 0, count = 0; itr != end;) {
 		if (!init_itr) {
 			// Create brush
@@ -309,12 +312,8 @@ void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
 
 	// TODO: caching data/dcolors
 
-
-	// Compute selectead area
-	if (doc_->length() <= position) {
-		QBrush br(config_.Colors[Color::Background]);
-		painter.fillRect(config_.x(x), yt, config_.charWidth(2), config_.byteHeight(), br);
-	} else {
+	// Compute selectead area and draw text
+	if (position < doc_->length()) {
 		bool selected = false;
 		quint64 sb = 0, se = 0;
 		isSelected(selected, sb, se, position, 1, 1);
@@ -335,13 +334,16 @@ void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
 		doc_->get(position, &buff_[0], 1);
 		byteToHex(buff_[0], hex);
 		painter.drawText(config_.x(x), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
+	} else {
+		QBrush br(config_.Colors[Color::Background]);
+		painter.fillRect(config_.x(x), yt, config_.charWidth(2), config_.byteHeight(), br);
 	}
-
 
 	if (visible) {
 		QBrush br(config_.HexCaretColor);
 		painter.fillRect(config_.x(x), yt, config_.caretWidth(), config_.caretHeight(), br);
 	}
+
 	update(config_.x(x), yt, config_.byteWidth(), config_.byteHeight());
 }
 
@@ -371,7 +373,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cur_->SelBegin = cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->Toggle = true;
 
-		if (cur_->HexTimerId && cur_->SelEnd != cur_->SelEndO) {
+		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
 		}
@@ -389,7 +391,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 
 		drawSelected();
 
-		if (cur_->HexTimerId && cur_->SelEnd != cur_->SelEndO) {
+		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
 		}
@@ -410,7 +412,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 
 		drawSelected();
 
-		if (cur_->HexTimerId && cur_->SelEnd != cur_->SelEndO) {
+		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
 		}
@@ -473,6 +475,9 @@ void HexView::drawSelected(bool reset)
 
 void HexView::setCaretBlink(bool enable)
 {
+	if (!config_.EnableCaret) {
+		return;
+	}
 	if (enable) {
 		if (cur_->HexTimerId == 0) {
 			cur_->HexTimerId = startTimer(config_.CaretBlinkTime);

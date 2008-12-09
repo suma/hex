@@ -23,6 +23,7 @@ namespace Standard {
 		QColor HexCaretColor;
 		int Spaces[Num+1]; // last is yoyuu
 
+		bool EnableCaret;
 		int CaretBlinkTime;
 
 	private:
@@ -104,13 +105,13 @@ namespace Standard {
 		HexView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL, Highlight *hi = NULL);
 
 		HexConfig & getConfig() { return config_; }
-		void setCaretBlink(bool);
+		void setCaretBlink(bool enable);
 
 	protected:
 
 		void refreshPixmap();
 		void refreshPixmap(int type, int = 0, int = 0);
-		void drawLines(QPainter &painter, int y, int yt);
+		void drawLines(QPainter &painter, int y, int ytop);
 
 		void resizeEvent(QResizeEvent *);
 		void mousePressEvent(QMouseEvent*);
