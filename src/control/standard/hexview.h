@@ -20,6 +20,7 @@ namespace Standard {
 		QRect ByteMargin;
 		QFont Font;
 		QColor Colors[Color::ColorCount];
+		QColor HexCaretColor;
 		int Spaces[Num+1]; // last is yoyuu
 
 		int CaretBlinkTime;

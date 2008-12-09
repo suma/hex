@@ -26,6 +26,7 @@ HexConfig::HexConfig()
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
+	HexCaretColor = QColor(0xFF, 0, 0, 128);
 
 	// Font
 	Font.setFixedPitch(true);
@@ -174,9 +175,10 @@ void HexView::refreshPixmap(int type, int line, int end)
 	const uint size = min(doc_->length() - top, (quint64)HexConfig::Num * yCount);
 
 	// Draw empty area
-	if (size / HexConfig::Num < yMax) {
+	if (type == DRAW_ALL && yMax < height()) {
+		qDebug("draw empty area yMax:%d height:%d", yMax, height());
 		QBrush br(config_.Colors[Color::Background]);
-		QRect rc(0, y + (size / HexConfig::Num) * config_.byteHeight(), width(), yMax);
+		QRect rc(0, yMax, width(), height());
 		painter.fillRect(rc, br);
 	}
 
@@ -196,10 +198,16 @@ void HexView::refreshPixmap(int type, int line, int end)
 	::DrawInfo di(y, top, sb, se, size, selected);
 	getDrawColors(di, dcolors_, config_.Colors);
 
+	// Draw Background clear
+	QBrush br(config_.Colors[Color::Background]);
+	QRect rc(0, yt, width(), yMax);
+	painter.fillRect(rc, br);
+
 	// Draw
 	drawLines(painter, y, yt);
 	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
-	//drawCaret(painter, cur_->HexCaretVisible, yt, yMax);
+	painter.end();
+	drawCaret(cur_->HexCaretVisible);
 }
 
 inline void HexView::isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size)
@@ -250,6 +258,7 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 			width = config_.byteWidth();
 		}
 		painter.fillRect(begin, yt, width, config_.byteHeight(), br);
+		// FIXME: draw garbage 'Spaces[j-1]' area
 
 		// Draw text
 		for (int k = 0; k < count; k++, i++, j++) {
@@ -331,7 +340,7 @@ void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
 
 
 	if (visible) {
-		QBrush br(config_.Colors[Color::SelText]);
+		QBrush br(config_.HexCaretColor);
 		painter.fillRect(config_.x(x), yt, config_.caretWidth(), config_.caretHeight(), br);
 	}
 	update(config_.x(x), yt, config_.byteWidth(), config_.byteHeight());

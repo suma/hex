@@ -34,6 +34,7 @@ namespace Standard {
 		bool HexCaretVisible;
 		bool StrCaretVisible;
 
+		//QColor StrCaretColor;
 	};
 
 }
