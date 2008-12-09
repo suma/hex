@@ -22,7 +22,7 @@ HexConfig::HexConfig()
 	, FontMetrics(Font)
 {
 	// Coloring
-	Colors[Color::Background] = QColor(0xEE,0xFF,0xEE);
+	Colors[Color::Background] = QColor(0xCE,0xFF,0xCE);
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
@@ -200,7 +200,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw Background clear
 	QBrush br(config_.Colors[Color::Background]);
-	QRect rc(0, yt, width(), yMax);
+	QRect rc(0, yt, width(), yt+config_.byteHeight());
 	painter.fillRect(rc, br);
 
 	// Draw
@@ -258,7 +258,6 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 			width = config_.byteWidth();
 		}
 		painter.fillRect(begin, yt, width, config_.byteHeight(), br);
-		// FIXME: draw garbage 'Spaces[j-1]' area
 
 		// Draw text
 		for (int k = 0; k < count; k++, i++, j++) {
@@ -306,7 +305,7 @@ void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
 
 	QPainter painter(&pix_);
 	painter.setFont(config_.Font);
-	qDebug("draw caret (%llu) => (%d, %d)", position, x, y);
+	qDebug("draw caret (%llu) => (%d, %d)", position, x, line);
 
 	// TODO: caching data/dcolors
 

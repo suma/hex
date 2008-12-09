@@ -87,7 +87,7 @@ namespace Standard {
 		}
 		inline int caretHeight() const
 		{
-			return charHeight();
+			return byteHeight();
 		}
 		int drawableLines(int height) const;
 		int drawableLinesN(int height) const;
