@@ -173,10 +173,12 @@ void HexView::refreshPixmap(int type, int line, int end)
 		yCount = config_.drawableLines(yMax - y);
 		break;
 	}
+
+	// Index of view top
 	quint64 top = (cur_->Top + line) * HexConfig::Num;
 	const uint size = min(doc_->length() - top, (quint64)HexConfig::Num * yCount);
 
-	// Draw empty area
+	// Draw empty area(after end line)
 	if (type == DRAW_ALL && yMax < height()) {
 		qDebug("draw empty area yMax:%d height:%d", yMax, height());
 		QBrush br(config_.Colors[Color::Background]);
@@ -184,7 +186,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 		painter.fillRect(rc, br);
 	}
 
-	// Copy data
+	// Copy from document
 	qDebug("Document::get(%llu, .., %u)", top, size);
 	if (buff_.capacity() < size) {
 		buff_.reserve(size);
@@ -209,7 +211,6 @@ void HexView::refreshPixmap(int type, int line, int end)
 	drawLines(painter, y, yt);
 	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
 	painter.end();
-	drawCaret(cur_->HexCaretVisible);
 }
 
 inline void HexView::isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size)
