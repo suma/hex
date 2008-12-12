@@ -29,8 +29,7 @@ namespace Standard {
 		bool Toggle;
 		bool CaretHigh;
 
-		int HexTimerId;		// for Caret
-		int StrTimerId;		// for Caret
+		int CaretTimerId;	// for Caret
 		bool HexCaretVisible;
 		bool StrCaretVisible;
 

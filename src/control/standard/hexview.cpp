@@ -468,20 +468,20 @@ void HexView::setCaretBlink(bool enable)
 		return;
 	}
 	if (enable) {
-		if (cur_->HexTimerId == 0) {
-			cur_->HexTimerId = startTimer(config_.CaretBlinkTime);
+		if (cur_->CaretTimerId == 0) {
+			cur_->CaretTimerId = startTimer(config_.CaretBlinkTime);
 		}
 	} else {
-		if (cur_->HexTimerId != 0) {
-			killTimer(cur_->HexTimerId);
-			cur_->HexTimerId = 0;
+		if (cur_->CaretTimerId != 0) {
+			killTimer(cur_->CaretTimerId);
+			cur_->CaretTimerId = 0;
 		}
 	}
 }
 
 void HexView::timerEvent(QTimerEvent *ev)
 {
-	if (cur_->HexTimerId == ev->timerId()) {
+	if (cur_->CaretTimerId == ev->timerId()) {
 		drawCaret(cur_->HexCaretVisible);
 		cur_->HexCaretVisible = !cur_->HexCaretVisible;
 	}
