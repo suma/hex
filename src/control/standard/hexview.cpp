@@ -362,6 +362,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
+			cur_->HexCaretVisible = false;
 		}
 		qDebug("press -  begin:%lld", cur_->SelBegin);
 	}
@@ -380,6 +381,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
+			cur_->HexCaretVisible = false;
 		}
 	}
 }
@@ -401,6 +403,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
+			cur_->HexCaretVisible = false;
 		}
 	}
 }
