@@ -132,6 +132,7 @@ namespace Standard {
 		// Main components
 		HexConfig config_;
 		Cursor *cur_;
+		QPixmap off_;
 	};
 
 }

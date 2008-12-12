@@ -121,6 +121,7 @@ void HexView::resizeEvent(QResizeEvent *rs)
 	QResizeEvent resize(size, rs->oldSize());
 	View::resizeEvent(&resize);
 	pix_.fill(config_.Colors[Color::Background]);
+	off_ = pix_;
 	refreshPixmap();
 }
 
@@ -133,13 +134,17 @@ void HexView::refreshPixmap(int type, int line, int end)
 {
 	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
 
-	QPainter painter(&pix_);
+	//QPainter painter(&pix_);
+	QPainter painter(&off_);
 	painter.setFont(config_.Font);
 
 	if (!doc_->length()) {
 		// TODO: draw Empty Background only
 		QBrush br(config_.Colors[Color::Background]);
 		painter.fillRect(0, 0, width(), height(), br);
+		painter.end();
+		pix_ = off_;
+		update(0, 0, width(), height());
 		return;
 	}
 
@@ -209,8 +214,14 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw
 	drawLines(painter, y, yt);
-	update(0, yt, min(width(), config_.maxWidth()), yCount * config_.byteHeight());
 	painter.end();
+
+	QPainter pixpainter(&pix_);
+	int drawwidth = min(width(), config_.maxWidth());
+	int drawheight= yCount * config_.byteHeight();
+	QRect cprc(0, yt, drawwidth, drawheight);
+	pixpainter.drawPixmap(cprc, off_, cprc);
+	update(0, yt, drawwidth, drawheight);
 }
 
 inline void HexView::isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size)
@@ -308,44 +319,18 @@ void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
 	}
 
 	QPainter painter(&pix_);
-	painter.setFont(config_.Font);
-	qDebug("draw caret (%llu) => (%d, %d)", position, x, line);
-
-	// TODO: caching data/dcolors
-
-	// Compute selectead area and draw text
-	if (position < doc_->length()) {
-		bool selected = false;
-		quint64 sb = 0, se = 0;
-		isSelected(selected, sb, se, position, 1, 1);
-		::DrawInfo di(ytop, position, sb, se, 1, selected);
-
-		DCIList dlist;
-		getDrawColors(di, dlist, config_.Colors);
-
-		QBrush br(dlist.back().Colors[Color::Background]);
-		painter.fillRect(config_.x(x), yt, config_.charWidth(2), config_.byteHeight(), br);
-
-		// Set color
-		painter.setBackground(br);
-		painter.setPen(dlist.back().Colors[Color::Text]);
-
-		QString hex;
-		hex.resize(2);
-		doc_->get(position, &buff_[0], 1);
-		byteToHex(buff_[0], hex);
-		painter.drawText(config_.x(x), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
-	} else {
-		QBrush br(config_.Colors[Color::Background]);
-		painter.fillRect(config_.x(x), yt, config_.charWidth(2), config_.byteHeight(), br);
-	}
+	const int dx = config_.x(x);
+	const int dw = config_.caretWidth();
+	const int dh = config_.caretHeight();
 
 	if (visible) {
 		QBrush br(config_.HexCaretColor);
-		painter.fillRect(config_.x(x), yt, config_.caretWidth(), config_.caretHeight(), br);
+		painter.fillRect(dx, yt, dw, dh, br);
+	} else {
+		painter.drawPixmap(dx, yt, dw, dh, off_, dx, yt, dw, dh);
 	}
 
-	update(config_.x(x), yt, config_.byteWidth(), config_.byteHeight());
+	update(dx, yt, dw, dh);
 }
 
 void HexView::byteToHex(uchar c, QString &h)
