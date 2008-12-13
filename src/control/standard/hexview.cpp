@@ -464,7 +464,7 @@ void HexView::drawSelected(bool reset)
 
 void HexView::setCaretBlink(bool enable)
 {
-	if (!config_.EnableCaret) {
+	if (!config_.EnableCaret || !config_.CaretBlinkTime) {
 		return;
 	}
 	if (enable) {
