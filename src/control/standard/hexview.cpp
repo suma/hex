@@ -294,14 +294,22 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 	}
 }
 
-inline void HexView::drawCaret(bool visible)
+void HexView::drawCaret(bool visible)
 {
 	drawCaret(visible, cur_->Position, config_.top(), height());
+	emit caretChanged(visible, cur_->Position);
 }
 
-inline void HexView::drawCaret(bool visible, quint64 pos)
+void HexView::drawCaret(bool visible, quint64 pos)
 {
 	drawCaret(visible, pos, config_.top(), height());
+	emit caretChanged(visible, pos);
+}
+
+void HexView::redrawCaret()
+{
+	drawCaret(false, cur_->SelEndO);
+	drawCaret(true);
 }
 
 void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
@@ -360,8 +368,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cur_->Toggle = true;
 
 		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
-			drawCaret(false, cur_->SelEndO);
-			drawCaret(true);
+			redrawCaret();
 			cur_->HexCaretVisible = false;
 		}
 		qDebug("press -  begin:%lld", cur_->SelBegin);
@@ -381,6 +388,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			drawCaret(false, cur_->SelEndO);
 			drawCaret(true);
+			redrawCaret();
 			cur_->HexCaretVisible = false;
 		}
 	}
@@ -401,8 +409,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		drawSelected();
 
 		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
-			drawCaret(false, cur_->SelEndO);
-			drawCaret(true);
+			redrawCaret();
 			cur_->HexCaretVisible = false;
 		}
 	}

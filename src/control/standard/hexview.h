@@ -121,12 +121,19 @@ namespace Standard {
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		void drawSelected(bool reset = false);
-		void drawCaret(bool visible);
-		void drawCaret(bool visible, quint64 pos);
 		void drawCaret(bool visible, quint64 pos, int ytop, int ymax);
+		void redrawCaret();
 
 		void byteToHex(uchar c, QString &h);
 		quint64 moveByMouse(int x, int y);
+
+	public slots:
+		void drawCaret(bool visible);
+		void drawCaret(bool visible, quint64 pos);
+
+	signals:
+		//connect to drawCaret(visible, pos);
+		void caretChanged(bool visible, quint64 pos);
 
 	protected:
 		// Main components
