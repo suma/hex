@@ -40,6 +40,11 @@ struct DrawColorInfo {
 
 typedef std::vector<DrawColorInfo> DCIList;
 
+// TODO: add caret support
+//       caret width, height, x, y
+//       caret color(QColor with Alpha)
+//       redraw support
+
 class View : public QWidget
 {
 	Q_OBJECT

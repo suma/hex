@@ -383,7 +383,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 
-		drawSelected();
+		drawSelected(false);
 
 		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			drawCaret(false, cur_->SelEndO);
@@ -406,7 +406,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		cur_->Toggle = false;
 		qDebug("mouse release - begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
 
-		drawSelected();
+		drawSelected(false);
 
 		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
 			redrawCaret();
