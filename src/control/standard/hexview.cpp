@@ -263,7 +263,7 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 			init_color = true;
 		}
 
-		// Continuous size
+		// Compute continuous size
 		color_count = min((int)(itr_color->Length), HexConfig::Num - pos_x);
 		qDebug("itr_color->Length:%d pos_x:%d color_count:%d", itr_color->Length, pos_x, color_count);
 
