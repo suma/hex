@@ -238,7 +238,7 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 	}
 }
 
-void HexView::drawLines(QPainter &painter, int y, int yt)
+void HexView::drawLines(QPainter &painter, int y, int y_top)
 {
 	// Draw lines
 	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
@@ -272,14 +272,14 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 		} else {
 			width = config_.byteWidth();
 		}
-		painter.fillRect(begin, yt, width, config_.byteHeight(), brush);
+		painter.fillRect(begin, y_top, width, config_.byteHeight(), brush);
 
 		// Draw text
 		for (int k = 0; k < count; k++, i++, j++) {
 			byteToHex(buff_[i], hex);
 			painter.drawText(config_.x(j), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
 		}
-		qDebug("y: %d, yt:%d", y, yt);
+		qDebug("y: %d, y_top:%d", y, y_top);
 
 		itr->Length -= count;
 		j = j % HexConfig::Num;
@@ -289,7 +289,7 @@ void HexView::drawLines(QPainter &painter, int y, int yt)
 		}
 		if (j == 0) {
 			y += config_.byteHeight();
-			yt += config_.byteHeight();
+			y_top += config_.byteHeight();
 		}
 	}
 }
@@ -312,16 +312,16 @@ void HexView::redrawCaret()
 	drawCaret(true);
 }
 
-void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
+void HexView::drawCaret(bool visible, quint64 position, int y_begin, int ymax)
 {
-	qDebug("drawCaret visible:%d ytop:%d ymax:%d sel:%llu top:%llu", visible, ytop, ymax, position, cur_->Top);
+	qDebug("drawCaret visible:%d y_begin:%d ymax:%d sel:%llu top:%llu", visible, y_begin, ymax, position, cur_->Top);
 
-	int line = position / HexConfig::Num - cur_->Top;
+	const int line = position / HexConfig::Num - cur_->Top;
 	const int x = position % HexConfig::Num;
-	const int yt = ytop + line * config_.byteHeight();
+	const int y = y_begin + line * config_.byteHeight();
 	qDebug("caret (line:%d x:%d)", line, x);
 
-	if (!(ytop <= yt && ytop + config_.byteHeight() < ymax)) {
+	if (!(y_begin <= y && y_begin + config_.byteHeight() < ymax)) {
 		return;
 	}
 
@@ -332,12 +332,12 @@ void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
 
 	if (visible) {
 		QBrush brush(config_.HexCaretColor);
-		painter.fillRect(dx, yt, dw, dh, brush);
+		painter.fillRect(dx, y, dw, dh, brush);
 	} else {
-		painter.drawPixmap(dx, yt, dw, dh, off_, dx, yt, dw, dh);
+		painter.drawPixmap(dx, y, dw, dh, off_, dx, y, dw, dh);
 	}
 
-	update(dx, yt, dw, dh);
+	update(dx, y, dw, dh);
 }
 
 void HexView::byteToHex(uchar c, QString &h)
