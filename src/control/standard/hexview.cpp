@@ -245,13 +245,13 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 	// Draw lines
 	DCIList::iterator itr_color = dcolors_.begin(), color_end = dcolors_.end();
 	QBrush brush;
-	bool init_itr = false;
+	bool init_color = false;
 	QString hex;
 	hex.resize(2);
 
 	// Draw text each lines and colors
 	for (int i = 0, j = 0, count = 0; itr_color != color_end;) {
-		if (!init_itr) {
+		if (!init_color) {
 			// Create brush
 			brush = QBrush(itr_color->Colors[Color::Background]);
 
@@ -260,7 +260,7 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 			painter.setPen(itr_color->Colors[Color::Text]);
 
 			// ok
-			init_itr = true;
+			init_color = true;
 		}
 
 		// Continuous size
@@ -287,9 +287,11 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 		// Subtract	count from iterator of color info
 		itr_color->Length -= count;
 		j = j % HexConfig::Num;
-		if (itr_color->Length == 0) {
+		if (itr_color->Length <= 0) {
+			// Next color info
 			++itr_color;
-			init_itr = false;
+			// Reset initialize flag of color info
+			init_color = false;
 		}
 
 		// Move to next line
@@ -403,8 +405,6 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 {
 	if (cur_->Toggle) {
 		releaseMouse();
-		quint64 oldBegin = cur_->SelBegin;
-		quint64 oldEnd = cur_->SelEnd;
 
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
