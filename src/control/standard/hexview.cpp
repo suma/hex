@@ -250,7 +250,8 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 	hex.resize(2);
 
 	// Draw text each lines and colors
-	for (int i = 0, j = 0, count = 0; itr_color != color_end;) {
+	int index_byte, pos_x, color_count;
+	for (index_byte = pos_x = color_count = 0; itr_color != color_end;) {
 		if (!init_color) {
 			// Create brush
 			brush = QBrush(itr_color->Colors[Color::Background]);
@@ -264,29 +265,29 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 		}
 
 		// Continuous size
-		count = min((int)(itr_color->Length), HexConfig::Num - j);
-		qDebug("itr_color->Length:%d j:%d count:%d", itr_color->Length, j, count);
+		color_count = min((int)(itr_color->Length), HexConfig::Num - pos_x);
+		qDebug("itr_color->Length:%d j:%d count:%d", itr_color->Length, pos_x, color_count);
 
 		// Draw background
 		int width;
-		int begin = config_.x(j) - config_.ByteMargin.left();
-		if (2 <= count) {
-			width = config_.X(j + count - 1) - begin;
+		int begin = config_.x(pos_x) - config_.ByteMargin.left();
+		if (2 <= color_count) {
+			width = config_.X(pos_x + color_count - 1) - begin;
 		} else {
 			width = config_.byteWidth();
 		}
 		painter.fillRect(begin, y_top, width, config_.byteHeight(), brush);
 
 		// Draw text
-		for (int k = 0; k < count; k++, i++, j++) {
-			byteToHex(buff_[i], hex);
-			painter.drawText(config_.x(j), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
+		for (int k = 0; k < color_count; k++, index_byte++, pos_x++) {
+			byteToHex(buff_[index_byte], hex);
+			painter.drawText(config_.x(pos_x), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
 		}
 		qDebug("y: %d, y_top:%d", y, y_top);
 
 		// Subtract	count from iterator of color info
-		itr_color->Length -= count;
-		j = j % HexConfig::Num;
+		itr_color->Length -= color_count;
+		pos_x %= HexConfig::Num;
 		if (itr_color->Length <= 0) {
 			// Next color info
 			++itr_color;
@@ -295,7 +296,7 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 		}
 
 		// Move to next line
-		if (j == 0) {
+		if (pos_x == 0) {
 			y += config_.byteHeight();
 			y_top += config_.byteHeight();
 		}
