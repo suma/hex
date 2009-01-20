@@ -243,29 +243,30 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 void HexView::drawLines(QPainter &painter, int y, int y_top)
 {
 	// Draw lines
-	DCIList::iterator itr = dcolors_.begin(), end = dcolors_.end();
+	DCIList::iterator itr_color = dcolors_.begin(), color_end = dcolors_.end();
 	QBrush brush;
 	bool init_itr = false;
 	QString hex;
 	hex.resize(2);
 
 	// Draw text each lines and colors
-	for (int i = 0, j = 0, count = 0; itr != end;) {
+	for (int i = 0, j = 0, count = 0; itr_color != color_end;) {
 		if (!init_itr) {
 			// Create brush
-			brush = QBrush(itr->Colors[Color::Background]);
+			brush = QBrush(itr_color->Colors[Color::Background]);
 
 			// Set color
 			painter.setBackground(brush);
-			painter.setPen(itr->Colors[Color::Text]);
+			painter.setPen(itr_color->Colors[Color::Text]);
 
 			// ok
 			init_itr = true;
 		}
 
 		// Continuous size
-		count = min((int)(itr->Length), HexConfig::Num - j);
-		qDebug("itr->Length:%d j:%d count:%d", itr->Length, j, count);
+		count = min((int)(itr_color->Length), HexConfig::Num - j);
+		qDebug("itr_color->Length:%d j:%d count:%d", itr_color->Length, j, count);
+
 		// Draw background
 		int width;
 		int begin = config_.x(j) - config_.ByteMargin.left();
@@ -283,12 +284,15 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 		}
 		qDebug("y: %d, y_top:%d", y, y_top);
 
-		itr->Length -= count;
+		// Subtract	count from iterator of color info
+		itr_color->Length -= count;
 		j = j % HexConfig::Num;
-		if (itr->Length == 0) {
-			++itr;
+		if (itr_color->Length == 0) {
+			++itr_color;
 			init_itr = false;
 		}
+
+		// Move to next line
 		if (j == 0) {
 			y += config_.byteHeight();
 			y_top += config_.byteHeight();
@@ -314,16 +318,16 @@ void HexView::redrawCaret()
 	drawCaret(true);
 }
 
-void HexView::drawCaret(bool visible, quint64 position, int y_begin, int ymax)
+void HexView::drawCaret(bool visible, quint64 position, int y_begin, int height_max)
 {
-	qDebug("drawCaret visible:%d y_begin:%d ymax:%d sel:%llu top:%llu", visible, y_begin, ymax, position, cur_->Top);
+	qDebug("drawCaret visible:%d y_begin:%d height_max:%d sel:%llu top:%llu", visible, y_begin, height_max, position, cur_->Top);
 
 	const int line = position / HexConfig::Num - cur_->Top;
 	const int x = position % HexConfig::Num;
 	const int y = y_begin + line * config_.byteHeight();
 	qDebug("caret (line:%d x:%d)", line, x);
 
-	if (!(y_begin <= y && y_begin + config_.byteHeight() < ymax)) {
+	if (!(y_begin <= y && y_begin + config_.byteHeight() < height_max)) {
 		return;
 	}
 
