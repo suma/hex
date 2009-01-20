@@ -319,7 +319,6 @@ void HexView::drawCaret(bool visible, quint64 position, int ytop, int ymax)
 	int line = position / HexConfig::Num - cur_->Top;
 	const int x = position % HexConfig::Num;
 	const int yt = ytop + line * config_.byteHeight();
-	const int y = yt + config_.ByteMargin.top();
 	qDebug("caret (line:%d x:%d)", line, x);
 
 	if (!(ytop <= yt && ytop + config_.byteHeight() < ymax)) {
