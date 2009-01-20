@@ -162,18 +162,18 @@ void HexView::refreshPixmap(int type, int line, int end)
 		break;
 	case DRAW_LINE:
 		y_top += config_.byteHeight() * line;
-		y  += config_.byteHeight() * line;
+		y += config_.byteHeight() * line;
 		count_line = 1;
 		break;
 	case DRAW_AFTER:
 		y_top += config_.byteHeight() * line;
-		y  += config_.byteHeight() * line;
-		max_y = min(y + config_.byteHeight(), height());
+		y += config_.byteHeight() * line;
+		max_y = max(y + config_.byteHeight(), height());
 		count_line = config_.drawableLines(max_y - y);
 		break;
 	case DRAW_RANGE:
 		y_top += config_.byteHeight() * line;
-		y  += config_.byteHeight() * line;
+		y += config_.byteHeight() * line;
 		max_y = min(y + config_.byteHeight() * end, height());
 		count_line = config_.drawableLines(max_y - y);
 		break;
@@ -184,7 +184,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	const uint size = min(doc_->length() - top, (quint64)HexConfig::Num * count_line);
 
 	// Draw empty area(after end line)
-	if (type == DRAW_ALL && max_y < height()) {
+	if (type == DRAW_ALL || type == DRAW_AFTER) {
 		qDebug("draw empty area max_y:%d height:%d", max_y, height());
 		QBrush brush(config_.Colors[Color::Background]);
 		QRect rc(0, max_y, width(), height());
