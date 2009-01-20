@@ -185,9 +185,9 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw empty area(after end line)
 	if (type == DRAW_ALL || type == DRAW_AFTER) {
-		qDebug("draw empty area max_y:%d height:%d", max_y, height());
+		qDebug("draw empty area height:%d", height());
 		QBrush brush(config_.Colors[Color::Background]);
-		QRect rc(0, max_y, width(), height());
+		QRect rc(0, y_top, width(), height());
 		painter.fillRect(rc, brush);
 	}
 
