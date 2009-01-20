@@ -279,7 +279,7 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 		painter.fillRect(begin, y_top, width, config_.byteHeight(), brush);
 
 		// Draw text
-		for (int k = 0; k < color_count; k++, index_byte++, pos_x++) {
+		for (int i = 0; i < color_count; i++, index_byte++, pos_x++) {
 			byteToHex(buff_[index_byte], hex);
 			painter.drawText(config_.x(pos_x), y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
 		}
