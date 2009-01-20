@@ -152,42 +152,42 @@ void HexView::refreshPixmap(int type, int line, int end)
 	Q_ASSERT(0 <= end && end <= doc_->length() / HexConfig::Num + 1);
 
 	// Compute drawing area
-	int yt = config_.top();
+	int y_top = config_.top();
 	int y = config_.top() + config_.byteMargin().top();
-	int yCount, yMax;
+	int count_line, max_y;
 
 	switch (type) {
 	case DRAW_ALL:
-		yCount = config_.drawableLines(height());
+		count_line = config_.drawableLines(height());
 		break;
 	case DRAW_LINE:
-		yt += config_.byteHeight() * line;
+		y_top += config_.byteHeight() * line;
 		y  += config_.byteHeight() * line;
-		yCount = 1;
+		count_line = 1;
 		break;
 	case DRAW_AFTER:
-		yt += config_.byteHeight() * line;
+		y_top += config_.byteHeight() * line;
 		y  += config_.byteHeight() * line;
-		yMax = min(y + config_.byteHeight(), height());
-		yCount = config_.drawableLines(yMax - y);
+		max_y = min(y + config_.byteHeight(), height());
+		count_line = config_.drawableLines(max_y - y);
 		break;
 	case DRAW_RANGE:
-		yt += config_.byteHeight() * line;
+		y_top += config_.byteHeight() * line;
 		y  += config_.byteHeight() * line;
-		yMax = min(y + config_.byteHeight() * end, height());
-		yCount = config_.drawableLines(yMax - y);
+		max_y = min(y + config_.byteHeight() * end, height());
+		count_line = config_.drawableLines(max_y - y);
 		break;
 	}
 
 	// Index of view top
 	quint64 top = (cur_->Top + line) * HexConfig::Num;
-	const uint size = min(doc_->length() - top, (quint64)HexConfig::Num * yCount);
+	const uint size = min(doc_->length() - top, (quint64)HexConfig::Num * count_line);
 
 	// Draw empty area(after end line)
-	if (type == DRAW_ALL && yMax < height()) {
-		qDebug("draw empty area yMax:%d height:%d", yMax, height());
+	if (type == DRAW_ALL && max_y < height()) {
+		qDebug("draw empty area max_y:%d height:%d", max_y, height());
 		QBrush brush(config_.Colors[Color::Background]);
-		QRect rc(0, yMax, width(), height());
+		QRect rc(0, max_y, width(), height());
 		painter.fillRect(rc, brush);
 	}
 
@@ -201,7 +201,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	// Compute selectead area
 	bool selected = false;
 	quint64 sb = 0, se = 0;
-	isSelected(selected, sb, se, top, yCount, size);
+	isSelected(selected, sb, se, top, count_line, size);
 
 	// TODO: Adding cache class for computed values if this function is bottle neck
 	::DrawInfo di(y, top, sb, se, size, selected);
@@ -209,28 +209,30 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw Background clear
 	QBrush brush(config_.Colors[Color::Background]);
-	QRect rc(0, yt, width(), yt+config_.byteHeight());
+	QRect rc(0, y_top, width(), y_top + config_.byteHeight());
 	painter.fillRect(rc, brush);
 
 	// Draw
-	drawLines(painter, y, yt);
+	drawLines(painter, y, y_top);
 	painter.end();
 
+	// Update real window
 	QPainter pixpainter(&pix_);
 	int drawwidth = min(width(), config_.maxWidth());
-	int drawheight= yCount * config_.byteHeight();
-	QRect cprc(0, yt, drawwidth, drawheight);
+	int drawheight= count_line * config_.byteHeight();
+	QRect cprc(0, y_top, drawwidth, drawheight);
 	pixpainter.drawPixmap(cprc, off_, cprc);
-	update(0, yt, drawwidth, drawheight);
+
+	update(0, y_top, drawwidth, drawheight);
 }
 
-inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int yCount, uint size)
+inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_line, uint size)
 {
 	if (cur_->Selected) {
 		sel_begin = min(cur_->SelBegin, cur_->SelEnd);
 		sel_end   = max(cur_->SelBegin, cur_->SelEnd);
 		if (top <= sel_end) {
-			const quint64 vpos_end = max(top + (HexConfig::Num * yCount), top + size);
+			const quint64 vpos_end = max(top + (HexConfig::Num * count_line), top + size);
 			if (sel_begin <= vpos_end) {
 				selected = true;
 			}
