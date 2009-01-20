@@ -250,8 +250,7 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 	hex.resize(2);
 
 	// Draw text each lines and colors
-	int index_byte, pos_x, color_count;
-	for (index_byte = pos_x = color_count = 0; itr_color != color_end;) {
+	for (int index_byte = 0, pos_x = 0, color_count = 0; itr_color != color_end; /* nothing */) {
 		if (!init_color) {
 			// Create brush
 			brush = QBrush(itr_color->Colors[Color::Background]);
@@ -266,7 +265,7 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 
 		// Continuous size
 		color_count = min((int)(itr_color->Length), HexConfig::Num - pos_x);
-		qDebug("itr_color->Length:%d j:%d count:%d", itr_color->Length, pos_x, color_count);
+		qDebug("itr_color->Length:%d pos_x:%d color_count:%d", itr_color->Length, pos_x, color_count);
 
 		// Draw background
 		int width;
