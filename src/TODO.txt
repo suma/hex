@@ -1,0 +1,9 @@
+
+TODO
+*control::standard::hexview
+	implement
+		keyboard input(insert doc, move cursor)
+
+	fix(do refactoring)
+		drawPixmap and drawLines
+
