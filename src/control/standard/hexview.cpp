@@ -187,8 +187,8 @@ void HexView::refreshPixmap(int type, int line, int end)
 	if (type == DRAW_ALL || type == DRAW_AFTER) {
 		qDebug("draw empty area height:%d", height());
 		QBrush brush(config_.Colors[Color::Background]);
-		QRect rc(0, y_top, width(), height());
-		painter.fillRect(rc, brush);
+		QRect rect(0, y_top, width(), height());
+		painter.fillRect(rect, brush);
 	}
 
 	// Copy from document
@@ -209,8 +209,8 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw Background clear
 	QBrush brush(config_.Colors[Color::Background]);
-	QRect rc(0, y_top, width(), y_top + config_.byteHeight());
-	painter.fillRect(rc, brush);
+	QRect rect_bg(0, y_top, width(), y_top + config_.byteHeight());
+	painter.fillRect(rect_bg, brush);
 
 	// Draw
 	drawLines(painter, y, y_top);
@@ -218,12 +218,12 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Update real window
 	QPainter pixpainter(&pix_);
-	int drawwidth = min(width(), config_.maxWidth());
-	int drawheight= count_line * config_.byteHeight();
-	QRect cprc(0, y_top, drawwidth, drawheight);
-	pixpainter.drawPixmap(cprc, off_, cprc);
+	int draw_width = min(width(), config_.maxWidth());
+	int draw_height= count_line * config_.byteHeight();
+	QRect copy_rect(0, y_top, draw_width, draw_height);
+	pixpainter.drawPixmap(copy_rect, off_, copy_rect);
 
-	update(0, y_top, drawwidth, drawheight);
+	update(0, y_top, draw_width, draw_height);
 }
 
 inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_line, uint size)
