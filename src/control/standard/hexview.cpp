@@ -200,11 +200,11 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Compute selectead area
 	bool selected = false;
-	quint64 sb = 0, se = 0;
-	isSelected(selected, sb, se, top, count_line, size);
+	quint64 sel_begin = 0, sel_end = 0;
+	isSelected(selected, sel_begin, sel_end, top, count_line, size);
 
 	// TODO: Adding cache class for computed values if this function is bottle neck
-	::DrawInfo di(y, top, sb, se, size, selected);
+	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
 	getDrawColors(di, dcolors_, config_.Colors);
 
 	// Draw Background clear
@@ -217,11 +217,11 @@ void HexView::refreshPixmap(int type, int line, int end)
 	painter.end();
 
 	// Update real window
-	QPainter pixpainter(&pix_);
-	int draw_width = min(width(), config_.maxWidth());
-	int draw_height= count_line * config_.byteHeight();
+	QPainter painter_pix(&pix_);
+	const int draw_width  = min(width(), config_.maxWidth());
+	const int draw_height = count_line * config_.byteHeight();
 	QRect copy_rect(0, y_top, draw_width, draw_height);
-	pixpainter.drawPixmap(copy_rect, off_, copy_rect);
+	painter_pix.drawPixmap(copy_rect, off_, copy_rect);
 
 	update(0, y_top, draw_width, draw_height);
 }
