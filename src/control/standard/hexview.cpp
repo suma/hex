@@ -113,6 +113,7 @@ HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cur_(new Cursor(doc, this))
 {
+	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
 }
 
@@ -537,6 +538,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		// TODO: optimization: compute refresh area and
 		// support keyboard macros(like Vim repeat command)
 		refreshPixmap();
+		redrawCaret();
 	}
 }
 

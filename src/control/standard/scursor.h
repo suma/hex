@@ -19,6 +19,7 @@ namespace Standard {
 		Cursor(Document *, HexView *);
 		void refreshSelected();
 		bool selMoved();
+		void resetSelection();
 
 	private:
 		Document *document;
@@ -44,15 +45,17 @@ namespace Standard {
 		//QColor StrCaretColor;
 	
 	public:
+
 		void Home();
 		void End();
-		void Left(uint = 0);
-		void Right(uint = 0);
-		void Up(uint = 0);
-		void Down(uint = 0);
-		void PageUp(uint = 0);
-		void PageDown(uint = 0);
+		void Left(uint = 1);
+		void Right(uint = 1);
+		void Up(uint = 1);
+		void Down(uint = 1);
+		void PageUp(uint = 1);
+		void PageDown(uint = 1);
 
+	private:
 
 	};
 

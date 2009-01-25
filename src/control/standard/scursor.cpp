@@ -1,7 +1,10 @@
 
+#include <algorithm>
 #include "scursor.h"
 #include "../document.h"
 #include "hexview.h"
+
+using namespace std;
 
 namespace Standard {
 
@@ -32,25 +35,38 @@ bool Cursor::selMoved()
 	return SelEnd != SelEndOld;
 }
 
+void Cursor::resetSelection()
+{
+	SelBegin = SelEnd;
+}
+
 void Cursor::Home()
 {
 	Top = 0;
-	Position = SelBegin = SelEnd = 0;
-	refreshSelected();
+	Position = SelEnd = 0;
 }
 
 void Cursor::End()
 {
-	Position = SelBegin = SelEnd = document->length();
-	refreshSelected();
+	Position = SelEnd = document->length();
 }
 
-void Cursor::Left(uint)
+void Cursor::Left(uint count)
 {
+	if (Position < count) {
+		Home();
+	} else {
+		Position = Position - count;
+		SelEnd = Position;
+		// Consider refresh Top
+	}
 }
 
-void Cursor::Right(uint)
+void Cursor::Right(uint count)
 {
+	Position = min(Position + count, document->length());
+	SelEnd = Position;
+	// Consider refresh Top
 }
 
 void Cursor::Up(uint)
