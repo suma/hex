@@ -53,36 +53,42 @@ void Cursor::End()
 
 void Cursor::Left(uint count)
 {
+	qDebug("left");
 	if (Position < count) {
 		Home();
 	} else {
 		Position = Position - count;
 		SelEnd = Position;
-		// Consider refresh Top
+		Top = min(Top, Position / HexConfig::Num);
 	}
 }
 
 void Cursor::Right(uint count)
 {
+	qDebug("right");
 	Position = min(Position + count, document->length());
 	SelEnd = Position;
-	// Consider refresh Top
+	// TODO: Consider compute Top
 }
 
 void Cursor::Up(uint)
 {
+	// TODO: implement
 }
 
 void Cursor::Down(uint)
 {
+	// TODO: implement
 }
 
 void Cursor::PageUp(uint)
 {
+	// TODO: implement
 }
 
 void Cursor::PageDown(uint)
 {
+	// TODO: implement
 }
 
 
