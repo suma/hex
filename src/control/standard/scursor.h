@@ -3,7 +3,11 @@
 
 #include <QtGlobal>
 
+class Document;
+
 namespace Standard {
+
+	class HexView;
 
 	struct HPos {
 		quint64 X, Y;
@@ -12,9 +16,13 @@ namespace Standard {
 	class Cursor
 	{
 	public:
-		Cursor();
+		Cursor(Document *, HexView *);
 		void refreshSelected();
 		bool selMoved();
+
+	private:
+		Document *document;
+		HexView *view;
 
 	public:
 
@@ -38,12 +46,12 @@ namespace Standard {
 	public:
 		void Home();
 		void End();
-		void Left();
-		void Right();
-		void Up();
-		void Down();
-		void PageUp();
-		void PageDown();
+		void Left(uint = 0);
+		void Right(uint = 0);
+		void Up(uint = 0);
+		void Down(uint = 0);
+		void PageUp(uint = 0);
+		void PageDown(uint = 0);
 
 
 	};

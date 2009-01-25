@@ -102,7 +102,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		HexView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL, Highlight *hi = NULL);
+		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
 
 		HexConfig & getConfig() { return config_; }
 		void setCaretBlink(bool enable);

@@ -1,10 +1,14 @@
 
 #include "scursor.h"
+#include "../document.h"
+#include "hexview.h"
 
 namespace Standard {
 
-Cursor::Cursor()
-	: Top(0)
+Cursor::Cursor(Document *Doc, HexView *View)
+	: document(Doc)
+	, view(View)
+	, Top(0)
 	, Position(0)
 	, SelBegin(0)
 	, SelEnd(0)
@@ -28,36 +32,40 @@ bool Cursor::selMoved()
 	return SelEnd != SelEndOld;
 }
 
-
 void Cursor::Home()
 {
+	Top = 0;
+	Position = SelBegin = SelEnd = 0;
+	refreshSelected();
 }
 
 void Cursor::End()
 {
+	Position = SelBegin = SelEnd = document->length();
+	refreshSelected();
 }
 
-void Cursor::Left()
+void Cursor::Left(uint)
 {
 }
 
-void Cursor::Right()
+void Cursor::Right(uint)
 {
 }
 
-void Cursor::Up()
+void Cursor::Up(uint)
 {
 }
 
-void Cursor::Down()
+void Cursor::Down(uint)
 {
 }
 
-void Cursor::PageUp()
+void Cursor::PageUp(uint)
 {
 }
 
-void Cursor::PageDown()
+void Cursor::PageDown(uint)
 {
 }
 

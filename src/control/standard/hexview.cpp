@@ -109,9 +109,9 @@ enum {
 	DRAW_RANGE,	// [begin, end)
 };
 
-HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
+HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
-	, cur_(cur)
+	, cur_(new Cursor(doc, this))
 {
 	setFocusPolicy(Qt::WheelFocus);
 }
@@ -505,24 +505,38 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	if (ev->modifiers() != Qt::NoModifier) {
 	} else {
 		qDebug("Modfiier");
+		// TODO: support keyboard remap
 		switch (ev->key()) {
 		case Qt::Key_Home:
+			cur_->Home();
 			break;
 		case Qt::Key_End:
+			cur_->End();
 			break;
 		case Qt::Key_Left:
+			cur_->Left();
 			break;
 		case Qt::Key_Right:
+			cur_->Right();
 			break;
 		case Qt::Key_Up:
+			cur_->Up();
 			break;
 		case Qt::Key_Down:
+			cur_->Down();
 			break;
 		case Qt::Key_PageUp:
+			cur_->PageUp();
 			break;
 		case Qt::Key_PageDown:
+			cur_->PageDown();
 			break;
+		default:
+			return;
 		}
+		// TODO: optimization: compute refresh area and
+		// support keyboard macros(like Vim repeat command)
+		refreshPixmap();
 	}
 }
 

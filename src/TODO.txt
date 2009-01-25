@@ -6,4 +6,7 @@ TODO
 
 	fix(do refactoring)
 		drawPixmap and drawLines
+	
+	fix Caret
+		rewrite all
 
