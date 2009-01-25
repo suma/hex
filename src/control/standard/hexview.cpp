@@ -196,7 +196,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	// Copy from document
 	qDebug("Document::get(%llu, .., %u)", top, size);
 	if (buff_.capacity() < size) {
-		buff_.reserve(size);
+		buff_.resize(size);
 	}
 	doc_->get(top, &buff_[0], size);
 
