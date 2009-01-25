@@ -113,6 +113,7 @@ HexView::HexView(QWidget *parent, Document *doc, Cursor *cur, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cur_(cur)
 {
+	setFocusPolicy(Qt::WheelFocus);
 }
 
 void HexView::resizeEvent(QResizeEvent *rs)
@@ -316,7 +317,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 
 void HexView::redrawCaret()
 {
-	drawCaret(false, cur_->SelEndO);
+	drawCaret(false, cur_->SelEndOld);
 	drawCaret(true);
 }
 
@@ -370,11 +371,11 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		grabMouse();
 		drawSelected(true);
 
-		cur_->SelEndO = cur_->Position;
+		cur_->SelEndOld = cur_->Position;
 		cur_->SelBegin = cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->Toggle = true;
 
-		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
+		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
 			redrawCaret();
 			cur_->HexCaretVisible = false;
 		}
@@ -385,15 +386,15 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
 	if (cur_->Toggle) {
-		cur_->SelEndO = cur_->SelEnd;
+		cur_->SelEndOld = cur_->SelEnd;
 
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 
 		drawSelected(false);
 
-		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
-			drawCaret(false, cur_->SelEndO);
+		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
+			drawCaret(false, cur_->SelEndOld);
 			drawCaret(true);
 			redrawCaret();
 			cur_->HexCaretVisible = false;
@@ -413,7 +414,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 
 		drawSelected(false);
 
-		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndO) {
+		if (config_.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
 			redrawCaret();
 			cur_->HexCaretVisible = false;
 		}
@@ -445,26 +446,26 @@ void HexView::drawSelected(bool reset)
 {
 	quint64 b, e;
 	if (reset && cur_->Selected) {
-		b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
-		e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
+		b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndOld);
+		e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndOld);
 		const int bL = b / HexConfig::Num - cur_->Top;
 		const int eL = e / HexConfig::Num - cur_->Top + 1;
 		cur_->Selected = false;
 		qDebug("reset - bL:%d eL:%d", bL, eL);
-		qDebug("reset - begin:%lld end:%lld endO:%lld", cur_->SelBegin, cur_->SelEnd, cur_->SelEndO);
+		qDebug("reset - begin:%lld end:%lld endO:%lld", cur_->SelBegin, cur_->SelEnd, cur_->SelEndOld);
 		refreshPixmap(DRAW_RANGE, bL, eL);
 	} else if (cur_->selMoved()) {
-		if ((cur_->SelBegin < cur_->SelEndO && cur_->SelBegin >= cur_->SelEnd ||
-			cur_->SelBegin >= cur_->SelEndO && cur_->SelBegin < cur_->SelEnd)) {
+		if ((cur_->SelBegin < cur_->SelEndOld && cur_->SelBegin >= cur_->SelEnd ||
+			cur_->SelBegin >= cur_->SelEndOld && cur_->SelBegin < cur_->SelEnd)) {
 			// Crossing between begin and end
-			b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
-			e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndO);
-			qDebug("cross end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
+			b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndOld);
+			e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndOld);
+			qDebug("cross end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndOld);
 		} else {
 			// Minimum area
-			b = min(cur_->SelEnd, cur_->SelEndO);
-			e = max(cur_->SelEnd, cur_->SelEndO);
-			qDebug("minimum end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndO);
+			b = min(cur_->SelEnd, cur_->SelEndOld);
+			e = max(cur_->SelEnd, cur_->SelEndOld);
+			qDebug("minimum end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndOld);
 		}
 
 		const int bL = b / HexConfig::Num - cur_->Top;
@@ -496,6 +497,32 @@ void HexView::timerEvent(QTimerEvent *ev)
 	if (cur_->CaretTimerId == ev->timerId()) {
 		drawCaret(cur_->HexCaretVisible);
 		cur_->HexCaretVisible = !cur_->HexCaretVisible;
+	}
+}
+
+void HexView::keyPressEvent(QKeyEvent *ev)
+{
+	if (ev->modifiers() != Qt::NoModifier) {
+	} else {
+		qDebug("Modfiier");
+		switch (ev->key()) {
+		case Qt::Key_Home:
+			break;
+		case Qt::Key_End:
+			break;
+		case Qt::Key_Left:
+			break;
+		case Qt::Key_Right:
+			break;
+		case Qt::Key_Up:
+			break;
+		case Qt::Key_Down:
+			break;
+		case Qt::Key_PageUp:
+			break;
+		case Qt::Key_PageDown:
+			break;
+		}
 	}
 }
 

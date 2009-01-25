@@ -8,7 +8,7 @@ Cursor::Cursor()
 	, Position(0)
 	, SelBegin(0)
 	, SelEnd(0)
-	, SelEndO(0)
+	, SelEndOld(0)
 	, Selected(false)
 	, Toggle(false)
 	, CaretHigh(true)
@@ -25,7 +25,42 @@ void Cursor::refreshSelected()
 
 bool Cursor::selMoved()
 {
-	return SelEnd != SelEndO;
+	return SelEnd != SelEndOld;
 }
+
+
+void Cursor::Home()
+{
+}
+
+void Cursor::End()
+{
+}
+
+void Cursor::Left()
+{
+}
+
+void Cursor::Right()
+{
+}
+
+void Cursor::Up()
+{
+}
+
+void Cursor::Down()
+{
+}
+
+void Cursor::PageUp()
+{
+}
+
+void Cursor::PageDown()
+{
+}
+
+
 
 }	// namespace

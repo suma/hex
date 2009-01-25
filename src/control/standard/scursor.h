@@ -24,7 +24,7 @@ namespace Standard {
 		// Selected: [SelBegin, SelEnd]
 		quint64 SelBegin;	// pos(not line)
 		quint64 SelEnd;		// pos(not line)
-		quint64 SelEndO;	// old
+		quint64 SelEndOld;	// old
 		bool Selected;		// Begin != End
 		bool Toggle;
 		bool CaretHigh;
@@ -34,6 +34,18 @@ namespace Standard {
 		bool StrCaretVisible;
 
 		//QColor StrCaretColor;
+	
+	public:
+		void Home();
+		void End();
+		void Left();
+		void Right();
+		void Up();
+		void Down();
+		void PageUp();
+		void PageDown();
+
+
 	};
 
 }
