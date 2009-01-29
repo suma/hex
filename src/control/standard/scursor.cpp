@@ -55,30 +55,51 @@ void Cursor::Left(uint count)
 {
 	qDebug("left");
 	if (Position < count) {
-		Home();
-	} else {
-		Position = Position - count;
-		SelEnd = Position;
-		Top = min(Top, Position / HexConfig::Num);
+		return;
 	}
+
+	Position = Position - count;
+	SelEnd = Position;
+
+	// TODO: refresh Top for up
 }
 
 void Cursor::Right(uint count)
 {
 	qDebug("right");
-	Position = min(Position + count, document->length());
+	if (document->length() < count || document->length() - count < Position) {
+		return;
+	}
+
+	Position += count;
 	SelEnd = Position;
+
 	// TODO: Consider compute Top
+	int count_line = view->getConfig().drawableLines(view->height());
+
+	// TODO: refresh Top for down
 }
 
-void Cursor::Up(uint)
+void Cursor::Up(uint count)
 {
-	// TODO: implement
+	if (Position < count * HexConfig::Num) {
+		return;
+	}
+
+	Position -= count * HexConfig::Num;
+	SelEnd = Position;
+	// TODO: refresh Top for up
 }
 
-void Cursor::Down(uint)
+void Cursor::Down(uint count)
 {
-	// TODO: implement
+	if (document->length() < count * HexConfig::Num || document->length() - count * HexConfig::Num < Position) {
+		return;
+	}
+
+	Position += count * HexConfig::Num;
+	SelEnd = Position;
+	// TODO: refresh Top for down
 }
 
 void Cursor::PageUp(uint)

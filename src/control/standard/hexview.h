@@ -91,7 +91,6 @@ namespace Standard {
 			return byteHeight();
 		}
 		int drawableLines(int height) const;
-		int drawableLinesN(int height) const;
 		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void calculate();
@@ -104,7 +103,7 @@ namespace Standard {
 	public:
 		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
 
-		HexConfig & getConfig() { return config_; }
+		HexConfig & getConfig() { return config; }
 		void setCaretBlink(bool enable);
 
 	protected:
@@ -139,7 +138,7 @@ namespace Standard {
 
 	protected:
 		// Main components
-		HexConfig config_;
+		HexConfig config;
 		Cursor *cur_;
 		QPixmap off_;
 	};
