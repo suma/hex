@@ -527,6 +527,10 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	default:
 		return;
 	}
+
+	if (ev->modifiers() != Qt::SHIFT) {
+		cur_->resetSelection();
+	}
 	// TODO: optimization: compute refresh area and
 	// support keyboard macros(like Vim repeat command)
 	refreshPixmap();
