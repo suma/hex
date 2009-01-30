@@ -15,7 +15,7 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: Margin(3, 3, 3, 3)
-	, ByteMargin(3, 1, 2, 2)
+	, ByteMargin(3, 3, 2, 2)
 	//, ByteMargin(1, 1, 1, 0)
 	//, Font("Courier", 13)
 	, Font("Monaco", 13)
@@ -39,17 +39,10 @@ HexConfig::HexConfig()
 
 void HexConfig::calculate()
 {
-	// Spaces
-	for (int i = 1; i < Num; i++) {
-		Spaces[i] = charWidth();
-	}
-	Spaces[0] = Spaces[Num] = 0;
-	Spaces[Num / 2] *= 2;
-
 	// Pos
 	x_[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
-		x_[i] = x_[i-1] + byteWidth() + Spaces[i];
+		x_[i] = x_[i-1] + byteWidth();
 	}
 
 	// Pos of end
@@ -59,12 +52,9 @@ void HexConfig::calculate()
 	}
 
 	// Area
-	xarea_[0] = Margin.left();
+	xarea_[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
-		xarea_[i] = xarea_[i-1] + byteWidth() + Spaces[i];
-	}
-	for (int i = 1; i < Num; i++) {
-		xarea_[i] -= Spaces[i];
+		xarea_[i] = xarea_[i-1] + byteWidth();
 	}
 	xarea_[Num] = xarea_[Num-1] + byteWidth();
 
@@ -265,19 +255,14 @@ void HexView::drawLines(QPainter &painter, int y, int y_top)
 		qDebug("itr_color->Length:%d pos_x:%d color_count:%d", itr_color->Length, pos_x, color_count);
 
 		// Draw background
-		int width;
-		int begin = config.x(pos_x) - config.ByteMargin.left();
-		if (2 <= color_count) {
-			width = config.X(pos_x + color_count - 1) - begin;
-		} else {
-			width = config.byteWidth();
-		}
+		int width = config.byteWidth() * color_count;
+		int begin = config.x(pos_x);
 		painter.fillRect(begin, y_top, width, config.byteHeight(), brush);
 
 		// Draw text
 		for (int i = 0; i < color_count; i++, index_byte++, pos_x++) {
 			byteToHex(buff_[index_byte], hex);
-			painter.drawText(config.x(pos_x), y, config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
+			painter.drawText(config.x(pos_x) + config.ByteMargin.left(), y, config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
 		}
 		qDebug("y: %d, y_top:%d", y, y_top);
 

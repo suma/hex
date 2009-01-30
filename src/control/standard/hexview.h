@@ -21,7 +21,6 @@ namespace Standard {
 		QFont Font;
 		QColor Colors[Color::ColorCount];
 		QColor HexCaretColor;
-		int Spaces[Num+1]; // last is yoyuu
 
 		bool EnableCaret;
 		int CaretBlinkTime;
