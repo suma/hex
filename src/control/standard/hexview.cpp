@@ -26,9 +26,10 @@ HexConfig::HexConfig()
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
-	Colors[Color::CaretBackground] = QColor(0xCC,0x00,0xFF);
+	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0);
 	Colors[Color::CaretText] = QColor(0xAA,0xAA,0x20);
-	HexCaretColor = QColor(0xFF, 0, 0, 128);
+	Colors[Color::SelCaretBackground] = QColor(0xFF, 0xFF, 0);
+	Colors[Color::SelCaretText] = QColor(0xAA,0,0xAA);
 
 	// Font
 	Font.setFixedPitch(true);
@@ -222,6 +223,13 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 	}
 }
 
+inline bool HexView::isSelected(quint64 pos)
+{
+	quint64 sel_begin = min(cur_->SelBegin, cur_->SelEnd);
+	quint64 sel_end   = max(cur_->SelBegin, cur_->SelEnd);
+	return sel_begin <= pos && pos <  sel_end;
+}
+
 void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
 {
 	// Draw lines
@@ -291,48 +299,39 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 	const int y = config.top() + config.byteHeight() * line;
 	qDebug("caret (line:%d x:%d)", line, x);
 
-
+	int caret_color = Color::CaretBackground;
 	if (doc_->length() <= position) {
 		// Draw background
 		QBrush brush(config.Colors[Color::Background]);
 		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
 	} else {
-		// Compute selectead area
-		bool selected = false;
-		quint64 sel_begin = 0, sel_end = 0;
-		isSelected(selected, sel_begin, sel_end, position / HexConfig::Num, 1, 1);
-
 		// Copy from document
 		uchar data;
 		doc_->get(position, &data, 1);
-
-		::DrawInfo di(y, position, sel_begin, sel_end, 0, selected);
-		DrawColorInfo dci(0);
-		getDrawColor(di, dci, data);
 
 		QString hex;
 		hex.resize(2);
 		byteToHex(data, hex);
 
 		// Create brush for background
-		QBrush brush(config.Colors[dci.BackgroundColor]);
+		int x = isSelected(position) ? Color::SelCaretBackground - Color::CaretBackground : 0;
+		caret_color += x;
+		QBrush brush(config.Colors[Color::CaretBackground + x]);
 
 		// Set color
 		painter.setBackground(brush);
-		painter.setPen(config.Colors[dci.TextColor]);
+		painter.setPen(config.Colors[Color::CaretText + x]);
 
 		// Draw background
 		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
 
 		// Draw text
 		drawText(painter, hex, config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top());
+	}
 
-		if (visible) {
-			//QBrush brush(config.HexCaretColor);
-			//painter.fillRect(dx, y, dw, dh, brush);
-		} else {
-			//painter.drawPixmap(dx, y, dw, dh, pix_, dx, y, dw, dh);
-		}
+	if (visible) {
+		QBrush brush(config.Colors[caret_color]);
+		painter.fillRect(config.x(x), y, config.caretWidth(), config.caretHeight(), brush);
 	}
 
 	painter.end();

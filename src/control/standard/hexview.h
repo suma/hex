@@ -20,7 +20,6 @@ namespace Standard {
 		QRect ByteMargin;
 		QFont Font;
 		QColor Colors[Color::ColorCount];
-		QColor HexCaretColor;
 
 		bool EnableCaret;
 		int CaretBlinkTime;
@@ -122,6 +121,7 @@ namespace Standard {
 		void keyPressEvent(QKeyEvent *);
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
+		bool isSelected(quint64 pos);
 		void drawSelected(bool reset = false);
 		void drawCaret(bool visible, quint64 pos, int ymax);
 		void redrawCaret();

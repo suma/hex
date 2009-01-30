@@ -9,6 +9,8 @@ namespace Color {
 		SelText,
 		CaretBackground,
 		CaretText,
+		SelCaretBackground,
+		SelCaretText,
 		ColorCount,
 	};
 }
