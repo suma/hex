@@ -225,17 +225,17 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 	}
 }
 
-void HexView::drawLines(QPainter &painter, int y_top)
+void HexView::drawLines(QPainter &painter, int y)
 {
 	// Draw lines
-	int index_byte = 0, pos_x = 0;
+	int index_byte = 0, x = 0;
 	bool change_color = true;
 	QBrush brush;
 	QString hex;
 	hex.resize(2);
 
 	for (DCIList::iterator itr_color = dcolors_.begin(); itr_color != dcolors_.end(); ) {
-		// 
+		// Setup color settings
 		if (change_color) {
 			// Create brush for background
 			brush = QBrush(config.Colors[itr_color->BackgroundColor]);
@@ -246,30 +246,27 @@ void HexView::drawLines(QPainter &painter, int y_top)
 		}
 
 		// Draw background
-		painter.fillRect(config.x(pos_x), y_top, config.byteWidth(), config.byteHeight(), brush);
+		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
 
 		// Draw text
 		byteToHex(buff_[index_byte], hex);
-		painter.drawText(config.x(pos_x) + config.ByteMargin.left(), y_top + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
+		painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
 
+		// Count up
 		index_byte++;
-		pos_x++;
-
-		// Subtract	count from iterator of color info
-		itr_color->Length--;
-		pos_x %= HexConfig::Num;
+		x = (x + 1) % HexConfig::Num;
 
 		// Iterate color
-		if (itr_color->Length <= 0) {
-			// Move to next color info
+		if (--itr_color->Length <= 0) {
+			// Move next color
 			++itr_color;
-			// Reset initialize flag of color info
+			// Enable color change
 			change_color = true;
 		}
 
-		// Move to next line
-		if (pos_x == 0) {
-			y_top += config.byteHeight();
+		// Move next line
+		if (x == 0) {
+			y += config.byteHeight();
 		}
 	}
 }
