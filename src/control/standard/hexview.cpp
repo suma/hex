@@ -316,26 +316,24 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 		// Create brush for background
 		int x = isSelected(position) ? Color::SelCaretBackground - Color::CaretBackground : 0;
 		caret_color += x;
-		QBrush brush(config.Colors[Color::CaretBackground + x]);
 
-		// Set color
+		// Left
+		QBrush brush(config.Colors[Color::CaretBackground + x]);
 		painter.setBackground(brush);
 		painter.setPen(config.Colors[Color::CaretText + x]);
+		painter.fillRect(config.x(x), y, config.ByteMargin.left() + config.charWidth(), config.byteHeight(), brush);
+		painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(1), config.charHeight(), Qt::AlignCenter, hex);
 
-		// Draw background
-		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
-
-		// Draw text
-		drawText(painter, hex, config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top());
-	}
-
-	if (visible) {
-		QBrush brush(config.Colors[caret_color]);
-		painter.fillRect(config.x(x), y, config.caretWidth(), config.caretHeight(), brush);
+		// Right
+		brush = QBrush(config.Colors[Color::CaretBackground]);
+		painter.setBackground(brush);
+		painter.setPen(config.Colors[Color::CaretText]);
+		painter.fillRect(config.x(x) + config.charWidth(), y, config.ByteMargin.right() + config.charWidth(), config.byteHeight(), brush);
+		painter.drawText(config.x(x) + config.charWidth() + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(1), config.charHeight(), Qt::AlignCenter, hex);
 	}
 
 	painter.end();
-	update(config.x(x), y, config.caretWidth(), config.caretHeight());
+	update(config.x(x), y, config.charWidth(), config.charHeight());
 }
 
 void HexView::drawCaret(bool visible)
