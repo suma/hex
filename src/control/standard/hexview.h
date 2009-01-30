@@ -110,7 +110,7 @@ namespace Standard {
 
 		void refreshPixmap();
 		void refreshPixmap(int type, int = 0, int = 0);
-		void drawLines(QPainter &painter, int y, int ytop);
+		void drawLines(QPainter &painter, int ytop);
 
 		void resizeEvent(QResizeEvent *);
 		void mousePressEvent(QMouseEvent*);

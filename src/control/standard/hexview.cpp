@@ -190,7 +190,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// TODO: Adding cache class for computed values if this function is bottle neck
 	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
-	getDrawColors(di, dcolors_, config.Colors);
+	getDrawColors(di, dcolors_);
 
 	// Draw Background clear
 	QBrush brush(config.Colors[Color::Background]);
@@ -198,7 +198,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	painter.fillRect(rect_bg, brush);
 
 	// Draw
-	drawLines(painter, y, y_top);
+	drawLines(painter, y_top);
 	painter.end();
 
 	// Update real window
@@ -225,58 +225,50 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 	}
 }
 
-void HexView::drawLines(QPainter &painter, int y, int y_top)
+void HexView::drawLines(QPainter &painter, int y_top)
 {
 	// Draw lines
-	DCIList::iterator itr_color = dcolors_.begin(), color_end = dcolors_.end();
+	int index_byte = 0, pos_x = 0;
+	bool change_color = true;
 	QBrush brush;
-	bool init_color = false;
 	QString hex;
 	hex.resize(2);
 
-	// Draw text each lines and colors
-	for (int index_byte = 0, pos_x = 0, color_count = 0; itr_color != color_end; /* nothing */) {
-		if (!init_color) {
-			// Create brush
-			brush = QBrush(itr_color->Colors[Color::Background]);
-
+	for (DCIList::iterator itr_color = dcolors_.begin(); itr_color != dcolors_.end(); ) {
+		// 
+		if (change_color) {
+			// Create brush for background
+			brush = QBrush(config.Colors[itr_color->BackgroundColor]);
 			// Set color
 			painter.setBackground(brush);
-			painter.setPen(itr_color->Colors[Color::Text]);
-
-			// ok
-			init_color = true;
+			painter.setPen(config.Colors[itr_color->TextColor]);
+			change_color = false;
 		}
-
-		// Compute continuous size
-		color_count = min((int)(itr_color->Length), HexConfig::Num - pos_x);
-		qDebug("itr_color->Length:%d pos_x:%d color_count:%d", itr_color->Length, pos_x, color_count);
 
 		// Draw background
-		int width = config.byteWidth() * color_count;
-		int begin = config.x(pos_x);
-		painter.fillRect(begin, y_top, width, config.byteHeight(), brush);
+		painter.fillRect(config.x(pos_x), y_top, config.byteWidth(), config.byteHeight(), brush);
 
 		// Draw text
-		for (int i = 0; i < color_count; i++, index_byte++, pos_x++) {
-			byteToHex(buff_[index_byte], hex);
-			painter.drawText(config.x(pos_x) + config.ByteMargin.left(), y, config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
-		}
-		qDebug("y: %d, y_top:%d", y, y_top);
+		byteToHex(buff_[index_byte], hex);
+		painter.drawText(config.x(pos_x) + config.ByteMargin.left(), y_top + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
+
+		index_byte++;
+		pos_x++;
 
 		// Subtract	count from iterator of color info
-		itr_color->Length -= color_count;
+		itr_color->Length--;
 		pos_x %= HexConfig::Num;
+
+		// Iterate color
 		if (itr_color->Length <= 0) {
-			// Next color info
+			// Move to next color info
 			++itr_color;
 			// Reset initialize flag of color info
-			init_color = false;
+			change_color = true;
 		}
 
 		// Move to next line
 		if (pos_x == 0) {
-			y += config.byteHeight();
 			y_top += config.byteHeight();
 		}
 	}

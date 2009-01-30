@@ -30,11 +30,13 @@ struct DrawInfo {
 
 struct DrawColorInfo {
 	uint Length;
-	QColor Colors[2];
-	DrawColorInfo(uint length, QColor *col)
+	int BackgroundColor;
+	int TextColor;
+	DrawColorInfo(uint length, int bg_color = Color::Background, int text_color = Color::Text)
 	{
 		Length = length;
-		memcpy(Colors, col, sizeof(Colors));
+		BackgroundColor = bg_color;
+		TextColor = text_color;
 	}
 };
 
@@ -65,7 +67,7 @@ public:
 protected:
 	void paintEvent(QPaintEvent*);
 	void resizeEvent(QResizeEvent*);
-	void getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defaultColors);
+	void getDrawColors(const DrawInfo &di, DCIList &ci);
 
 protected:
 	virtual void refreshPixmap() = 0;

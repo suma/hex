@@ -27,10 +27,8 @@ void View::resizeEvent(QResizeEvent *rs)
 	}
 }
 
-void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
+void View::getDrawColors(const DrawInfo &di, DCIList &ci)
 {
-	Q_ASSERT(defColors != NULL);
-
 	quint64 top = di.top;
 	const int sb = di.sb, se = di.se;
 	const uint size = di.size;
@@ -54,21 +52,21 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size; ) {
 				if (itr == end || i < itr->Index) {
 					int left = itr->Index - size;
-					ci.push_back(DrawColorInfo(left, defColors));
+					ci.push_back(DrawColorInfo(left));
 					i += left;
 				} else {
-					ci.push_back(DrawColorInfo(itr->Length, itr->Colors));
+					ci.push_back(DrawColorInfo(itr->Length));
 					i += itr->Length;
 					++itr;
 				}
 			}
 			// Left
 			if (i < size) {
-				ci.push_back(DrawColorInfo(size - i, defColors));
+				ci.push_back(DrawColorInfo(size - i));
 			}
 		} else {
 			// case: Highlight off
-			ci.push_back(DrawColorInfo(size, defColors));
+			ci.push_back(DrawColorInfo(size));
 		}
 	} else {
 
@@ -78,17 +76,16 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci, QColor *defColors)
 		// check colors
 		qDebug("sb: %d, se: %d", sb, se);
 		int i = 0;
-		QColor *last = NULL;
+		int last = -1;
 		for (; i < size; i++, index++) {
-			bool sel = sb <= index && index < se;
-			int x = sel ? 2 : 0;
-			if (last == defColors + x) {
-				// continues same color
-				ci.back().Length++;
-			} else {
-				last = defColors + x;
-				ci.push_back(DrawColorInfo(1, last));
+			int index_color = (sb <= index && index < se) ? Color::SelBackground : 0;
+			if (last != index_color) {
+				last = index_color;
+				ci.push_back(DrawColorInfo(1, Color::Background + index_color, Color::Text + index_color));
+				continue;
 			}
+			// continues same color
+			ci.back().Length++;
 		}
 		/*
 		bool l_out = false;
