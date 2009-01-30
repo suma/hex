@@ -120,7 +120,6 @@ void HexView::refreshPixmap(int type, int line, int end)
 {
 	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
 
-	//QPainter painter(&pix_);
 	QPainter painter(&pix_);
 	painter.setFont(config.Font);
 
@@ -281,16 +280,17 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 {
 	qDebug("drawCaret visible:%d height_max:%d sel:%llu top:%llu", visible, height_max, position, cur_->Top);
 
-	const int line = position / HexConfig::Num - cur_->Top;
-	const int x = position % HexConfig::Num;
-	const int y = config.top() + line * config.byteHeight();
-	qDebug("caret (line:%d x:%d)", line, x);
-
 	if (!(config.top() + config.byteHeight() < height_max)) {
 		return;
 	}
 
 	QPainter painter(&pix_);
+	painter.setFont(config.Font);
+	const int line = position / HexConfig::Num - cur_->Top;
+	const int x = position % HexConfig::Num;
+	const int y = config.top() + config.byteHeight() * line;
+	qDebug("caret (line:%d x:%d)", line, x);
+
 
 	if (doc_->length() <= position) {
 		// Draw background
@@ -321,7 +321,10 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 		painter.setBackground(brush);
 		painter.setPen(config.Colors[dci.TextColor]);
 
-		// draw text
+		// Draw background
+		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
+
+		// Draw text
 		drawText(painter, hex, config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top());
 
 		if (visible) {
@@ -332,6 +335,7 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 		}
 	}
 
+	painter.end();
 	update(config.x(x), y, config.caretWidth(), config.caretHeight());
 }
 
