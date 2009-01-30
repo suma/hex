@@ -14,10 +14,8 @@ namespace Standard {
 ////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
-	: Margin(3, 3, 3, 3)
-	, ByteMargin(3, 3, 2, 2)
-	//, ByteMargin(1, 1, 1, 0)
-	//, Font("Courier", 13)
+	: Margin(2, 2, 3, 3)
+	, ByteMargin(2, 0, 3, 1)
 	, Font("Monaco", 13)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)

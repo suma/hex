@@ -83,7 +83,8 @@ namespace Standard {
 		}
 		inline int caretWidth() const
 		{
-			return charWidth();
+			return 3;
+			//return ByteMargin.left() + charWidth();
 		}
 		inline int caretHeight() const
 		{
