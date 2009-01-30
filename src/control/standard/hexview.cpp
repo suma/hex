@@ -213,15 +213,15 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_line, uint size)
 {
-	if (cur_->Selected) {
-		sel_begin = min(cur_->SelBegin, cur_->SelEnd);
-		sel_end   = max(cur_->SelBegin, cur_->SelEnd);
-		if (top <= sel_end) {
-			const quint64 vpos_end = max(top + (HexConfig::Num * count_line), top + size);
-			if (sel_begin <= vpos_end) {
-				selected = true;
-			}
-		}
+	if (!cur_->Selected) {
+		return;
+	}
+
+	sel_begin = min(cur_->SelBegin, cur_->SelEnd);
+	sel_end   = max(cur_->SelBegin, cur_->SelEnd);
+
+	if (top <= sel_end) {
+		selected = sel_begin <= max(top + (HexConfig::Num * count_line), top + size);
 	}
 }
 
