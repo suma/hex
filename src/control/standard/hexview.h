@@ -110,7 +110,8 @@ namespace Standard {
 
 		void refreshPixmap();
 		void refreshPixmap(int type, int = 0, int = 0);
-		void drawLines(QPainter &painter, int ytop);
+		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
+		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
 		void resizeEvent(QResizeEvent *);
 		void mousePressEvent(QMouseEvent*);
@@ -122,7 +123,7 @@ namespace Standard {
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		void drawSelected(bool reset = false);
-		void drawCaret(bool visible, quint64 pos, int ytop, int ymax);
+		void drawCaret(bool visible, quint64 pos, int ymax);
 		void redrawCaret();
 
 		void byteToHex(uchar c, QString &h);
@@ -140,7 +141,6 @@ namespace Standard {
 		// Main components
 		HexConfig config;
 		Cursor *cur_;
-		QPixmap off_;
 	};
 
 }

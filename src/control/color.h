@@ -7,6 +7,8 @@ namespace Color {
 		Text,
 		SelBackground,	// hilighted
 		SelText,
+		CaretBackground,
+		CaretText,
 		ColorCount,
 	};
 }

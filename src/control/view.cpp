@@ -27,6 +27,17 @@ void View::resizeEvent(QResizeEvent *rs)
 	}
 }
 
+
+void View::getDrawColor(const DrawInfo &di, DrawColorInfo &dci, uchar)
+{
+	if (!di.selected) {
+		dci = DrawColorInfo(0);
+	} else {
+		int index_color = (di.sb <= di.top && di.top < di.se) ? Color::SelBackground : 0;
+		dci = DrawColorInfo(0, Color::Background + index_color, Color::Text + index_color);
+	}
+}
+
 void View::getDrawColors(const DrawInfo &di, DCIList &ci)
 {
 	quint64 top = di.top;

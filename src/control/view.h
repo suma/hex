@@ -67,6 +67,7 @@ public:
 protected:
 	void paintEvent(QPaintEvent*);
 	void resizeEvent(QResizeEvent*);
+	void getDrawColor(const DrawInfo &di, DrawColorInfo &dci, uchar data);
 	void getDrawColors(const DrawInfo &di, DCIList &ci);
 
 protected:

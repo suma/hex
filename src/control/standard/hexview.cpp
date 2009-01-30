@@ -26,6 +26,8 @@ HexConfig::HexConfig()
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
+	Colors[Color::CaretBackground] = QColor(0xCC,0x00,0xFF);
+	Colors[Color::CaretText] = QColor(0xAA,0xAA,0x20);
 	HexCaretColor = QColor(0xFF, 0, 0, 128);
 
 	// Font
@@ -106,7 +108,6 @@ void HexView::resizeEvent(QResizeEvent *rs)
 	QResizeEvent resize(size, rs->oldSize());
 	View::resizeEvent(&resize);
 	pix_.fill(config.Colors[Color::Background]);
-	off_ = pix_;
 	refreshPixmap();
 }
 
@@ -120,7 +121,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
 
 	//QPainter painter(&pix_);
-	QPainter painter(&off_);
+	QPainter painter(&pix_);
 	painter.setFont(config.Font);
 
 	if (!doc_->length()) {
@@ -128,7 +129,6 @@ void HexView::refreshPixmap(int type, int line, int end)
 		QBrush brush(config.Colors[Color::Background]);
 		painter.fillRect(0, 0, width(), height(), brush);
 		painter.end();
-		pix_ = off_;
 		update(0, 0, width(), height());
 		return;
 	}
@@ -198,15 +198,13 @@ void HexView::refreshPixmap(int type, int line, int end)
 	painter.fillRect(rect_bg, brush);
 
 	// Draw
-	drawLines(painter, y_top);
+	drawLines(painter, dcolors_, y_top);
 	painter.end();
 
 	// Update real window
 	QPainter painter_pix(&pix_);
 	const int draw_width  = min(width(), config.maxWidth());
 	const int draw_height = count_line * config.byteHeight();
-	QRect copy_rect(0, y_top, draw_width, draw_height);
-	painter_pix.drawPixmap(copy_rect, off_, copy_rect);
 
 	update(0, y_top, draw_width, draw_height);
 }
@@ -225,7 +223,7 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 	}
 }
 
-void HexView::drawLines(QPainter &painter, int y)
+void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
 {
 	// Draw lines
 	int index_byte = 0, x = 0;
@@ -234,7 +232,7 @@ void HexView::drawLines(QPainter &painter, int y)
 	QString hex;
 	hex.resize(2);
 
-	for (DCIList::iterator itr_color = dcolors_.begin(); itr_color != dcolors_.end(); ) {
+	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
 		// Setup color settings
 		if (change_color) {
 			// Create brush for background
@@ -244,15 +242,18 @@ void HexView::drawLines(QPainter &painter, int y)
 			painter.setPen(config.Colors[itr_color->TextColor]);
 			change_color = false;
 		}
+		if (x < x_begin || x_end <= x) {
+			goto COUNTUP;
+		}
 
 		// Draw background
 		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
 
 		// Draw text
 		byteToHex(buff_[index_byte], hex);
-		painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
+		drawText(painter, hex, config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top());
 
-		// Count up
+COUNTUP:// Count up
 		index_byte++;
 		x = (x + 1) % HexConfig::Num;
 
@@ -271,15 +272,78 @@ void HexView::drawLines(QPainter &painter, int y)
 	}
 }
 
+inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int y)
+{
+	painter.drawText(x, y, config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
+}
+
+void HexView::drawCaret(bool visible, quint64 position, int height_max)
+{
+	qDebug("drawCaret visible:%d height_max:%d sel:%llu top:%llu", visible, height_max, position, cur_->Top);
+
+	const int line = position / HexConfig::Num - cur_->Top;
+	const int x = position % HexConfig::Num;
+	const int y = config.top() + line * config.byteHeight();
+	qDebug("caret (line:%d x:%d)", line, x);
+
+	if (!(config.top() + config.byteHeight() < height_max)) {
+		return;
+	}
+
+	QPainter painter(&pix_);
+
+	if (doc_->length() <= position) {
+		// Draw background
+		QBrush brush(config.Colors[Color::Background]);
+		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
+	} else {
+		// Compute selectead area
+		bool selected = false;
+		quint64 sel_begin = 0, sel_end = 0;
+		isSelected(selected, sel_begin, sel_end, position / HexConfig::Num, 1, 1);
+
+		// Copy from document
+		uchar data;
+		doc_->get(position, &data, 1);
+
+		::DrawInfo di(y, position, sel_begin, sel_end, 0, selected);
+		DrawColorInfo dci(0);
+		getDrawColor(di, dci, data);
+
+		QString hex;
+		hex.resize(2);
+		byteToHex(data, hex);
+
+		// Create brush for background
+		QBrush brush(config.Colors[dci.BackgroundColor]);
+
+		// Set color
+		painter.setBackground(brush);
+		painter.setPen(config.Colors[dci.TextColor]);
+
+		// draw text
+		drawText(painter, hex, config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top());
+
+		if (visible) {
+			//QBrush brush(config.HexCaretColor);
+			//painter.fillRect(dx, y, dw, dh, brush);
+		} else {
+			//painter.drawPixmap(dx, y, dw, dh, pix_, dx, y, dw, dh);
+		}
+	}
+
+	update(config.x(x), y, config.caretWidth(), config.caretHeight());
+}
+
 void HexView::drawCaret(bool visible)
 {
-	drawCaret(visible, cur_->Position, config.top(), height());
+	drawCaret(visible, cur_->Position, height());
 	emit caretChanged(visible, cur_->Position);
 }
 
 void HexView::drawCaret(bool visible, quint64 pos)
 {
-	drawCaret(visible, pos, config.top(), height());
+	drawCaret(visible, pos, height());
 	emit caretChanged(visible, pos);
 }
 
@@ -287,34 +351,6 @@ void HexView::redrawCaret()
 {
 	drawCaret(false, cur_->SelEndOld);
 	drawCaret(true);
-}
-
-void HexView::drawCaret(bool visible, quint64 position, int y_begin, int height_max)
-{
-	qDebug("drawCaret visible:%d y_begin:%d height_max:%d sel:%llu top:%llu", visible, y_begin, height_max, position, cur_->Top);
-
-	const int line = position / HexConfig::Num - cur_->Top;
-	const int x = position % HexConfig::Num;
-	const int y = y_begin + line * config.byteHeight();
-	qDebug("caret (line:%d x:%d)", line, x);
-
-	if (!(y_begin <= y && y_begin + config.byteHeight() < height_max)) {
-		return;
-	}
-
-	QPainter painter(&pix_);
-	const int dx = config.x(x);
-	const int dw = config.caretWidth();
-	const int dh = config.caretHeight();
-
-	if (visible) {
-		QBrush brush(config.HexCaretColor);
-		painter.fillRect(dx, y, dw, dh, brush);
-	} else {
-		painter.drawPixmap(dx, y, dw, dh, off_, dx, y, dw, dh);
-	}
-
-	update(dx, y, dw, dh);
 }
 
 void HexView::byteToHex(uchar c, QString &h)
