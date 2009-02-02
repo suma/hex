@@ -302,7 +302,7 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 	int caret_color = Color::CaretBackground;
 	if (doc_->length() <= position) {
 		// Draw background
-		QBrush brush(config.Colors[Color::Background]);
+		QBrush brush(config.Colors[Color::CaretBackground]);
 		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
 	} else {
 		// Copy from document
@@ -314,26 +314,21 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 		byteToHex(data, hex);
 
 		// Create brush for background
-		int x = isSelected(position) ? Color::SelCaretBackground - Color::CaretBackground : 0;
-		caret_color += x;
+		int col = isSelected(position) ? Color::SelCaretBackground - Color::CaretBackground : 0;
+		caret_color += col;
 
-		// Left
-		QBrush brush(config.Colors[Color::CaretBackground + x]);
+		// Draw
+		QBrush brush(config.Colors[Color::CaretBackground + col]);
 		painter.setBackground(brush);
-		painter.setPen(config.Colors[Color::CaretText + x]);
-		painter.fillRect(config.x(x), y, config.ByteMargin.left() + config.charWidth(), config.byteHeight(), brush);
-		painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(1), config.charHeight(), Qt::AlignCenter, hex);
+		painter.setPen(config.Colors[Color::CaretText + col]);
+		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
+	qDebug("fillRect config.x(x):%d", config.x(x));
 
-		// Right
-		brush = QBrush(config.Colors[Color::CaretBackground]);
-		painter.setBackground(brush);
-		painter.setPen(config.Colors[Color::CaretText]);
-		painter.fillRect(config.x(x) + config.charWidth(), y, config.ByteMargin.right() + config.charWidth(), config.byteHeight(), brush);
-		painter.drawText(config.x(x) + config.charWidth() + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(1), config.charHeight(), Qt::AlignCenter, hex);
+		painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
 	}
 
 	painter.end();
-	update(config.x(x), y, config.charWidth(), config.charHeight());
+	update(config.x(x), y, config.byteWidth(), config.charHeight());
 }
 
 void HexView::drawCaret(bool visible)
