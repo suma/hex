@@ -339,7 +339,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 
 void HexView::redrawCaret()
 {
-	drawCaret(false, cur_->SelEndOld);
+	//drawCaret(false, cur_->SelEndOld);
 	drawCaret(true);
 }
 
@@ -388,7 +388,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		drawSelected(false);
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
-			drawCaret(false, cur_->SelEndOld);
+			//drawCaret(false, cur_->SelEndOld);
 			drawCaret(true);
 			redrawCaret();
 			cur_->HexCaretVisible = false;
