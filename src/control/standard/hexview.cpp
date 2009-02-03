@@ -15,7 +15,7 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: Margin(2, 2, 3, 3)
-	, ByteMargin(2, 0, 3, 1)
+	, ByteMargin(2, 0, 2, 1)
 	, Font("Monaco", 13)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
@@ -28,8 +28,6 @@ HexConfig::HexConfig()
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
 	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0);
 	Colors[Color::CaretText] = QColor(0xAA,0xAA,0x20);
-	Colors[Color::SelCaretBackground] = QColor(0xFF, 0xFF, 0);
-	Colors[Color::SelCaretText] = QColor(0xAA,0,0xAA);
 
 	// Font
 	Font.setFixedPitch(true);
@@ -313,14 +311,10 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 		hex.resize(2);
 		byteToHex(data, hex);
 
-		// Create brush for background
-		int col = isSelected(position) ? Color::SelCaretBackground - Color::CaretBackground : 0;
-		caret_color += col;
-
 		// Draw
-		QBrush brush(config.Colors[Color::CaretBackground + col]);
+		QBrush brush(config.Colors[Color::CaretBackground]);
 		painter.setBackground(brush);
-		painter.setPen(config.Colors[Color::CaretText + col]);
+		painter.setPen(config.Colors[Color::CaretText]);
 		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
 	qDebug("fillRect config.x(x):%d", config.x(x));
 
