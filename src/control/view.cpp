@@ -46,14 +46,14 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci)
 
 	bool high = false;
 	if (high_ != NULL && high_->GetColor(buff_, top, size, hcolors_)) {
-		qDebug("hcolors_.size(): %d", hcolors_.size());
+		//qDebug("hcolors_.size(): %d", hcolors_.size());
 		high = true;
 	}
 
 	// clear
 	ci.clear();
 
-	qDebug("selected: %d, highligh on: %d", di.selected, high);
+	//qDebug("selected: %d, highligh on: %d", di.selected, high);
 	if (!di.selected) {
 		// case: Not selected
 		if (high) {
@@ -85,7 +85,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci)
 		// case: Selected
 		quint64 index = top;
 		// check colors
-		qDebug("sb: %d, se: %d", sb, se);
+		//qDebug("sb: %d, se: %d", sb, se);
 		int i = 0;
 		int last = -1;
 		for (; i < size; i++, index++) {
@@ -109,7 +109,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci)
 					// continues same color
 					ci.back().Length++;
 				} else {
-					qDebug("i:%d index:%d len:%d\n", i, itr->Index, itr->Length);
+					//qDebug("i:%d index:%d len:%d\n", i, itr->Index, itr->Length);
 					ci.push_back(DrawColorInfo(1, itr->Colors + x));
 				}
 				itr->Length--;

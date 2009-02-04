@@ -31,7 +31,6 @@ HexConfig::HexConfig()
 
 	// Font
 	Font.setFixedPitch(true);
-	qDebug("isFixed: %d", Font.fixedPitch());
 
 	calculate();
 }
@@ -47,7 +46,6 @@ void HexConfig::calculate()
 	// Pos of end
 	for (int i = 0; i < Num; i++) {
 		X_[i] = x_[i] + charWidth(2) + ByteMargin.right();
-		qDebug("i:%d x: %d X: %d", i, x_[i], X_[i]);
 	}
 
 	// Area
@@ -168,14 +166,12 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw empty area(after end line)
 	if (type == DRAW_ALL || type == DRAW_AFTER) {
-		qDebug("draw empty area height:%d", height());
 		QBrush brush(config.Colors[Color::Background]);
 		QRect rect(0, y_top, width(), height());
 		painter.fillRect(rect, brush);
 	}
 
 	// Copy from document
-	qDebug("Document::get(%llu, .., %u)", top, size);
 	if (buff_.capacity() < size) {
 		buff_.resize(size);
 	}
@@ -295,7 +291,6 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 	const int line = position / HexConfig::Num - cur_->Top;
 	const int x = position % HexConfig::Num;
 	const int y = config.top() + config.byteHeight() * line;
-	qDebug("caret (line:%d x:%d)", line, x);
 
 	int caret_color = Color::CaretBackground;
 	if (doc_->length() <= position) {
@@ -316,7 +311,6 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 		painter.setBackground(brush);
 		painter.setPen(config.Colors[Color::CaretText]);
 		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
-	qDebug("fillRect config.x(x):%d", config.x(x));
 
 		painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
 	}
@@ -373,7 +367,6 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 			redrawCaret();
 			cur_->HexCaretVisible = false;
 		}
-		qDebug("press -  begin:%lld", cur_->SelBegin);
 	}
 }
 
@@ -404,7 +397,6 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
 		cur_->Toggle = false;
-		qDebug("mouse release - begin:%lld end:%lld", cur_->SelBegin, cur_->SelEnd);
 
 		drawSelected(false);
 
@@ -421,8 +413,6 @@ quint64 HexView::moveByMouse(int xx, int yy)
 	int x = config.XToPos(xx);
 	int y = config.YToLine(yy);
 
-	qDebug("move x:%d y:%d top: %lld", x, y, cur_->Top);
-
 	if (x < 0) {
 		x = 0;
 	}
@@ -431,7 +421,6 @@ quint64 HexView::moveByMouse(int xx, int yy)
 	}
 
 	cur_->Position = MIN(cur_->Top + x + y * HexConfig::Num, doc_->length());
-	qDebug("Position: %lld", cur_->Position);
 	return cur_->Position;
 }
 #undef MIN
@@ -445,8 +434,6 @@ void HexView::drawSelected(bool reset)
 		const int bL = b / HexConfig::Num - cur_->Top;
 		const int eL = e / HexConfig::Num - cur_->Top + 1;
 		cur_->Selected = false;
-		qDebug("reset - bL:%d eL:%d", bL, eL);
-		qDebug("reset - begin:%lld end:%lld endO:%lld", cur_->SelBegin, cur_->SelEnd, cur_->SelEndOld);
 		refreshPixmap(DRAW_RANGE, bL, eL);
 	} else if (cur_->selMoved()) {
 		if ((cur_->SelBegin < cur_->SelEndOld && cur_->SelBegin >= cur_->SelEnd ||
@@ -454,17 +441,14 @@ void HexView::drawSelected(bool reset)
 			// Crossing between begin and end
 			b = min(min(cur_->SelBegin, cur_->SelEnd), cur_->SelEndOld);
 			e = max(max(cur_->SelBegin, cur_->SelEnd), cur_->SelEndOld);
-			qDebug("cross end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndOld);
 		} else {
 			// Minimum area
 			b = min(cur_->SelEnd, cur_->SelEndOld);
 			e = max(cur_->SelEnd, cur_->SelEndOld);
-			qDebug("minimum end:%lld endO:%lld", cur_->SelEnd, cur_->SelEndOld);
 		}
 
 		const int bL = b / HexConfig::Num - cur_->Top;
 		const int eL = e / HexConfig::Num - cur_->Top + 1;
-		qDebug("bL:%d eL:%d", bL, eL);
 		refreshPixmap(DRAW_RANGE, bL, eL);
 	}
 }
@@ -476,7 +460,7 @@ void HexView::setCaretBlink(bool enable)
 	}
 	if (enable) {
 		if (cur_->CaretTimerId == 0) {
-			cur_->CaretTimerId = startTimer(config.CaretBlinkTime);
+			//cur_->CaretTimerId = startTimer(config.CaretBlinkTime);
 		}
 	} else {
 		if (cur_->CaretTimerId != 0) {
@@ -536,7 +520,6 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 
 	if (ev->modifiers() != Qt::NoModifier) {
 	} else {
-		qDebug("Modfiier");
 	}
 }
 

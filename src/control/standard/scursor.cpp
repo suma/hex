@@ -53,7 +53,6 @@ void Cursor::End()
 
 void Cursor::Left(uint count)
 {
-	qDebug("left");
 	if (Position < count) {
 		return;
 	}
@@ -66,7 +65,6 @@ void Cursor::Left(uint count)
 
 void Cursor::Right(uint count)
 {
-	qDebug("right");
 	if (document->length() < count || document->length() - count < Position) {
 		return;
 	}
