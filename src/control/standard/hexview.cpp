@@ -118,6 +118,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
 	qDebug(" end:%llu endOld:%llu pos:%llu", cursor->SelEnd, cursor->SelEndOld, cursor->Position);
 
+	// FIXME: refactoring refresh event
 	QPainter painter(&pix_);
 	painter.setFont(config.Font);
 
@@ -443,7 +444,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cursor->Toggle = true;
 
 		if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
-			int pos = cursor->SelEndOld / HexConfig::Num - cursor->Top;
+			int pos = (cursor->SelEndOld / HexConfig::Num) - cursor->Top;
 			if (pos <= config.drawableLines(height())) {
 				refreshPixmap(DRAW_RANGE, pos, pos + 1);
 			}
@@ -515,29 +516,29 @@ quint64 HexView::moveByMouse(int xx, int yy)
 
 void HexView::drawSelected(bool reset)
 {
-	quint64 b, e;
+	quint64 begin, end;
 	if (reset && cursor->Selected) {
-		b = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
-		e = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
-		const int bL = b / HexConfig::Num - cursor->Top;
-		const int eL = e / HexConfig::Num - cursor->Top + 1;
+		begin = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+		end   = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+		const int begin_line = begin / HexConfig::Num - cursor->Top;
+		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
 		cursor->Selected = false;
-		refreshPixmap(DRAW_RANGE, bL, eL);
+		refreshPixmap(DRAW_RANGE, begin_line, end_line);
 	} else if (cursor->selMoved()) {
 		if ((cursor->SelBegin < cursor->SelEndOld && cursor->SelBegin >= cursor->SelEnd ||
 			cursor->SelBegin >= cursor->SelEndOld && cursor->SelBegin < cursor->SelEnd)) {
 			// Crossing between begin and end
-			b = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
-			e = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+			begin = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+			end   = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
 		} else {
 			// Minimum area
-			b = min(cursor->SelEnd, cursor->SelEndOld);
-			e = max(cursor->SelEnd, cursor->SelEndOld);
+			begin = min(cursor->SelEnd, cursor->SelEndOld);
+			end   = max(cursor->SelEnd, cursor->SelEndOld);
 		}
 
-		const int bL = b / HexConfig::Num - cursor->Top;
-		const int eL = e / HexConfig::Num - cursor->Top + 1;
-		refreshPixmap(DRAW_RANGE, bL, eL);
+		const int begin_line = begin / HexConfig::Num - cursor->Top;
+		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
+		refreshPixmap(DRAW_RANGE, begin_line, end_line);
 	}
 }
 
