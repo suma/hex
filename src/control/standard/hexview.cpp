@@ -288,9 +288,8 @@ void HexView::drawCaret(bool visible, quint64 pos, int height_max)
 
 	QPainter painter(&pix_);
 	painter.setFont(config.Font);
-	const int line = pos / HexConfig::Num - cur_->Top;
 	const int x = pos % HexConfig::Num;
-	const int y = config.top() + config.byteHeight() * line;
+	const int y = config.top() + config.byteHeight() * (pos / HexConfig::Num - cur_->Top);
 
 	drawCaretShape(CaretDrawInfo(painter, pos, x, y), pos < doc_->length());
 
