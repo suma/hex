@@ -4,4 +4,15 @@ TODO
 	implement
 		keyboard input(insert doc, move cursor)
 
+*control::standard::address view
+	implement
+
+
+*control::standard::text view
+	implement
+		view
+
+*control::
+		scroll bar
+
 

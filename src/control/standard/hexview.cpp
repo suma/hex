@@ -119,7 +119,8 @@ void HexView::refreshPixmap(int type, int line, int end)
 	qDebug(" end:%llu endOld:%llu pos:%llu", cursor->SelEnd, cursor->SelEndOld, cursor->Position);
 
 	// FIXME: refactoring refresh event
-	QPainter painter(&pix_);
+	QPainter painter;
+	painter.begin(&pix_);
 	painter.setFont(config.Font);
 
 	if (!document->length()) {
@@ -190,18 +191,16 @@ void HexView::refreshPixmap(int type, int line, int end)
 
 	// Draw Background clear
 	QBrush brush(config.Colors[Color::Background]);
-	QRect rect_bg(0, y_top, width(), y_top + config.byteHeight());
-	painter.fillRect(rect_bg, brush);
+	painter.fillRect(0, y_top, width(), count_line * config.byteHeight(), brush);
 
 	// Draw
-	drawLines(painter, dcolors_, y_top);
+	qDebug("x:%d", (width() - config.Margin.left()) / config.byteWidth());
+	drawLines(painter, dcolors_, y_top, 0, (width() - config.Margin.left()) / config.byteWidth() + 1);
 	painter.end();
 
 	// Update real window
-	QPainter painter_pix(&pix_);
 	const int draw_width  = min(width(), config.maxWidth());
 	const int draw_height = count_line * config.byteHeight();
-
 	update(0, y_top, draw_width, draw_height);
 }
 
@@ -286,7 +285,8 @@ void HexView::drawCaret(quint64 pos, int height_max)
 		return;
 	}
 
-	QPainter painter(&pix_);
+	QPainter painter;
+	painter.begin(&pix_);
 	painter.setFont(config.Font);
 	const int x = pos % HexConfig::Num;
 	const int y = config.top() + config.byteHeight() * (pos / HexConfig::Num - cursor->Top);
