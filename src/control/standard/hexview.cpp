@@ -440,7 +440,6 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cur_->Toggle = true;
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
-			// FIXME: too slow
 			refreshPixmap(DRAW_RANGE, cur_->SelEndOld / HexConfig::Num - cur_->Top, cur_->SelEndOld / HexConfig::Num - cur_->Top + 1);
 			drawCaret(true);
 		}
