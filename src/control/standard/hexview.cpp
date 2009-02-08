@@ -189,10 +189,6 @@ void HexView::refreshPixmap(int type, int line, int end)
 	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
 	getDrawColors(di, dcolors_);
 
-	// Draw Background clear
-	QBrush brush(config.Colors[Color::Background]);
-	painter.fillRect(0, y_top, width(), count_line * config.byteHeight(), brush);
-
 	// Draw
 	qDebug("x:%d", (width() - config.Margin.left()) / config.byteWidth());
 	drawLines(painter, dcolors_, y_top, 0, (width() - config.Margin.left()) / config.byteWidth() + 1);
