@@ -157,7 +157,7 @@ namespace Standard {
 	protected:
 		// Main components
 		HexConfig config;
-		Cursor *cur_;
+		Cursor *cursor;
 	};
 
 }

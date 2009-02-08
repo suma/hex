@@ -7,7 +7,7 @@ namespace Standard {
 
 AddressView::AddressView(QWidget *parent, Document *doc, Cursor *cur)
 	: ::View(parent, doc)
-	, cur_(cur)
+	, cursor(cur)
 {
 }
 

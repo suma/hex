@@ -19,7 +19,7 @@ namespace Standard {
 		void refreshPixmap();
 
 	protected:
-		Cursor *cur_;
+		Cursor *cursor;
 	
 	};
 

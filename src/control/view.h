@@ -52,7 +52,7 @@ class View : public QWidget
 	Q_OBJECT
 
 protected:
-	Document *doc_;
+	Document *document;
 	QPixmap pix_;
 	Highlight *high_;
 
