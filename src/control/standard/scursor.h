@@ -13,6 +13,13 @@ namespace Standard {
 		quint64 X, Y;
 	};
 
+	enum CaretShape {
+		CARET_LINE,
+		CARET_BLOCK,
+		CARET_FRAME,
+		CARET_UNDERBAR,
+	};
+
 	class Cursor
 	{
 	public:
@@ -37,8 +44,10 @@ namespace Standard {
 		bool Selected;		// Begin != End
 		bool Toggle;
 		bool CaretHigh;
-
-		int CaretTimerId;	// for Caret
+	
+		// for Caret
+		int CaretShape;
+		int CaretTimerId;
 		bool HexCaretVisible;
 		bool StrCaretVisible;
 

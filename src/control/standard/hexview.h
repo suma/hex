@@ -106,6 +106,17 @@ namespace Standard {
 		void setCaretBlink(bool enable);
 
 	protected:
+		class CaretDrawInfo
+		{
+			public:
+				CaretDrawInfo(QPainter &, int x, int y);
+				QPainter &painter;
+				QString hex;
+				int x;
+				int y;
+		};
+
+	protected:
 
 		void refreshPixmap();
 		void refreshPixmap(int type, int = 0, int = 0);
@@ -124,6 +135,7 @@ namespace Standard {
 		bool isSelected(quint64 pos);
 		void drawSelected(bool reset = false);
 		void drawCaret(bool visible, quint64 pos, int ymax);
+		void drawCaretShape(QPainter &painter, quint64 pos, int x, int y, bool);
 		void redrawCaret();
 
 		void byteToHex(uchar c, QString &h);

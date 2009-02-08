@@ -27,7 +27,7 @@ HexConfig::HexConfig()
 	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
 	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0);
-	Colors[Color::CaretText] = QColor(0xAA,0xAA,0x20);
+	Colors[Color::CaretText] = QColor(0xFA,0xFA,0x20);
 
 	// Font
 	Font.setFixedPitch(true);
@@ -278,9 +278,9 @@ inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int 
 	painter.drawText(x, y, config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
 }
 
-void HexView::drawCaret(bool visible, quint64 position, int height_max)
+void HexView::drawCaret(bool visible, quint64 pos, int height_max)
 {
-	qDebug("drawCaret visible:%d height_max:%d sel:%llu top:%llu", visible, height_max, position, cur_->Top);
+	qDebug("drawCaret visible:%d height_max:%d sel:%llu top:%llu", visible, height_max, pos, cur_->Top);
 
 	if (!(config.top() + config.byteHeight() < height_max)) {
 		return;
@@ -288,35 +288,111 @@ void HexView::drawCaret(bool visible, quint64 position, int height_max)
 
 	QPainter painter(&pix_);
 	painter.setFont(config.Font);
-	const int line = position / HexConfig::Num - cur_->Top;
-	const int x = position % HexConfig::Num;
+	const int line = pos / HexConfig::Num - cur_->Top;
+	const int x = pos % HexConfig::Num;
 	const int y = config.top() + config.byteHeight() * line;
 
-	int caret_color = Color::CaretBackground;
-	if (doc_->length() <= position) {
-		// Draw background
-		QBrush brush(config.Colors[Color::CaretBackground]);
-		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
-	} else {
+	drawCaretShape(painter, pos, x, y, pos < doc_->length());
+
+	painter.end();
+	update(config.x(x), y, config.byteWidth(), config.charHeight());
+}
+
+void HexView::drawCaretShape(QPainter &painter, quint64 pos, int x, int y, bool drawText)
+{
+#define DrawTextNormally() { \
+	QBrush brush(config.Colors[Color::Background]); \
+	painter.setBackground(brush); \
+	painter.setPen(config.Colors[Color::Text]); \
+	painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush); \
+	painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex); \
+}
+
+#define DrawCaret_Line() { \
+	QBrush brush(config.Colors[Color::CaretBackground]); \
+	painter.fillRect(config.x(x) + (cur_->CaretHigh ? 0 : config.charWidth() + config.ByteMargin.left()), y, 2, config.byteHeight(), brush); \
+}
+
+#define DrawCaret_Underbar() { \
+	QBrush brush(config.Colors[Color::CaretBackground]); \
+	int width = config.charWidth() + (cur_->CaretHigh ? config.ByteMargin.left() : config.ByteMargin.right()); \
+	painter.fillRect(config.x(x) + (cur_->CaretHigh ? 0 : config.charWidth() + config.ByteMargin.left()), y + config.byteHeight() - 2, width, 2, brush); \
+}
+
+#define DrawCaret_Frame() { \
+		painter.setPen(config.Colors[Color::CaretBackground]); \
+		int width = cur_->CaretHigh ? config.byteWidth() : config.charWidth() + config.ByteMargin.right(); \
+		QRect rect(config.x(x) + (cur_->CaretHigh ? 0 : config.charWidth() + config.ByteMargin.left()), y, width, config.byteHeight()); \
+		painter.drawRect(rect); \
+}
+
+	if (drawText) {
 		// Copy from document
 		uchar data;
-		doc_->get(position, &data, 1);
+		doc_->get(pos, &data, 1);
 
 		QString hex;
 		hex.resize(2);
 		byteToHex(data, hex);
 
-		// Draw
-		QBrush brush(config.Colors[Color::CaretBackground]);
-		painter.setBackground(brush);
-		painter.setPen(config.Colors[Color::CaretText]);
-		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
-
-		painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
+		DrawTextNormally();
+		DrawCaret_Underbar();
+		return;
+		switch (cur_->CaretShape) {
+		case CARET_LINE:
+			DrawTextNormally();
+			DrawCaret_Line();
+			break;
+		case CARET_BLOCK:
+			if (cur_->CaretHigh) {
+				QBrush brush(config.Colors[Color::CaretBackground]);
+				painter.setBackground(brush);
+				painter.setPen(config.Colors[Color::CaretText]);
+				painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
+				painter.drawText(config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
+			} else {
+				DrawTextNormally();
+				QBrush brush(config.Colors[Color::CaretBackground]);
+				painter.setBackground(brush);
+				painter.setPen(config.Colors[Color::CaretText]);
+				painter.fillRect(config.x(x) + config.ByteMargin.left() + config.charWidth(), y, config.charWidth() + config.ByteMargin.right(), config.byteHeight(), brush);
+				hex.remove(0, 1);
+				painter.drawText(config.x(x) + config.ByteMargin.left() + config.charWidth(), y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignLeft, hex);
+			}
+			break;
+		case CARET_FRAME:
+			DrawTextNormally();
+			DrawCaret_Frame();
+			break;
+		case CARET_UNDERBAR:
+			DrawTextNormally();
+			DrawCaret_Underbar();
+			break;
+		}
+	} else {
+		switch (cur_->CaretShape) {
+		case CARET_LINE:
+			DrawCaret_Line();
+			break;
+		case CARET_BLOCK:
+		{
+			QBrush brush(config.Colors[Color::CaretBackground]);
+			painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
+			break;
+		}
+		case CARET_FRAME:
+			DrawCaret_Frame();
+			break;
+		case CARET_UNDERBAR:
+			DrawCaret_Underbar();
+			break;
+		}
 	}
 
-	painter.end();
-	update(config.x(x), y, config.byteWidth(), config.charHeight());
+
+	return;
+
+#undef DrawTextNormally
 }
 
 void HexView::drawCaret(bool visible)
@@ -521,5 +597,11 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	}
 }
 
+HexView::CaretDrawInfo::CaretDrawInfo(QPainter &p, int x, int y)
+	: painter(p)
+{
+	this->x = x;
+	this->y = y;
+}
 
 }	// namespace
