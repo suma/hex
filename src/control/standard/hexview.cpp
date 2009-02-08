@@ -279,10 +279,8 @@ inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int 
 	painter.drawText(x, y, config.charWidth(2), config.charHeight(), Qt::AlignCenter, hex);
 }
 
-void HexView::drawCaret(bool visible, quint64 pos, int height_max)
+void HexView::drawCaret(quint64 pos, int height_max)
 {
-	//qDebug("drawCaret visible:%d height_max:%d sel:%llu top:%llu", visible, height_max, pos, cur_->Top);
-
 	if (!(config.top() + config.byteHeight() < height_max)) {
 		return;
 	}
@@ -397,20 +395,25 @@ void HexView::drawCaretBlock(CaretDrawInfo &info)
 
 void HexView::drawCaret(bool visible)
 {
-	drawCaret(visible, cur_->Position, height());
+	if (visible) {
+		drawCaret(cur_->Position, height());
+	} else {
+		drawCaret(false, cur_->Position);
+	}
 	emit caretChanged(visible, cur_->Position);
 }
 
 void HexView::drawCaret(bool visible, quint64 pos)
 {
-	drawCaret(visible, pos, height());
+	if (visible) {
+		drawCaret(pos, height());
+	} else {
+		quint64 line = cur_->Position / HexConfig::Num;
+		if (cur_->Top <= line && line - cur_->Top < config.drawableLines(height())) {
+			refreshPixmap(DRAW_LINE, line);
+		}
+	}
 	emit caretChanged(visible, pos);
-}
-
-void HexView::redrawCaret()
-{
-	//drawCaret(false, cur_->SelEndOld);
-	drawCaret(true);
 }
 
 void HexView::byteToHex(uchar c, QString &h)
@@ -440,10 +443,12 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cur_->Toggle = true;
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
-			refreshPixmap(DRAW_RANGE, cur_->SelEndOld / HexConfig::Num - cur_->Top, cur_->SelEndOld / HexConfig::Num - cur_->Top + 1);
-			drawCaret(true);
+			int pos = cur_->SelEndOld / HexConfig::Num - cur_->Top;
+			if (pos <= config.drawableLines(height())) {
+				refreshPixmap(DRAW_RANGE, pos, pos + 1);
+			}
 		}
-		drawCaret(true);
+		drawCaret();
 		grabMouse();
 	}
 }
@@ -465,7 +470,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		drawSelected(false);
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
-			drawCaret(true);
+			drawCaret();
 			cur_->HexCaretVisible = false;
 		}
 	}
@@ -484,7 +489,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		drawSelected(false);
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
-			drawCaret(true);
+			drawCaret();
 			cur_->HexCaretVisible = false;
 		}
 	}
@@ -543,7 +548,7 @@ void HexView::setCaretBlink(bool enable)
 	}
 	if (enable) {
 		if (cur_->CaretTimerId == 0) {
-			//cur_->CaretTimerId = startTimer(config.CaretBlinkTime);
+			cur_->CaretTimerId = startTimer(config.CaretBlinkTime);
 		}
 	} else {
 		if (cur_->CaretTimerId != 0) {
@@ -603,7 +608,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	// support keyboard macros(like Vim repeat command)
 	if (cur_->SelEnd != old || cur_->Top != oldT) {
 		refreshPixmap();
-		redrawCaret();
+		drawCaret();
 	}
 
 	if (ev->modifiers() != Qt::NoModifier) {

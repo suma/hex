@@ -135,20 +135,19 @@ namespace Standard {
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		bool isSelected(quint64 pos);
 		void drawSelected(bool reset = false);
-		void drawCaret(bool visible, quint64 pos, int ymax);
+		void drawCaret(quint64 pos, int ymax);
 		void drawCaretShape(CaretDrawInfo info, bool);
 		void drawCaretText(const CaretDrawInfo &);
 		void drawCaretLine(const CaretDrawInfo &);
 		void drawCaretUnderbar(const CaretDrawInfo &);
 		void drawCaretFrame(const CaretDrawInfo &);
 		void drawCaretBlock(CaretDrawInfo &);
-		void redrawCaret();
 
 		void byteToHex(uchar c, QString &h);
 		quint64 moveByMouse(int x, int y);
 
 	public slots:
-		void drawCaret(bool visible);
+		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
 
 	signals:
