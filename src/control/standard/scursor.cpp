@@ -50,11 +50,13 @@ void Cursor::Home()
 void Cursor::End()
 {
 	Position = SelEnd = document->length();
+	refreshTopByDown();
 }
 
 void Cursor::Left(uint count)
 {
 	if (Position < count) {
+		Home();
 		return;
 	}
 
@@ -67,6 +69,7 @@ void Cursor::Left(uint count)
 void Cursor::Right(uint count)
 {
 	if (document->length() < count || document->length() - count < Position) {
+		End();
 		return;
 	}
 
@@ -79,6 +82,7 @@ void Cursor::Right(uint count)
 void Cursor::Up(uint count)
 {
 	if (Position < count * HexConfig::Num) {
+		Home();
 		return;
 	}
 
@@ -91,6 +95,7 @@ void Cursor::Up(uint count)
 void Cursor::Down(uint count)
 {
 	if (document->length() < count * HexConfig::Num || document->length() - count * HexConfig::Num < Position) {
+		End();
 		return;
 	}
 
