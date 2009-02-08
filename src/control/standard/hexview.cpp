@@ -410,7 +410,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	} else {
 		quint64 line = cursor->Position / HexConfig::Num;
 		if (cursor->Top <= line && line - cursor->Top < config.drawableLines(height())) {
-			refreshPixmap(DRAW_LINE, line);
+			refreshPixmap(DRAW_LINE, line - cursor->Top);
 		}
 	}
 	emit caretChanged(visible, pos);
