@@ -116,6 +116,7 @@ void HexView::refreshPixmap()
 void HexView::refreshPixmap(int type, int line, int end)
 {
 	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
+	qDebug(" end:%llu endOld:%llu pos:%llu", cur_->SelEnd, cur_->SelEndOld, cur_->Position);
 
 	QPainter painter(&pix_);
 	painter.setFont(config.Font);
@@ -280,7 +281,7 @@ inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int 
 
 void HexView::drawCaret(bool visible, quint64 pos, int height_max)
 {
-	qDebug("drawCaret visible:%d height_max:%d sel:%llu top:%llu", visible, height_max, pos, cur_->Top);
+	//qDebug("drawCaret visible:%d height_max:%d sel:%llu top:%llu", visible, height_max, pos, cur_->Top);
 
 	if (!(config.top() + config.byteHeight() < height_max)) {
 		return;
@@ -431,6 +432,7 @@ void HexView::byteToHex(uchar c, QString &h)
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
+		qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cur_->Position, cur_->SelEnd, cur_->SelEndOld, cur_->SelEnd / HexConfig::Num);
 		drawSelected(true);
 
 		cur_->SelEndOld = cur_->Position;
@@ -439,7 +441,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
 			// FIXME: too slow
-			refreshPixmap(DRAW_RANGE, cur_->SelEnd / HexConfig::Num, cur_->SelEnd / HexConfig::Num + 1);
+			refreshPixmap(DRAW_RANGE, cur_->SelEndOld / HexConfig::Num - cur_->Top, cur_->SelEndOld / HexConfig::Num - cur_->Top + 1);
 			drawCaret(true);
 		}
 		drawCaret(true);
@@ -450,7 +452,13 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
 	if (cur_->Toggle) {
+		qDebug("mouse move");
 		cur_->SelEndOld = cur_->SelEnd;
+
+		// FIXME: move down
+		if (height() < ev->pos().y()) {
+			return;
+		}
 
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 		cur_->refreshSelected();
@@ -467,6 +475,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 void HexView::mouseReleaseEvent(QMouseEvent *ev)
 {
 	if (cur_->Toggle) {
+		qDebug("mouse release");
 		releaseMouse();
 
 		cur_->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
