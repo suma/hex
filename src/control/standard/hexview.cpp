@@ -364,8 +364,8 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cur_->Toggle = true;
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
-			redrawCaret();
-			cur_->HexCaretVisible = false;
+			refreshPixmap(DRAW_RANGE, cur_->SelEnd / HexConfig::Num, cur_->SelEnd / HexConfig::Num + 1);
+			drawCaret(true);
 		}
 	}
 }
@@ -381,9 +381,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		drawSelected(false);
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
-			//drawCaret(false, cur_->SelEndOld);
 			drawCaret(true);
-			redrawCaret();
 			cur_->HexCaretVisible = false;
 		}
 	}
@@ -401,7 +399,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		drawSelected(false);
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
-			redrawCaret();
+			drawCaret(true);
 			cur_->HexCaretVisible = false;
 		}
 	}
