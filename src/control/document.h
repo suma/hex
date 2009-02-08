@@ -27,9 +27,9 @@ private:
 
 
 protected:
-	DocumentImpl *doc_;
-	QFile *file_;
-	std::vector<uchar> buffer_;
+	DocumentImpl *document;
+	QFile *file;
+	std::vector<uchar> buffer;
 
 };
 

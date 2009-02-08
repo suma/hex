@@ -569,6 +569,7 @@ void HexView::timerEvent(QTimerEvent *ev)
 void HexView::keyPressEvent(QKeyEvent *ev)
 {
 	// TODO: support keyboard remap
+
 	quint64 old = cursor->SelEnd;
 	quint64 oldT = cursor->Top;
 	switch (ev->key()) {
@@ -604,8 +605,8 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	if (ev->modifiers() != Qt::SHIFT) {
 		cursor->resetSelection();
 	}
-	// TODO: optimization: compute refresh area and
-	// support keyboard macros(like Vim repeat command)
+
+	// FIXME: refactoring refresh event
 	if (cursor->SelEnd != old || cursor->Top != oldT) {
 		refreshPixmap();
 		drawCaret();

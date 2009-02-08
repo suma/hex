@@ -35,7 +35,7 @@ public:
 
 protected:
 	ulint length_;
-	DocumentMap documents_;
+	DocumentMap documents;
 
 };
 

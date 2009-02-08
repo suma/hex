@@ -101,12 +101,12 @@ void Cursor::Down(uint count)
 
 void Cursor::PageUp(uint)
 {
-	// TODO: implement
+	Up(view->getConfig().drawableLines(view->height()) / 3);
 }
 
 void Cursor::PageDown(uint)
 {
-	// TODO: implement
+	Down(view->getConfig().drawableLines(view->height()) / 3);
 }
 
 void Cursor::refreshTopByUp()
