@@ -431,7 +431,6 @@ void HexView::byteToHex(uchar c, QString &h)
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
-		grabMouse();
 		drawSelected(true);
 
 		cur_->SelEndOld = cur_->Position;
@@ -439,9 +438,12 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cur_->Toggle = true;
 
 		if (config.EnableCaret && cur_->SelEnd != cur_->SelEndOld) {
+			// FIXME: too slow
 			refreshPixmap(DRAW_RANGE, cur_->SelEnd / HexConfig::Num, cur_->SelEnd / HexConfig::Num + 1);
 			drawCaret(true);
 		}
+		drawCaret(true);
+		grabMouse();
 	}
 }
 
@@ -493,7 +495,7 @@ quint64 HexView::moveByMouse(int xx, int yy)
 		x = y = 0;
 	}
 
-	cur_->Position = MIN(cur_->Top + x + y * HexConfig::Num, doc_->length());
+	cur_->Position = MIN((cur_->Top + y) * HexConfig::Num + x, doc_->length());
 	return cur_->Position;
 }
 #undef MIN
@@ -554,6 +556,8 @@ void HexView::timerEvent(QTimerEvent *ev)
 void HexView::keyPressEvent(QKeyEvent *ev)
 {
 	// TODO: support keyboard remap
+	quint64 old = cur_->SelEnd;
+	quint64 oldT = cur_->Top;
 	switch (ev->key()) {
 	case Qt::Key_Home:
 		cur_->Home();
@@ -582,14 +586,17 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	default:
 		return;
 	}
+	cur_->SelEndOld = cur_->SelEnd;
 
 	if (ev->modifiers() != Qt::SHIFT) {
 		cur_->resetSelection();
 	}
 	// TODO: optimization: compute refresh area and
 	// support keyboard macros(like Vim repeat command)
-	refreshPixmap();
-	redrawCaret();
+	if (cur_->SelEnd != old || cur_->Top != oldT) {
+		refreshPixmap();
+		redrawCaret();
+	}
 
 	if (ev->modifiers() != Qt::NoModifier) {
 	} else {

@@ -65,6 +65,8 @@ namespace Standard {
 		void PageDown(uint = 1);
 
 	private:
+		void refreshTopByUp();
+		void refreshTopByDown();
 
 	};
 

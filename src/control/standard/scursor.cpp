@@ -61,7 +61,7 @@ void Cursor::Left(uint count)
 	Position = Position - count;
 	SelEnd = Position;
 
-	// TODO: refresh Top for up
+	refreshTopByUp();
 }
 
 void Cursor::Right(uint count)
@@ -73,10 +73,7 @@ void Cursor::Right(uint count)
 	Position += count;
 	SelEnd = Position;
 
-	// TODO: Consider compute Top
-	int count_line = view->getConfig().drawableLines(view->height());
-
-	// TODO: refresh Top for down
+	refreshTopByDown();
 }
 
 void Cursor::Up(uint count)
@@ -87,7 +84,8 @@ void Cursor::Up(uint count)
 
 	Position -= count * HexConfig::Num;
 	SelEnd = Position;
-	// TODO: refresh Top for up
+
+	refreshTopByUp();
 }
 
 void Cursor::Down(uint count)
@@ -98,7 +96,7 @@ void Cursor::Down(uint count)
 
 	Position += count * HexConfig::Num;
 	SelEnd = Position;
-	// TODO: refresh Top for down
+	refreshTopByDown();
 }
 
 void Cursor::PageUp(uint)
@@ -109,6 +107,27 @@ void Cursor::PageUp(uint)
 void Cursor::PageDown(uint)
 {
 	// TODO: implement
+}
+
+void Cursor::refreshTopByUp()
+{
+	const int count_line = view->getConfig().drawableLines(view->height()) - 1;
+	const quint64 pos_line = Position / HexConfig::Num;
+
+	if (pos_line < Top) {
+		Top = pos_line;
+	}
+}
+
+void Cursor::refreshTopByDown()
+{
+	const int count_line = view->getConfig().drawableLines(view->height()) - 1;
+	const quint64 pos_line = Position / HexConfig::Num;
+
+	// if Top + count_line < pos_line then Pos is invisible
+	if (count_line <= pos_line && Top <= pos_line - count_line) {
+		Top = pos_line - count_line + 1;
+	}
 }
 
 
