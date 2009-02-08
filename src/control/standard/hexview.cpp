@@ -397,10 +397,10 @@ void HexView::drawCaret(bool visible)
 {
 	if (visible) {
 		drawCaret(cur_->Position, height());
+		emit caretChanged(visible, cur_->Position);
 	} else {
 		drawCaret(false, cur_->Position);
 	}
-	emit caretChanged(visible, cur_->Position);
 }
 
 void HexView::drawCaret(bool visible, quint64 pos)
