@@ -554,6 +554,7 @@ void HexView::drawSelected(bool reset)
 		// Get redrawing lines
 		const int begin_line = begin / HexConfig::Num - cursor->Top;
 		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
+		// Redraw lines
 		refreshPixmap(DRAW_RANGE, begin_line, end_line);
 	}
 }
