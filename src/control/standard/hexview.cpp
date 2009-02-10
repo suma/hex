@@ -456,7 +456,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		// Draw selected lines
 		drawSelected(true);
 
-		// Set start position
+		// Set begin position
 		cursor->SelEndOld = cursor->Position;
 		cursor->SelBegin = cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
 
