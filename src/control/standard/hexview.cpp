@@ -181,12 +181,12 @@ void HexView::refreshPixmap(int type, int line, int end)
 	}
 	document->get(top, &buff_[0], size);
 
-	// Compute selectead area
+	// Get selectead area
 	bool selected = false;
 	quint64 sel_begin = 0, sel_end = 0;
 	isSelected(selected, sel_begin, sel_end, top, count_line, size);
 
-	// TODO: Adding cache class for computed values if this function is bottle neck
+	// TODO: Adding cache class for color highligh data
 	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
 	getDrawColors(di, dcolors_);
 
