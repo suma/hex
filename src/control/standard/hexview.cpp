@@ -148,18 +148,18 @@ void HexView::refreshPixmap(int type, int line, int end)
 		break;
 	case DRAW_LINE:
 		y_top += config.byteHeight() * line;
-		y += config.byteHeight() * line;
+		y     += config.byteHeight() * line;
 		count_line = 1;
 		break;
 	case DRAW_AFTER:
 		y_top += config.byteHeight() * line;
-		y += config.byteHeight() * line;
+		y     += config.byteHeight() * line;
 		max_y = max(y + config.byteHeight(), height());
 		count_line = config.drawableLines(max_y - y);
 		break;
 	case DRAW_RANGE:
 		y_top += config.byteHeight() * line;
-		y += config.byteHeight() * line;
+		y     += config.byteHeight() * line;
 		max_y = min(y + config.byteHeight() * end, height());
 		count_line = config.drawableLines(max_y - y);
 		break;
@@ -191,7 +191,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
 	getDrawColors(di, dcolors_);
 
-	// Draw
+	// Draw lines
 	qDebug("x:%d", (width() - config.Margin.left()) / config.byteWidth());
 	drawLines(painter, dcolors_, y_top, 0, (width() - config.Margin.left()) / config.byteWidth() + 1);
 	painter.end();
@@ -244,6 +244,8 @@ void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin,
 			painter.setPen(config.Colors[itr_color->TextColor]);
 			change_color = false;
 		}
+
+		// Skip
 		if (x < x_begin || x_end <= x) {
 			goto COUNTUP;
 		}
