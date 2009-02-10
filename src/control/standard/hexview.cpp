@@ -209,8 +209,10 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 	sel_begin = min(cursor->SelBegin, cursor->SelEnd);
 	sel_end   = max(cursor->SelBegin, cursor->SelEnd);
 
-	if (top <= sel_end) {
-		selected = sel_begin <= max(top + (HexConfig::Num * count_line), top + size);
+	if (top <= sel_end && sel_begin <= max(top + (HexConfig::Num * count_line), top + size)) {
+		selected = true;
+	} else {
+		selected = false;
 	}
 }
 
@@ -343,9 +345,14 @@ void HexView::drawCaretShape(CaretDrawInfo info, bool drawText)
 
 void HexView::drawCaretText(const CaretDrawInfo &info)
 {
+	// check Selected
 	QBrush brush(config.Colors[Color::Background]);
-	info.painter.setBackground(brush);
+	if (isSelected(info.pos)) {
+		brush.setColor(config.Colors[Color::SelBackground]);
+	}
 	info.painter.setPen(config.Colors[Color::Text]);
+
+	info.painter.setBackground(brush);
 	info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
 	info.painter.drawText(config.x(info.x) + config.ByteMargin.left(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, info.hex);
 }
@@ -365,10 +372,16 @@ void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
 
 void HexView::drawCaretFrame(const CaretDrawInfo &info)
 {
+	int width, x;
+	if (cursor->CaretHigh) {
+		width = config.byteWidth() - 1;
+		x = config.x(info.x);
+	} else {
+		width = config.charWidth() + config.ByteMargin.right() - 1;
+		x = config.x(info.x) + config.charWidth() + config.ByteMargin.left();
+	}
 	info.painter.setPen(config.Colors[Color::CaretBackground]);
-	int width = cursor->CaretHigh ? config.byteWidth() : config.charWidth() + config.ByteMargin.right();
-	QRect rect(config.x(info.x) + (cursor->CaretHigh ? 0 : config.charWidth() + config.ByteMargin.left()), info.y, width, config.byteHeight());
-	info.painter.drawRect(rect);
+	info.painter.drawRect(x, info.y, width, config.byteHeight() - 1);
 }
 
 void HexView::drawCaretBlock(CaretDrawInfo &info)
