@@ -3,7 +3,7 @@
 
 #include "qfragmentmap_p.h"
 
-class DocumentData : public QFragment<1>
+class DocumentData : public QFragment<3>
 {
 public:
 	inline void initialize() {}

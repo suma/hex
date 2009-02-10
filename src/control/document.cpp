@@ -3,7 +3,6 @@
 #include "document.h"
 #include "document_i.h"
 
-#define DEFAULT_BUFFER_SIZE (1024 * 256)
 
 enum {
 	DOCTYPE_BUFFER = 0,
@@ -13,7 +12,7 @@ Document::Document()
 	: document(new DocumentImpl())
 	, file(NULL)
 {
-	buffer.reserve(DEFAULT_BUFFER_SIZE);
+	buffer.reserve(1024 * 256);
 }
 
 Document::~Document()
