@@ -136,7 +136,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	Q_ASSERT(0 <= line && line <= document->length() / HexConfig::Num + 1);
 	Q_ASSERT(0 <= end && end <= document->length() / HexConfig::Num + 1);
 
-	// Get range of drawing
+	// Get draw range
 	int y_top = config.top();
 	int y = config.top() + config.byteMargin().top();
 	int count_line, max_y;
@@ -298,7 +298,7 @@ void HexView::drawCaret(quint64 pos, int height_max)
 	painter.begin(&pix_);
 	painter.setFont(config.Font);
 
-	// Get coordinates of caret
+	// Get caret coordinates 
 	const int x = pos % HexConfig::Num;
 	const int y = config.top() + config.byteHeight() * (pos / HexConfig::Num - cursor->Top);
 
