@@ -32,10 +32,10 @@ HexConfig::HexConfig()
 	// Font
 	Font.setFixedPitch(true);
 
-	calculate();
+	update();
 }
 
-void HexConfig::calculate()
+void HexConfig::update()
 {
 	// Pos
 	x_[0] = Margin.left() + ByteMargin.left();
