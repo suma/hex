@@ -345,13 +345,8 @@ void HexView::drawCaretShape(CaretDrawInfo info, bool drawText)
 
 void HexView::drawCaretText(const CaretDrawInfo &info)
 {
-	// check Selected
-	QBrush brush(config.Colors[Color::Background]);
-	if (isSelected(info.pos)) {
-		brush.setColor(config.Colors[Color::SelBackground]);
-	}
+	QBrush brush(config.Colors[isSelected(info.pos) ? Color::SelBackground : Color::Background]);
 	info.painter.setPen(config.Colors[Color::Text]);
-
 	info.painter.setBackground(brush);
 	info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
 	info.painter.drawText(config.x(info.x) + config.ByteMargin.left(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, info.hex);
