@@ -128,6 +128,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 		QBrush brush(config.Colors[Color::Background]);
 		painter.fillRect(0, 0, width(), height(), brush);
 		painter.end();
+		// Update screen buffer
 		update(0, 0, width(), height());
 		return;
 	}
@@ -135,11 +136,12 @@ void HexView::refreshPixmap(int type, int line, int end)
 	Q_ASSERT(0 <= line && line <= document->length() / HexConfig::Num + 1);
 	Q_ASSERT(0 <= end && end <= document->length() / HexConfig::Num + 1);
 
-	// Compute drawing area
+	// Get range of drawing
 	int y_top = config.top();
 	int y = config.top() + config.byteMargin().top();
 	int count_line, max_y;
 
+	// Get minumum drawing area
 	switch (type) {
 	case DRAW_ALL:
 		count_line = config.drawableLines(height());
@@ -163,7 +165,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 		break;
 	}
 
-	// Index of view top
+	// Get top position of view
 	quint64 top = (cursor->Top + line) * HexConfig::Num;
 	const uint size = min(document->length() - top, (quint64)HexConfig::Num * count_line);
 
@@ -194,7 +196,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	drawLines(painter, dcolors_, y_top, 0, (width() - config.Margin.left()) / config.byteWidth() + 1);
 	painter.end();
 
-	// Update real window
+	// Update screen buffer
 	const int draw_width  = min(width(), config.maxWidth());
 	const int draw_height = count_line * config.byteHeight();
 	update(0, y_top, draw_width, draw_height);
@@ -279,18 +281,24 @@ inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int 
 
 void HexView::drawCaret(quint64 pos, int height_max)
 {
+	// Check out of range
 	if (!(config.top() + config.byteHeight() < height_max)) {
 		return;
 	}
 
+	// Begin paint
 	QPainter painter;
 	painter.begin(&pix_);
 	painter.setFont(config.Font);
+
+	// Get coordinates of caret
 	const int x = pos % HexConfig::Num;
 	const int y = config.top() + config.byteHeight() * (pos / HexConfig::Num - cursor->Top);
 
+	// Draw shape
 	drawCaretShape(CaretDrawInfo(painter, pos, x, y), pos < document->length());
 
+	// Finish paint and update screen buffer
 	painter.end();
 	update(config.x(x), y, config.byteWidth(), config.charHeight());
 }
@@ -323,6 +331,7 @@ void HexView::drawCaretShape(CaretDrawInfo info, bool drawText)
 			break;
 		}
 	} else {
+		// Draw caret only(without text data)
 		switch (cursor->CaretShape) {
 		case CARET_LINE:
 			drawCaretLine(info);
@@ -348,6 +357,7 @@ void HexView::drawCaretText(const CaretDrawInfo &info)
 	QBrush brush(config.Colors[isSelected(info.pos) ? Color::SelBackground : Color::Background]);
 	info.painter.setPen(config.Colors[Color::Text]);
 	info.painter.setBackground(brush);
+
 	info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
 	info.painter.drawText(config.x(info.x) + config.ByteMargin.left(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, info.hex);
 }
@@ -522,30 +532,37 @@ void HexView::drawSelected(bool reset)
 {
 	quint64 begin, end;
 	if (reset && cursor->Selected) {
+		//--- Reset selected lines
+		// Get selected lines
 		begin = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
 		end   = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
 		const int begin_line = begin / HexConfig::Num - cursor->Top;
 		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
 		cursor->Selected = false;
+
+		// Redraw lines
 		refreshPixmap(DRAW_RANGE, begin_line, end_line);
 	} else if (cursor->selMoved()) {
+		// Selected range is changing
 		if ((cursor->SelBegin < cursor->SelEndOld && cursor->SelBegin >= cursor->SelEnd ||
 			cursor->SelBegin >= cursor->SelEndOld && cursor->SelBegin < cursor->SelEnd)) {
 			// Crossing between begin and end
 			begin = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
 			end   = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
 		} else {
-			// Minimum area
+			// Minimum range
 			begin = min(cursor->SelEnd, cursor->SelEndOld);
 			end   = max(cursor->SelEnd, cursor->SelEndOld);
 		}
 
+		// Get redrawing lines
 		const int begin_line = begin / HexConfig::Num - cursor->Top;
 		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
 		refreshPixmap(DRAW_RANGE, begin_line, end_line);
 	}
 }
 
+// Enable caret blink
 void HexView::setCaretBlink(bool enable)
 {
 	if (!config.EnableCaret || !config.CaretBlinkTime) {
@@ -566,6 +583,7 @@ void HexView::setCaretBlink(bool enable)
 void HexView::timerEvent(QTimerEvent *ev)
 {
 	if (cursor->CaretTimerId == ev->timerId()) {
+		// Caret blink
 		drawCaret(cursor->HexCaretVisible);
 		cursor->HexCaretVisible = !cursor->HexCaretVisible;
 	}
