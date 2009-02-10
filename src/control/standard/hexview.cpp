@@ -382,12 +382,14 @@ void HexView::drawCaretBlock(CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
 		if (cursor->CaretHigh) {
+			// Draw higher
 			QBrush brush(config.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
 			info.painter.setPen(config.Colors[Color::CaretText]);
 			info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
 			info.painter.drawText(config.x(info.x) + config.ByteMargin.left(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, info.hex);
 		} else {
+			// Draw lowwer
 			QBrush brush(config.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
 			info.painter.setPen(config.Colors[Color::CaretText]);
@@ -396,6 +398,7 @@ void HexView::drawCaretBlock(CaretDrawInfo &info)
 			info.painter.drawText(config.x(info.x) + config.ByteMargin.left() + config.charWidth(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignLeft, info.hex);
 		}
 	} else {
+		// Draw caret without data
 		QBrush brush(config.Colors[Color::CaretBackground]);
 		info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
 	}
