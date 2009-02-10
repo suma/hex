@@ -52,7 +52,6 @@
 #include <QtGlobal>
 #include <stdlib.h>
 
-QT_BEGIN_NAMESPACE
 
 template <class T> class QFragmentMap;
 
@@ -402,6 +401,5 @@ private:
 };
 
 
-QT_END_NAMESPACE
 
 #endif // QFRAGMENTMAP_P_H

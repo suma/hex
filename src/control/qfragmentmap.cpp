@@ -52,7 +52,6 @@
 #define P (*fragment(p))
 #define PP (*fragment(pp))
 
-QT_BEGIN_NAMESPACE
 
 
 static int qAllocMore(int alloc, int extra)
@@ -663,4 +662,3 @@ ulint QFragmentMapData::length() const {
 }
 
 
-QT_END_NAMESPACE
