@@ -228,7 +228,6 @@ inline bool HexView::isSelected(quint64 pos)
 
 void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
 {
-	// Draw lines
 	int index_data = 0, x = 0;
 	bool reset_color = true;
 	QBrush brush;
@@ -236,7 +235,7 @@ void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin,
 	hex.resize(2);
 
 	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
-		// Setup color settings
+		// Setup/Update color settings
 		if (reset_color) {
 			// Create brush for background
 			brush = QBrush(config.Colors[itr_color->BackgroundColor]);
@@ -266,7 +265,7 @@ COUNTUP:// Count up
 		if (--itr_color->Length <= 0) {
 			// Move next color
 			++itr_color;
-			// Enable color change
+			// Make color update
 			reset_color = true;
 		}
 
@@ -420,9 +419,10 @@ void HexView::drawCaret(bool visible)
 void HexView::drawCaret(bool visible, quint64 pos)
 {
 	if (visible) {
+		// Draw
 		drawCaret(pos, height());
 	} else {
-		// Redraw(draw unvisible)
+		// Set caret invisible
 		quint64 line = cursor->Position / HexConfig::Num;
 		if (cursor->Top <= line && line - cursor->Top < config.drawableLines(height())) {
 			drawView(DRAW_LINE, line - cursor->Top);
