@@ -172,7 +172,8 @@ void HexView::refreshPixmap(int type, int line_start, int end)
 	// Draw empty area(after end line)
 	if (type == DRAW_ALL || type == DRAW_AFTER) {
 		QBrush brush(config.Colors[Color::Background]);
-		painter.fillRect(0, y_top + config.byteHeight(), width(), height(), brush);
+		const int y_start = y_top + max(0, count_line - 1) * config.byteHeight();
+		painter.fillRect(0, y_start, width(), height(), brush);
 	}
 
 	// Copy from document
@@ -192,7 +193,8 @@ void HexView::refreshPixmap(int type, int line_start, int end)
 
 	// Draw lines
 	qDebug("x:%d", (width() - config.Margin.left()) / config.byteWidth());
-	drawLines(painter, dcolors_, y_top, 0, (width() - config.Margin.left()) / config.byteWidth() + 1);
+	const int x_count_max = (width() - config.Margin.left()) / config.byteWidth() + 1;
+	drawLines(painter, dcolors_, y_top, 0, x_count_max);
 	painter.end();
 
 	// Update screen buffer
