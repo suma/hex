@@ -172,8 +172,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	// Draw empty area(after end line)
 	if (type == DRAW_ALL || type == DRAW_AFTER) {
 		QBrush brush(config.Colors[Color::Background]);
-		QRect rect(0, y_top, width(), height());
-		painter.fillRect(rect, brush);
+		painter.fillRect(0, y_top + config.byteHeight(), width(), height(), brush);
 	}
 
 	// Copy from document
@@ -273,6 +272,12 @@ COUNTUP:// Count up
 		if (x == 0) {
 			y += config.byteHeight();
 		}
+	}
+
+	// Draw empty area(after end line)
+	if (x <= HexConfig::Num) {
+		QBrush brush(config.Colors[Color::Background]);
+		painter.fillRect(config.x(x), y, width(), config.byteHeight(), brush);
 	}
 }
 
