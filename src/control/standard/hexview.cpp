@@ -15,7 +15,7 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: Margin(2, 2, 3, 3)
-	, ByteMargin(2, 0, 2, 1)
+	, ByteMargin(2, 0, 2, 0)
 	, Font("Monaco", 13)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
@@ -298,89 +298,71 @@ void HexView::drawCaret(quint64 pos, int height_max)
 	const int y = config.top() + config.byteHeight() * (pos / HexConfig::Num - cursor->Top);
 
 	// Draw shape
-	drawCaretShape(CaretDrawInfo(painter, pos, x, y), pos < document->length());
+	drawCaretShape(CaretDrawInfo(painter, pos, x, y, pos < document->length()));
 
 	// Finish paint and update screen buffer
 	painter.end();
 	update(config.x(x), y, config.byteWidth(), config.charHeight());
 }
 
-void HexView::drawCaretShape(CaretDrawInfo info, bool drawText)
+void HexView::drawCaretShape(CaretDrawInfo info)
 {
-	if (drawText) {
+	if (info.caret_middle) {
 		// Copy from document
 		uchar data;
 		document->get(info.pos, &data, 1);
 
 		info.hex.resize(2);
 		byteToHex(data, info.hex);
-
-		switch (cursor->CaretShape) {
-		case CARET_LINE:
-			drawCaretText(info);
-			drawCaretLine(info);
-			break;
-		case CARET_BLOCK:
-			drawCaretBlock(info);
-			break;
-		case CARET_FRAME:
-			drawCaretText(info);
-			drawCaretFrame(info);
-			break;
-		case CARET_UNDERBAR:
-			drawCaretText(info);
-			drawCaretUnderbar(info);
-			break;
-		}
-	} else {
-		// Draw caret only(without text data)
-		switch (cursor->CaretShape) {
-		case CARET_LINE:
-			drawCaretLine(info);
-			break;
-		case CARET_BLOCK:
-		{
-			QBrush brush(config.Colors[Color::CaretBackground]);
-			info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
-			break;
-		}
-		case CARET_FRAME:
-			drawCaretFrame(info);
-			break;
-		case CARET_UNDERBAR:
-			drawCaretUnderbar(info);
-			break;
-		}
 	}
-}
 
-void HexView::drawCaretText(const CaretDrawInfo &info)
-{
-	QBrush brush(config.Colors[isSelected(info.pos) ? Color::SelBackground : Color::Background]);
-	info.painter.setPen(config.Colors[Color::Text]);
-	info.painter.setBackground(brush);
-
-	info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
-	info.painter.drawText(config.x(info.x) + config.ByteMargin.left(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, info.hex);
+	switch (cursor->CaretShape) {
+	case CARET_LINE:
+		drawCaretLine(info);
+		break;
+	case CARET_BLOCK:
+		drawCaretBlock(info);
+		break;
+	case CARET_FRAME:
+		drawCaretFrame(info);
+		break;
+	case CARET_UNDERBAR:
+		drawCaretUnderbar(info);
+		break;
+	}
 }
 
 void HexView::drawCaretLine(const CaretDrawInfo &info)
 {
+	int x;
+	if (cursor->CaretHigh || !info.caret_middle) {
+		x = config.x(info.x);
+	} else {
+		x = config.x(info.x) + config.ByteMargin.left() + config.charWidth();
+	}
 	QBrush brush(config.Colors[Color::CaretBackground]);
-	info.painter.fillRect(config.x(info.x) + (cursor->CaretHigh ? 0 : config.charWidth() + config.ByteMargin.left()), info.y, 2, config.byteHeight(), brush);
+	info.painter.fillRect(x, info.y, 2, config.byteHeight(), brush);
 }
 
 void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
 {
+	int width, x;
+	if (cursor->CaretHigh || !info.caret_middle) {
+		width = config.byteWidth() - 1;
+		x = config.x(info.x);
+	} else {
+		width = config.charWidth() + config.ByteMargin.right() - 1;
+		x = config.x(info.x) + config.ByteMargin.left() + config.charWidth();
+	}
+
 	QBrush brush(config.Colors[Color::CaretBackground]);
-	int width = config.charWidth() + (cursor->CaretHigh ? config.ByteMargin.left() : config.ByteMargin.right());
-	info.painter.fillRect(config.x(info.x) + (cursor->CaretHigh ? 0 : config.charWidth() + config.ByteMargin.left()), info.y + config.byteHeight() - 2, width, 2, brush);
+	info.painter.fillRect(x, info.y + config.byteHeight() - 2, width, 2, brush);
 }
 
 void HexView::drawCaretFrame(const CaretDrawInfo &info)
 {
 	int width, x;
-	if (cursor->CaretHigh) {
+	if (cursor->CaretHigh || !info.caret_middle) {
 		width = config.byteWidth() - 1;
 		x = config.x(info.x);
 	} else {
@@ -393,20 +375,24 @@ void HexView::drawCaretFrame(const CaretDrawInfo &info)
 
 void HexView::drawCaretBlock(CaretDrawInfo &info)
 {
-	if (cursor->CaretHigh) {
-		QBrush brush(config.Colors[Color::CaretBackground]);
-		info.painter.setBackground(brush);
-		info.painter.setPen(config.Colors[Color::CaretText]);
-		info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
-		info.painter.drawText(config.x(info.x) + config.ByteMargin.left(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, info.hex);
+	if (info.caret_middle) {
+		if (cursor->CaretHigh) {
+			QBrush brush(config.Colors[Color::CaretBackground]);
+			info.painter.setBackground(brush);
+			info.painter.setPen(config.Colors[Color::CaretText]);
+			info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
+			info.painter.drawText(config.x(info.x) + config.ByteMargin.left(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, info.hex);
+		} else {
+			QBrush brush(config.Colors[Color::CaretBackground]);
+			info.painter.setBackground(brush);
+			info.painter.setPen(config.Colors[Color::CaretText]);
+			info.painter.fillRect(config.x(info.x) + config.ByteMargin.left() + config.charWidth(), info.y, config.charWidth() + config.ByteMargin.right(), config.byteHeight(), brush);
+			info.hex.remove(0, 1);
+			info.painter.drawText(config.x(info.x) + config.ByteMargin.left() + config.charWidth(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignLeft, info.hex);
+		}
 	} else {
-		drawCaretText(info);
 		QBrush brush(config.Colors[Color::CaretBackground]);
-		info.painter.setBackground(brush);
-		info.painter.setPen(config.Colors[Color::CaretText]);
-		info.painter.fillRect(config.x(info.x) + config.ByteMargin.left() + config.charWidth(), info.y, config.charWidth() + config.ByteMargin.right(), config.byteHeight(), brush);
-		info.hex.remove(0, 1);
-		info.painter.drawText(config.x(info.x) + config.ByteMargin.left() + config.charWidth(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignLeft, info.hex);
+		info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
 	}
 }
 
@@ -642,12 +628,13 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	}
 }
 
-HexView::CaretDrawInfo::CaretDrawInfo(QPainter &p, quint64 pos, int x, int y)
+HexView::CaretDrawInfo::CaretDrawInfo(QPainter &p, quint64 pos, int x, int y, bool caret_middle)
 	: painter(p)
 {
 	this->pos = pos;
 	this->x = x;
 	this->y = y;
+	this->caret_middle = caret_middle;
 }
 
 }	// namespace

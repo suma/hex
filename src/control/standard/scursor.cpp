@@ -19,7 +19,7 @@ Cursor::Cursor(Document *Doc, HexView *View)
 	, Selected(false)
 	, Toggle(false)
 	, CaretHigh(true)
-	, CaretShape(CARET_FRAME)
+	, CaretShape(CARET_BLOCK)
 	, CaretTimerId(0)
 	, HexCaretVisible(true)
 	, StrCaretVisible(true)
@@ -116,7 +116,6 @@ void Cursor::PageDown(uint)
 
 void Cursor::refreshTopByUp()
 {
-	const int count_line = view->getConfig().drawableLines(view->height()) - 1;
 	const quint64 pos_line = Position / HexConfig::Num;
 
 	if (pos_line < Top) {

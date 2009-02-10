@@ -109,10 +109,11 @@ namespace Standard {
 		class CaretDrawInfo
 		{
 			public:
-				CaretDrawInfo(QPainter &, quint64 pos, int x, int y);
+				CaretDrawInfo(QPainter &, quint64 pos, int x, int y, bool caret_middle);
 				QPainter &painter;
 				QString hex;
 				quint64 pos;
+				bool caret_middle;
 				int x;
 				int y;
 		};
@@ -136,8 +137,7 @@ namespace Standard {
 		bool isSelected(quint64 pos);
 		void drawSelected(bool reset = false);
 		void drawCaret(quint64 pos, int ymax);
-		void drawCaretShape(CaretDrawInfo info, bool);
-		void drawCaretText(const CaretDrawInfo &);
+		void drawCaretShape(CaretDrawInfo info);
 		void drawCaretLine(const CaretDrawInfo &);
 		void drawCaretUnderbar(const CaretDrawInfo &);
 		void drawCaretFrame(const CaretDrawInfo &);
