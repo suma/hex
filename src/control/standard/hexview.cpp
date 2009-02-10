@@ -166,7 +166,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 	}
 
 	// Get top position of view
-	quint64 top = (cursor->Top + line) * HexConfig::Num;
+	const quint64 top = (cursor->Top + line) * HexConfig::Num;
 	const uint size = min(document->length() - top, (quint64)HexConfig::Num * count_line);
 
 	// Draw empty area(after end line)
@@ -219,8 +219,8 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 
 inline bool HexView::isSelected(quint64 pos)
 {
-	quint64 sel_begin = min(cursor->SelBegin, cursor->SelEnd);
-	quint64 sel_end   = max(cursor->SelBegin, cursor->SelEnd);
+	const quint64 sel_begin = min(cursor->SelBegin, cursor->SelEnd);
+	const quint64 sel_end   = max(cursor->SelBegin, cursor->SelEnd);
 	return sel_begin <= pos && pos <  sel_end;
 }
 
