@@ -275,7 +275,7 @@ COUNTUP:// Count up
 	}
 
 	// Draw empty area(after end line)
-	if (x <= HexConfig::Num) {
+	if (x < x_end && x <= HexConfig::Num) {
 		QBrush brush(config.Colors[Color::Background]);
 		painter.fillRect(config.x(x), y, width(), config.byteHeight(), brush);
 	}
