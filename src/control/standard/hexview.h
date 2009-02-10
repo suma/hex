@@ -120,8 +120,8 @@ namespace Standard {
 
 	protected:
 
-		void refreshPixmap();
-		void refreshPixmap(int type, int = 0, int = 0);
+		void drawView();
+		void drawView(int type, int = 0, int = 0);
 		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 

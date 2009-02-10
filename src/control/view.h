@@ -71,7 +71,7 @@ protected:
 	void getDrawColors(const DrawInfo &di, DCIList &ci);
 
 protected:
-	virtual void refreshPixmap() = 0;
+	virtual void drawView() = 0;
 
 };
 

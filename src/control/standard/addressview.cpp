@@ -11,7 +11,7 @@ AddressView::AddressView(QWidget *parent, Document *doc, Cursor *cur)
 {
 }
 
-void AddressView::refreshPixmap()
+void AddressView::drawView()
 {
 	pix_.fill(QColor(0,255,0));
 

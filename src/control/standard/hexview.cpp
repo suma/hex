@@ -105,15 +105,15 @@ void HexView::resizeEvent(QResizeEvent *rs)
 	QResizeEvent resize(size, rs->oldSize());
 	View::resizeEvent(&resize);
 	pix_.fill(config.Colors[Color::Background]);
-	refreshPixmap();
+	drawView();
 }
 
-void HexView::refreshPixmap()
+void HexView::drawView()
 {
-	refreshPixmap(DRAW_ALL);
+	drawView(DRAW_ALL);
 }
 
-void HexView::refreshPixmap(int type, int line_start, int end)
+void HexView::drawView(int type, int line_start, int end)
 {
 	qDebug("refresh event type:%d line:%d end:%d", type, line_start, end);
 	qDebug(" end:%llu endOld:%llu pos:%llu", cursor->SelEnd, cursor->SelEndOld, cursor->Position);
@@ -425,7 +425,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 		// Redraw(draw unvisible)
 		quint64 line = cursor->Position / HexConfig::Num;
 		if (cursor->Top <= line && line - cursor->Top < config.drawableLines(height())) {
-			refreshPixmap(DRAW_LINE, line - cursor->Top);
+			drawView(DRAW_LINE, line - cursor->Top);
 		}
 	}
 
@@ -467,7 +467,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
 			const int pos = (cursor->SelEndOld / HexConfig::Num) - cursor->Top;
 			if (pos <= config.drawableLines(height())) {
-				refreshPixmap(DRAW_RANGE, pos, pos + 1);
+				drawView(DRAW_RANGE, pos, pos + 1);
 			}
 		}
 
@@ -571,7 +571,7 @@ void HexView::drawSelected(bool reset)
 		cursor->Selected = false;
 
 		// Redraw lines
-		refreshPixmap(DRAW_RANGE, begin_line, end_line);
+		drawView(DRAW_RANGE, begin_line, end_line);
 	} else if (cursor->selMoved()) {
 		// Selected range is changing
 		if ((cursor->SelBegin < cursor->SelEndOld && cursor->SelBegin >= cursor->SelEnd ||
@@ -589,7 +589,7 @@ void HexView::drawSelected(bool reset)
 		const int begin_line = begin / HexConfig::Num - cursor->Top;
 		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
 		// Redraw lines
-		refreshPixmap(DRAW_RANGE, begin_line, end_line);
+		drawView(DRAW_RANGE, begin_line, end_line);
 	}
 }
 
@@ -662,7 +662,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 
 	// FIXME: refactoring refresh event
 	if (cursor->SelEnd != old || cursor->Top != oldT) {
-		refreshPixmap();
+		drawView();
 		drawCaret();
 	}
 

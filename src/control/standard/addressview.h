@@ -16,7 +16,7 @@ namespace Standard {
 		AddressView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL);
 
 	protected:
-		void refreshPixmap();
+		void drawView();
 
 	protected:
 		Cursor *cursor;
