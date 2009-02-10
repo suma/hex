@@ -113,9 +113,9 @@ void HexView::refreshPixmap()
 	refreshPixmap(DRAW_ALL);
 }
 
-void HexView::refreshPixmap(int type, int line, int end)
+void HexView::refreshPixmap(int type, int line_start, int end)
 {
-	qDebug("refresh event type:%d line:%d end:%d", type, line, end);
+	qDebug("refresh event type:%d line:%d end:%d", type, line_start, end);
 	qDebug(" end:%llu endOld:%llu pos:%llu", cursor->SelEnd, cursor->SelEndOld, cursor->Position);
 
 	// FIXME: refactoring refresh event
@@ -133,7 +133,7 @@ void HexView::refreshPixmap(int type, int line, int end)
 		return;
 	}
 
-	Q_ASSERT(0 <= line && line <= document->length() / HexConfig::Num + 1);
+	Q_ASSERT(0 <= line_start && line_start <= document->length() / HexConfig::Num + 1);
 	Q_ASSERT(0 <= end && end <= document->length() / HexConfig::Num + 1);
 
 	// Get draw range
@@ -147,26 +147,26 @@ void HexView::refreshPixmap(int type, int line, int end)
 		count_line = config.drawableLines(height());
 		break;
 	case DRAW_LINE:
-		y_top += config.byteHeight() * line;
-		y     += config.byteHeight() * line;
+		y_top += config.byteHeight() * line_start;
+		y     += config.byteHeight() * line_start;
 		count_line = 1;
 		break;
 	case DRAW_AFTER:
-		y_top += config.byteHeight() * line;
-		y     += config.byteHeight() * line;
+		y_top += config.byteHeight() * line_start;
+		y     += config.byteHeight() * line_start;
 		max_y = max(y + config.byteHeight(), height());
 		count_line = config.drawableLines(max_y - y);
 		break;
 	case DRAW_RANGE:
-		y_top += config.byteHeight() * line;
-		y     += config.byteHeight() * line;
+		y_top += config.byteHeight() * line_start;
+		y     += config.byteHeight() * line_start;
 		max_y = min(y + config.byteHeight() * end, height());
 		count_line = config.drawableLines(max_y - y);
 		break;
 	}
 
 	// Get top position of view
-	const quint64 top = (cursor->Top + line) * HexConfig::Num;
+	const quint64 top = (cursor->Top + line_start) * HexConfig::Num;
 	const uint size = min(document->length() - top, (quint64)HexConfig::Num * count_line);
 
 	// Draw empty area(after end line)
@@ -227,21 +227,21 @@ inline bool HexView::isSelected(quint64 pos)
 void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
 {
 	// Draw lines
-	int index_byte = 0, x = 0;
-	bool change_color = true;
+	int index_data = 0, x = 0;
+	bool reset_color = true;
 	QBrush brush;
 	QString hex;
 	hex.resize(2);
 
 	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
 		// Setup color settings
-		if (change_color) {
+		if (reset_color) {
 			// Create brush for background
 			brush = QBrush(config.Colors[itr_color->BackgroundColor]);
 			// Set color
 			painter.setBackground(brush);
 			painter.setPen(config.Colors[itr_color->TextColor]);
-			change_color = false;
+			reset_color = false;
 		}
 
 		// Skip
@@ -253,11 +253,11 @@ void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin,
 		painter.fillRect(config.x(x), y, config.byteWidth(), config.byteHeight(), brush);
 
 		// Draw text
-		byteToHex(buff_[index_byte], hex);
+		byteToHex(buff_[index_data], hex);
 		drawText(painter, hex, config.x(x) + config.ByteMargin.left(), y + config.ByteMargin.top());
 
 COUNTUP:// Count up
-		index_byte++;
+		index_data++;
 		x = (x + 1) % HexConfig::Num;
 
 		// Iterate color
@@ -265,7 +265,7 @@ COUNTUP:// Count up
 			// Move next color
 			++itr_color;
 			// Enable color change
-			change_color = true;
+			reset_color = true;
 		}
 
 		// Move next line
@@ -275,7 +275,8 @@ COUNTUP:// Count up
 	}
 
 	// Draw empty area(after end line)
-	if (x < x_end && x <= HexConfig::Num) {
+	if (0 < x && x < x_end && x < HexConfig::Num) {
+		qDebug("empty: %d", x);
 		QBrush brush(config.Colors[Color::Background]);
 		painter.fillRect(config.x(x), y, width(), config.byteHeight(), brush);
 	}
@@ -419,11 +420,14 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	if (visible) {
 		drawCaret(pos, height());
 	} else {
+		// Redraw(draw unvisible)
 		quint64 line = cursor->Position / HexConfig::Num;
 		if (cursor->Top <= line && line - cursor->Top < config.drawableLines(height())) {
 			refreshPixmap(DRAW_LINE, line - cursor->Top);
 		}
 	}
+
+	// Send carete refresh event
 	emit caretChanged(visible, pos);
 }
 
@@ -447,62 +451,90 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
 		qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cursor->Position, cursor->SelEnd, cursor->SelEndOld, cursor->SelEnd / HexConfig::Num);
+		// Draw selected lines
 		drawSelected(true);
 
+		// Set start position
 		cursor->SelEndOld = cursor->Position;
 		cursor->SelBegin = cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+
+		// Set caret visible
 		cursor->Toggle = true;
 
+		// -- Redraw lines if caret moved
 		if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
-			int pos = (cursor->SelEndOld / HexConfig::Num) - cursor->Top;
+			const int pos = (cursor->SelEndOld / HexConfig::Num) - cursor->Top;
 			if (pos <= config.drawableLines(height())) {
 				refreshPixmap(DRAW_RANGE, pos, pos + 1);
 			}
 		}
+
 		drawCaret();
+
+		// Start mouse capture
 		grabMouse();
 	}
 }
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	if (cursor->Toggle) {
-		qDebug("mouse move");
-		cursor->SelEndOld = cursor->SelEnd;
+	// Check mouse captured
+	if (!cursor->Toggle) {
+		return;
+	}
 
-		// FIXME: move down
-		if (height() < ev->pos().y()) {
-			return;
-		}
+	qDebug("mouse move");
 
-		cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
-		cursor->refreshSelected();
+	// Set moved position to OLD
+	cursor->SelEndOld = cursor->SelEnd;
 
-		drawSelected(false);
+	// FIXME: move down automatically
+	if (height() < ev->pos().y()) {
+		return;
+	}
 
-		if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
-			drawCaret();
-			cursor->HexCaretVisible = false;
-		}
+	// Set moved position
+	cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+
+	// Refresh flag
+	cursor->refreshSelected();
+
+	// Redraw updated lines
+	drawSelected(false);
+
+	// -- Redraw lines if caret moved
+	if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
+		drawCaret();
+		cursor->HexCaretVisible = false;
 	}
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *ev)
 {
-	if (cursor->Toggle) {
-		qDebug("mouse release");
-		releaseMouse();
+	// Check mouse captured
+	if (!cursor->Toggle) {
+		return;
+	}
 
-		cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
-		cursor->refreshSelected();
-		cursor->Toggle = false;
+	qDebug("mouse release");
 
-		drawSelected(false);
+	// End mouse capture
+	releaseMouse();
 
-		if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
-			drawCaret();
-			cursor->HexCaretVisible = false;
-		}
+	// Set moved position
+	cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+	cursor->refreshSelected();
+
+	// Set caret invisible
+	cursor->Toggle = false;
+
+	// Redraw updated lines
+	drawSelected(false);
+
+	// -- Redraw lines if caret moved
+	if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
+		drawCaret();
+		cursor->HexCaretVisible = false;
 	}
 }
 
