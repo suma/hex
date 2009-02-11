@@ -168,6 +168,9 @@ void HexView::drawView(int type, int line_start, int end)
 	// Get top position of view
 	const quint64 top = (cursor->Top + line_start) * HexConfig::Num;
 	const uint size = min(document->length() - top, (quint64)HexConfig::Num * count_line);
+	if (size == 0) {
+		return;
+	}
 
 	// Draw empty area(after end line)
 	if (type == DRAW_ALL || type == DRAW_AFTER) {
@@ -262,6 +265,7 @@ COUNTUP:// Count up
 		x = (x + 1) % HexConfig::Num;
 
 		// Iterate color
+		Q_ASSERT(0 <= itr_color->Length);
 		if (--itr_color->Length <= 0) {
 			// Move next color
 			++itr_color;

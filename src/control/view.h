@@ -29,10 +29,10 @@ struct DrawInfo {
 };
 
 struct DrawColorInfo {
-	uint Length;
+	int Length;
 	int BackgroundColor;
 	int TextColor;
-	DrawColorInfo(uint length, int bg_color = Color::Background, int text_color = Color::Text)
+	DrawColorInfo(int length, int bg_color = Color::Background, int text_color = Color::Text)
 	{
 		Length = length;
 		BackgroundColor = bg_color;
@@ -67,7 +67,6 @@ public:
 protected:
 	void paintEvent(QPaintEvent*);
 	void resizeEvent(QResizeEvent*);
-	void getDrawColor(const DrawInfo &di, DrawColorInfo &dci, uchar data);
 	void getDrawColors(const DrawInfo &di, DCIList &ci);
 
 protected:
