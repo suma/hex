@@ -40,7 +40,7 @@ namespace Standard {
 		}
 		inline int charWidth(int num = 1) const
 		{
-			return FontMetrics.maxWidth() * num;
+			return FontMetrics.width(QChar('A')) * num;
 		}
 		inline int charHeight() const
 		{
