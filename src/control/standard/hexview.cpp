@@ -54,8 +54,6 @@ void HexConfig::update()
 		x_area[i] = x_area[i-1] + byteWidth();
 	}
 	x_area[Num] = x_area[Num-1] + byteWidth();
-
-	top_ = Margin.top();
 }
 
 int HexConfig::drawableLines(int height) const
@@ -70,7 +68,7 @@ int HexConfig::XToPos(int x) const
 		return -1;
 	}
 
-	return (int)distance(x_area, lower_bound(x_area, x_area + Num + 2, x)) - 1;
+	return (int)distance(x_area, lower_bound(x_area, x_area + Num + 1, x)) - 1;
 }
 
 int HexConfig::YToLine(int y) const

@@ -26,7 +26,6 @@ namespace Standard {
 
 	protected:
 		QFontMetrics FontMetrics;
-		int top_;
 		int x_begin[Num];	// pos of value
 		int x_end[Num];		// pos of end
 		int x_area[Num];
@@ -64,7 +63,7 @@ namespace Standard {
 		}
 		inline int top() const
 		{
-			return top_;
+			return Margin.top();
 		}
 		inline int maxWidth() const
 		{
