@@ -675,13 +675,4 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	}
 }
 
-HexView::CaretDrawInfo::CaretDrawInfo(QPainter &p, quint64 pos, int x, int y, bool caret_middle)
-	: painter(p)
-{
-	this->pos = pos;
-	this->x = x;
-	this->y = y;
-	this->caret_middle = caret_middle;
-}
-
 }	// namespace
