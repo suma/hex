@@ -73,10 +73,10 @@ int HexConfig::XToPos(int x) const
 
 int HexConfig::YToLine(int y) const
 {
-	if (y < Margin.top()) {
+	if (y < top()) {
 		return -1;
 	}
-	return (y - Margin.top()) / byteHeight();
+	return (y - top()) / byteHeight();
 }
 
 ////////////////////////////////////////
