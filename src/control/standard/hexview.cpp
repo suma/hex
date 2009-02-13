@@ -414,7 +414,6 @@ void HexView::drawCaret(bool visible)
 {
 	if (visible) {
 		drawCaret(cursor->Position, height());
-		emit caretChanged(visible, cursor->Position);
 	} else {
 		drawCaret(false, cursor->Position);
 	}
