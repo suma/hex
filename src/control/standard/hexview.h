@@ -109,13 +109,13 @@ namespace Standard {
 		class CaretDrawInfo
 		{
 			public:
-				CaretDrawInfo(QPainter &, quint64 pos, int x, int y, bool caret_middle);
 				QPainter &painter;
 				QString hex;
 				quint64 pos;
 				bool caret_middle;
 				int x;
 				int y;
+			public:
 				CaretDrawInfo(QPainter &p, quint64 pos, int x, int y, bool caret_middle)
 					: painter(p)
 				{
