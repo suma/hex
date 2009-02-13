@@ -38,14 +38,14 @@ HexConfig::HexConfig()
 void HexConfig::update()
 {
 	// Pos
-	x_[0] = Margin.left() + ByteMargin.left();
+	x_begin[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
-		x_[i] = x_[i-1] + byteWidth();
+		x_begin[i] = x_begin[i-1] + byteWidth();
 	}
 
 	// Pos of end
 	for (int i = 0; i < Num; i++) {
-		X_[i] = x_[i] + charWidth(2) + ByteMargin.right();
+		x_end[i] = x_begin[i] + charWidth(2) + ByteMargin.right();
 	}
 
 	// Area

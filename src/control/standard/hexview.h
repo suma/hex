@@ -27,8 +27,8 @@ namespace Standard {
 	protected:
 		QFontMetrics FontMetrics;
 		int top_;
-		int x_[Num];	// pos of value
-		int X_[Num];	// pos of end
+		int x_begin[Num];	// pos of value
+		int x_end[Num];		// pos of end
 		int xarea_[Num+1];
 	
 	public:
@@ -73,12 +73,12 @@ namespace Standard {
 		inline int x(int i) const
 		{
 			Q_ASSERT(0 <= i && i < Num);
-			return x_[i];
+			return x_begin[i];
 		}
 		inline int X(int i) const
 		{
 			Q_ASSERT(0 <= i && i < Num);
-			return X_[i];
+			return x_end[i];
 		}
 		inline int caretWidth() const
 		{
