@@ -29,7 +29,7 @@ namespace Standard {
 		int top_;
 		int x_begin[Num];	// pos of value
 		int x_end[Num];		// pos of end
-		int xarea_[Num+1];
+		int x_area[Num];
 	
 	public:
 		HexConfig();

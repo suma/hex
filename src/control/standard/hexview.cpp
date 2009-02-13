@@ -49,11 +49,11 @@ void HexConfig::update()
 	}
 
 	// Area
-	xarea_[0] = Margin.left() + ByteMargin.left();
+	x_area[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
-		xarea_[i] = xarea_[i-1] + byteWidth();
+		x_area[i] = x_area[i-1] + byteWidth();
 	}
-	xarea_[Num] = xarea_[Num-1] + byteWidth();
+	x_area[Num] = x_area[Num-1] + byteWidth();
 
 	top_ = Margin.top();
 }
@@ -70,7 +70,7 @@ int HexConfig::XToPos(int x) const
 		return -1;
 	}
 
-	return (int)distance(xarea_, lower_bound(xarea_, xarea_ + Num + 2, x)) - 1;
+	return (int)distance(x_area, lower_bound(x_area, x_area + Num + 2, x)) - 1;
 }
 
 int HexConfig::YToLine(int y) const
