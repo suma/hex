@@ -16,7 +16,7 @@ namespace Standard {
 HexConfig::HexConfig()
 	: Margin(2, 2, 3, 3)
 	, ByteMargin(2, 0, 2, 0)
-	, Font("Monaco", 13)
+	, Font("Monaco", 17)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
 	, FontMetrics(Font)
@@ -24,10 +24,10 @@ HexConfig::HexConfig()
 	// Coloring
 	Colors[Color::Background] = QColor(0xCE,0xFF,0xCE);
 	Colors[Color::Text] = QColor(0,0,0);
-	Colors[Color::SelBackground] = QColor(0xCC,0xCC,0xFF);
+	Colors[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
 	Colors[Color::SelText] = QColor(0,0x40,0x40);
 	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0);
-	Colors[Color::CaretText] = QColor(0xFA,0xFA,0x20);
+	Colors[Color::CaretText] = QColor(0,0,0);
 
 	// Font
 	Font.setFixedPitch(true);

@@ -32,9 +32,10 @@ Editor::Editor()
 	aview_ = new Standard::AddressView(this, doc_, NULL);
 	resize(600,400);
 	aview_->move(0,0);
-	aview_->resize(50, 270);
-	hview_->move(50,0);
-	hview_->resize(width() - 50 - 10, 270);
+	aview_->resize(0, 270);
+	hview_->move(0,0);
+	hview_->resize(width(), 270);
+	hview_->resize(width(), 270);
 	aview_->show();
 	hview_->show();
 
@@ -66,6 +67,6 @@ Editor::Editor()
 
 void Editor::resizeEvent(QResizeEvent*)
 {
-	hview_->resize(width() - 50 - 10, height());
+	hview_->resize(width(), height());
 }
 
