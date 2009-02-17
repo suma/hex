@@ -196,11 +196,11 @@ void HexView::drawView(int type, int line_start, int end)
 	qDebug("x:%d", (width() - config.Margin.left()) / config.byteWidth());
 	const int x_count_max = (width() - config.Margin.left()) / config.byteWidth() + 1;
 	drawLines(painter, dcolors_, y_top, 0, x_count_max);
-	painter.end();
 
 	// Update screen buffer
 	const int draw_width  = min(width(), config.maxWidth());
 	const int draw_height = count_line * config.byteHeight();
+	painter.end();
 	update(0, y_top, draw_width, draw_height);
 }
 
@@ -464,7 +464,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		// Set caret visible
 		cursor->Toggle = true;
 
-		// -- Redraw lines if caret moved
+		//-- Redraw lines if caret moved
 		if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
 			const int pos = (cursor->SelEndOld / HexConfig::Num) - cursor->Top;
 			if (pos <= config.drawableLines(height())) {
@@ -505,7 +505,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	// Redraw updated lines
 	drawSelected(false);
 
-	// -- Redraw lines if caret moved
+	//-- Redraw caret if caret selection moved
 	if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
 		drawCaret();
 		cursor->HexCaretVisible = false;
@@ -534,7 +534,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 	// Redraw updated lines
 	drawSelected(false);
 
-	// -- Redraw lines if caret moved
+	//-- Redraw caret if selection moved
 	if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
 		drawCaret();
 		cursor->HexCaretVisible = false;
@@ -563,7 +563,7 @@ void HexView::drawSelected(bool reset)
 {
 	quint64 begin, end;
 	if (reset && cursor->Selected) {
-		//--- Reset selected lines
+		//-- Reset selected lines
 		// Get selected lines
 		begin = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
 		end   = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
