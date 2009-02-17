@@ -424,8 +424,8 @@ void HexView::drawCaret(bool visible, quint64 pos)
 		drawCaret(pos, height());
 	} else {
 		// Set caret invisible
-		quint64 line = cursor->Position / HexConfig::Num;
-		if (cursor->Top <= line && line - cursor->Top < config.drawableLines(height())) {
+		const quint64 line = cursor->Position / HexConfig::Num;
+		if (cursor->Top <= line && line - cursor->Top < (unsigned int)config.drawableLines(height())) {
 			drawView(DRAW_LINE, line - cursor->Top);
 		}
 	}
