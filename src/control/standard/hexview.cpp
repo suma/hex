@@ -624,6 +624,11 @@ void HexView::timerEvent(QTimerEvent *ev)
 void HexView::keyPressEvent(QKeyEvent *ev)
 {
 	// TODO: support keyboard remap
+	if (ev->modifiers() == Qt::NoModifier) {
+		qDebug("keypress:[%s]", ev->text().toStdString().c_str());
+	} else {
+		qDebug("keypress:[%s] with modifier", ev->text().toStdString().c_str());
+	}
 
 	quint64 old = cursor->SelEnd;
 	quint64 oldT = cursor->Top;
@@ -651,6 +656,15 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_PageDown:
 		cursor->PageDown();
+		break;
+	case Qt::Key_Backspace:
+		qDebug("key backspace");
+		break;
+	case Qt::Key_Insert:
+		qDebug("key insert");
+		break;
+	case Qt::Key_Delete:
+		qDebug("key delete");
 		break;
 	default:
 		return;
