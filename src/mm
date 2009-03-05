@@ -1,4 +1,4 @@
-rm -f hex.pro
-qmake -project -o hex.pro
-qmake hex.pro -spec macx-g++
+#rm -f hex.pro
+#qmake -project -o hex.pro
+qmake hex.pro -spec macx-g++ -platform macx-g++42
 make -j3
