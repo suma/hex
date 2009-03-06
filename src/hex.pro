@@ -37,6 +37,6 @@ SOURCES += editor.cpp \
     control/standard/addressview.cpp \
     control/standard/hexview.cpp \
     control/standard/scursor.cpp \
-    qtc-gdbmacros/gdbmacros.cpp
+    build/qtc-gdbmacros/gdbmacros.cpp
 CONFIG += x86_64
 OTHER_FILES += 

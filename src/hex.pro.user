@@ -26,7 +26,7 @@
  </data>
  <data>
   <variable>activebuildconfiguration</variable>
-  <value type="QString" >Release</value>
+  <value type="QString" >Debug</value>
  </data>
  <data>
   <variable>buildConfiguration-Debug</variable>
@@ -34,7 +34,8 @@
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
    <value key="QtVersionId" type="int" >3</value>
    <value key="addQDumper" type="" ></value>
-   <value key="buildDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="buildDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
+   <value key="useShadowBuild" type="bool" >true</value>
   </valuemap>
  </data>
  <data>
@@ -43,11 +44,18 @@
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
    <value key="QtVersionId" type="int" >3</value>
    <value key="addQDumper" type="" ></value>
-   <value key="buildDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="buildDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
+   <value key="useShadowBuild" type="bool" >true</value>
   </valuemap>
  </data>
  <data>
   <variable>buildconfiguration-Debug-buildstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Debug-buildstep1</variable>
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList" >
@@ -76,7 +84,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/local/Trolltech/Qt-4.5.0/bin/qmake</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
    <value key="buildConfiguration" type="int" >2</value>
    <valuelist key="qmakeArgs" type="QVariantList" >
     <value type="QString" >CONFIG+=debug_and_release</value>
@@ -86,7 +94,7 @@
   </valuemap>
  </data>
  <data>
-  <variable>buildconfiguration-Debug-buildstep1</variable>
+  <variable>buildconfiguration-Debug-buildstep2</variable>
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList" >
@@ -105,12 +113,15 @@
     <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >-j3</value>
+    <value type="QString" >debug</value>
     <value type="QString" >-w</value>
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
    <valuelist key="makeargs" type="QVariantList" >
+    <value type="QString" >-j3</value>
     <value type="QString" >debug</value>
    </valuelist>
   </valuemap>
@@ -146,47 +157,13 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
   </valuemap>
  </data>
  <data>
   <variable>buildconfiguration-Release-buildstep0</variable>
   <valuemap type="QVariantMap" >
-   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
-   <valuelist key="abstractProcess.Environment" type="QVariantList" >
-    <value type="QString" >Apple_PubSub_Socket_Render=/tmp/launch-kVX9tN/Render</value>
-    <value type="QString" >COMMAND_MODE=legacy</value>
-    <value type="QString" >DISPLAY=/tmp/launch-ciIdVa/:0</value>
-    <value type="QString" >HOME=/Users/suma</value>
-    <value type="QString" >LOGNAME=suma</value>
-    <value type="QString" >PATH=/usr/local/Trolltech/Qt-4.5.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</value>
-    <value type="QString" >QTDIR=/usr/local/Trolltech/Qt-4.5.0</value>
-    <value type="QString" >SECURITYSESSIONID=795150</value>
-    <value type="QString" >SHELL=/bin/bash</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/launch-nhBe3g/Listeners</value>
-    <value type="QString" >TMPDIR=/var/folders/mb/mbgj1cU8E2e7QmnE8aXZDE+++TI/-Tmp-/</value>
-    <value type="QString" >USER=suma</value>
-    <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
-   </valuelist>
-   <valuelist key="abstractProcess.arguments" type="QVariantList" >
-    <value type="QString" >/Users/suma/dev/hex/src/hex.pro</value>
-    <value type="QString" >-spec</value>
-    <value type="QString" >macx-g++</value>
-    <value type="QString" >-r</value>
-    <value type="QString" >CONFIG+=release</value>
-    <value type="QString" >CONFIG+=debug_and_release</value>
-    <value type="QString" >-platform</value>
-    <value type="QString" >macx-g++42</value>
-   </valuelist>
-   <value key="abstractProcess.command" type="QString" >/usr/local/Trolltech/Qt-4.5.0/bin/qmake</value>
-   <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
-   <value key="buildConfiguration" type="int" >0</value>
-   <valuelist key="qmakeArgs" type="QVariantList" >
-    <value type="QString" >CONFIG+=debug_and_release</value>
-    <value type="QString" >-platform</value>
-    <value type="QString" >macx-g++42</value>
-   </valuelist>
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
   </valuemap>
  </data>
  <data>
@@ -209,13 +186,56 @@
     <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >/Users/suma/dev/hex/src/hex.pro</value>
+    <value type="QString" >-spec</value>
+    <value type="QString" >macx-g++</value>
+    <value type="QString" >-r</value>
+    <value type="QString" >CONFIG+=debug_and_release</value>
+    <value type="QString" >CONFIG+=debug_and_release</value>
+    <value type="QString" >-platform</value>
+    <value type="QString" >macx-g++42</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString" >/usr/local/Trolltech/Qt-4.5.0/bin/qmake</value>
+   <value key="abstractProcess.enabled" type="bool" >false</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
+   <value key="buildConfiguration" type="int" >10</value>
+   <valuelist key="qmakeArgs" type="QVariantList" >
+    <value type="QString" >CONFIG+=debug_and_release</value>
+    <value type="QString" >-platform</value>
+    <value type="QString" >macx-g++42</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-buildstep2</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList" >
+    <value type="QString" >Apple_PubSub_Socket_Render=/tmp/launch-kVX9tN/Render</value>
+    <value type="QString" >COMMAND_MODE=legacy</value>
+    <value type="QString" >DISPLAY=/tmp/launch-ciIdVa/:0</value>
+    <value type="QString" >HOME=/Users/suma</value>
+    <value type="QString" >LOGNAME=suma</value>
+    <value type="QString" >PATH=/usr/local/Trolltech/Qt-4.5.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</value>
+    <value type="QString" >QTDIR=/usr/local/Trolltech/Qt-4.5.0</value>
+    <value type="QString" >SECURITYSESSIONID=795150</value>
+    <value type="QString" >SHELL=/bin/bash</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/launch-nhBe3g/Listeners</value>
+    <value type="QString" >TMPDIR=/var/folders/mb/mbgj1cU8E2e7QmnE8aXZDE+++TI/-Tmp-/</value>
+    <value type="QString" >USER=suma</value>
+    <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >-j3</value>
+    <value type="QString" >debug</value>
     <value type="QString" >-w</value>
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
    <valuelist key="makeargs" type="QVariantList" >
-    <value type="QString" >release</value>
+    <value type="QString" >-j3</value>
+    <value type="QString" >debug</value>
    </valuelist>
   </valuemap>
  </data>
@@ -250,7 +270,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
   </valuemap>
  </data>
  <data>
@@ -264,11 +284,17 @@
   <variable>buildstep0</variable>
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" ></value>
-   <value key="mkspec" type="QString" ></value>
   </valuemap>
  </data>
  <data>
   <variable>buildstep1</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" ></value>
+   <value key="mkspec" type="QString" ></value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildstep2</variable>
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" ></value>
   </valuemap>
@@ -276,6 +302,7 @@
  <data>
   <variable>buildsteps</variable>
   <valuelist type="QVariantList" >
+   <value type="QString" >trolltech.qt4projectmanager.gdbmaros</value>
    <value type="QString" >trolltech.qt4projectmanager.qmake</value>
    <value type="QString" >trolltech.qt4projectmanager.make</value>
   </valuelist>
