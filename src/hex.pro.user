@@ -1,0 +1,312 @@
+<!DOCTYPE QtCreatorProject>
+<qtcreator>
+ <data>
+  <variable>RunConfiguration0-CommandLineArguments</variable>
+  <valuelist type="QVariantList" />
+ </data>
+ <data>
+  <variable>RunConfiguration0-ProFile</variable>
+  <value type="QString" >/Users/suma/dev/hex/src/hex.pro</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-RunConfiguration.name</variable>
+  <value type="QString" >hex</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-UserSetName</variable>
+  <value type="bool" >false</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-type</variable>
+  <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
+ </data>
+ <data>
+  <variable>activeRunConfiguration</variable>
+  <value type="int" >0</value>
+ </data>
+ <data>
+  <variable>activebuildconfiguration</variable>
+  <value type="QString" >Release</value>
+ </data>
+ <data>
+  <variable>buildConfiguration-Debug</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+   <value key="QtVersionId" type="int" >3</value>
+   <value key="addQDumper" type="" ></value>
+   <value key="buildDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildConfiguration-Release</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
+   <value key="QtVersionId" type="int" >3</value>
+   <value key="addQDumper" type="" ></value>
+   <value key="buildDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Debug-buildstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList" >
+    <value type="QString" >Apple_PubSub_Socket_Render=/tmp/launch-kVX9tN/Render</value>
+    <value type="QString" >COMMAND_MODE=legacy</value>
+    <value type="QString" >DISPLAY=/tmp/launch-ciIdVa/:0</value>
+    <value type="QString" >HOME=/Users/suma</value>
+    <value type="QString" >LOGNAME=suma</value>
+    <value type="QString" >PATH=/usr/local/Trolltech/Qt-4.5.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</value>
+    <value type="QString" >QTDIR=/usr/local/Trolltech/Qt-4.5.0</value>
+    <value type="QString" >SECURITYSESSIONID=795150</value>
+    <value type="QString" >SHELL=/bin/bash</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/launch-nhBe3g/Listeners</value>
+    <value type="QString" >TMPDIR=/var/folders/mb/mbgj1cU8E2e7QmnE8aXZDE+++TI/-Tmp-/</value>
+    <value type="QString" >USER=suma</value>
+    <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >/Users/suma/dev/hex/src/hex.pro</value>
+    <value type="QString" >-spec</value>
+    <value type="QString" >macx-g++</value>
+    <value type="QString" >-r</value>
+    <value type="QString" >CONFIG+=debug_and_release</value>
+    <value type="QString" >-platform</value>
+    <value type="QString" >macx-g++42</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString" >/usr/local/Trolltech/Qt-4.5.0/bin/qmake</value>
+   <value key="abstractProcess.enabled" type="bool" >true</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="buildConfiguration" type="int" >2</value>
+   <valuelist key="qmakeArgs" type="QVariantList" >
+    <value type="QString" >CONFIG+=debug_and_release</value>
+    <value type="QString" >-platform</value>
+    <value type="QString" >macx-g++42</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Debug-buildstep1</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList" >
+    <value type="QString" >Apple_PubSub_Socket_Render=/tmp/launch-kVX9tN/Render</value>
+    <value type="QString" >COMMAND_MODE=legacy</value>
+    <value type="QString" >DISPLAY=/tmp/launch-ciIdVa/:0</value>
+    <value type="QString" >HOME=/Users/suma</value>
+    <value type="QString" >LOGNAME=suma</value>
+    <value type="QString" >PATH=/usr/local/Trolltech/Qt-4.5.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</value>
+    <value type="QString" >QTDIR=/usr/local/Trolltech/Qt-4.5.0</value>
+    <value type="QString" >SECURITYSESSIONID=795150</value>
+    <value type="QString" >SHELL=/bin/bash</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/launch-nhBe3g/Listeners</value>
+    <value type="QString" >TMPDIR=/var/folders/mb/mbgj1cU8E2e7QmnE8aXZDE+++TI/-Tmp-/</value>
+    <value type="QString" >USER=suma</value>
+    <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >-w</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
+   <value key="abstractProcess.enabled" type="bool" >true</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <valuelist key="makeargs" type="QVariantList" >
+    <value type="QString" >debug</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Debug-cleanstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Debug-cleanstep1</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList" >
+    <value type="QString" >Apple_PubSub_Socket_Render=/tmp/launch-kVX9tN/Render</value>
+    <value type="QString" >COMMAND_MODE=legacy</value>
+    <value type="QString" >DISPLAY=/tmp/launch-ciIdVa/:0</value>
+    <value type="QString" >HOME=/Users/suma</value>
+    <value type="QString" >LOGNAME=suma</value>
+    <value type="QString" >PATH=/usr/local/Trolltech/Qt-4.5.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</value>
+    <value type="QString" >QTDIR=/usr/local/Trolltech/Qt-4.5.0</value>
+    <value type="QString" >SECURITYSESSIONID=795150</value>
+    <value type="QString" >SHELL=/bin/bash</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/launch-nhBe3g/Listeners</value>
+    <value type="QString" >TMPDIR=/var/folders/mb/mbgj1cU8E2e7QmnE8aXZDE+++TI/-Tmp-/</value>
+    <value type="QString" >USER=suma</value>
+    <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >clean</value>
+    <value type="QString" >-w</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
+   <value key="abstractProcess.enabled" type="bool" >true</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-buildstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList" >
+    <value type="QString" >Apple_PubSub_Socket_Render=/tmp/launch-kVX9tN/Render</value>
+    <value type="QString" >COMMAND_MODE=legacy</value>
+    <value type="QString" >DISPLAY=/tmp/launch-ciIdVa/:0</value>
+    <value type="QString" >HOME=/Users/suma</value>
+    <value type="QString" >LOGNAME=suma</value>
+    <value type="QString" >PATH=/usr/local/Trolltech/Qt-4.5.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</value>
+    <value type="QString" >QTDIR=/usr/local/Trolltech/Qt-4.5.0</value>
+    <value type="QString" >SECURITYSESSIONID=795150</value>
+    <value type="QString" >SHELL=/bin/bash</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/launch-nhBe3g/Listeners</value>
+    <value type="QString" >TMPDIR=/var/folders/mb/mbgj1cU8E2e7QmnE8aXZDE+++TI/-Tmp-/</value>
+    <value type="QString" >USER=suma</value>
+    <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >/Users/suma/dev/hex/src/hex.pro</value>
+    <value type="QString" >-spec</value>
+    <value type="QString" >macx-g++</value>
+    <value type="QString" >-r</value>
+    <value type="QString" >CONFIG+=release</value>
+    <value type="QString" >CONFIG+=debug_and_release</value>
+    <value type="QString" >-platform</value>
+    <value type="QString" >macx-g++42</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString" >/usr/local/Trolltech/Qt-4.5.0/bin/qmake</value>
+   <value key="abstractProcess.enabled" type="bool" >true</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <value key="buildConfiguration" type="int" >0</value>
+   <valuelist key="qmakeArgs" type="QVariantList" >
+    <value type="QString" >CONFIG+=debug_and_release</value>
+    <value type="QString" >-platform</value>
+    <value type="QString" >macx-g++42</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-buildstep1</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList" >
+    <value type="QString" >Apple_PubSub_Socket_Render=/tmp/launch-kVX9tN/Render</value>
+    <value type="QString" >COMMAND_MODE=legacy</value>
+    <value type="QString" >DISPLAY=/tmp/launch-ciIdVa/:0</value>
+    <value type="QString" >HOME=/Users/suma</value>
+    <value type="QString" >LOGNAME=suma</value>
+    <value type="QString" >PATH=/usr/local/Trolltech/Qt-4.5.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</value>
+    <value type="QString" >QTDIR=/usr/local/Trolltech/Qt-4.5.0</value>
+    <value type="QString" >SECURITYSESSIONID=795150</value>
+    <value type="QString" >SHELL=/bin/bash</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/launch-nhBe3g/Listeners</value>
+    <value type="QString" >TMPDIR=/var/folders/mb/mbgj1cU8E2e7QmnE8aXZDE+++TI/-Tmp-/</value>
+    <value type="QString" >USER=suma</value>
+    <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >-w</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
+   <value key="abstractProcess.enabled" type="bool" >true</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+   <valuelist key="makeargs" type="QVariantList" >
+    <value type="QString" >release</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-cleanstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-cleanstep1</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList" >
+    <value type="QString" >Apple_PubSub_Socket_Render=/tmp/launch-kVX9tN/Render</value>
+    <value type="QString" >COMMAND_MODE=legacy</value>
+    <value type="QString" >DISPLAY=/tmp/launch-ciIdVa/:0</value>
+    <value type="QString" >HOME=/Users/suma</value>
+    <value type="QString" >LOGNAME=suma</value>
+    <value type="QString" >PATH=/usr/local/Trolltech/Qt-4.5.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</value>
+    <value type="QString" >QTDIR=/usr/local/Trolltech/Qt-4.5.0</value>
+    <value type="QString" >SECURITYSESSIONID=795150</value>
+    <value type="QString" >SHELL=/bin/bash</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/launch-nhBe3g/Listeners</value>
+    <value type="QString" >TMPDIR=/var/folders/mb/mbgj1cU8E2e7QmnE8aXZDE+++TI/-Tmp-/</value>
+    <value type="QString" >USER=suma</value>
+    <value type="QString" >__CF_USER_TEXT_ENCODING=0x1F5:1:14</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList" >
+    <value type="QString" >clean</value>
+    <value type="QString" >-w</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
+   <value key="abstractProcess.enabled" type="bool" >true</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfigurations</variable>
+  <valuelist type="QVariantList" >
+   <value type="QString" >Debug</value>
+   <value type="QString" >Release</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>buildstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" ></value>
+   <value key="mkspec" type="QString" ></value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildstep1</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" ></value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildsteps</variable>
+  <valuelist type="QVariantList" >
+   <value type="QString" >trolltech.qt4projectmanager.qmake</value>
+   <value type="QString" >trolltech.qt4projectmanager.make</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>cleanstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" ></value>
+   <value key="clean" type="bool" >true</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>cleanstep1</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" ></value>
+   <value key="clean" type="bool" >true</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>cleansteps</variable>
+  <valuelist type="QVariantList" >
+   <value type="QString" >trolltech.qt4projectmanager.gdbmaros</value>
+   <value type="QString" >trolltech.qt4projectmanager.make</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>defaultFileEncoding</variable>
+  <value type="QByteArray" >System</value>
+ </data>
+ <data>
+  <variable>project</variable>
+  <valuemap type="QVariantMap" />
+ </data>
+</qtcreator>
