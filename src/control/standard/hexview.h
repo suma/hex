@@ -153,9 +153,9 @@ namespace Standard {
 		void drawCaret(bool visible, quint64 pos);
 		void drawCaretShape(CaretDrawInfo info);
 		void drawCaretLine(const CaretDrawInfo &);
-		void drawCaretUnderbar(const CaretDrawInfo &);
 		void drawCaretFrame(const CaretDrawInfo &);
-		void drawCaretBlock(CaretDrawInfo &);
+		void drawCaretBlock(const CaretDrawInfo &);
+		void drawCaretUnderbar(const CaretDrawInfo &);
 
 	protected:
 		// Main components

@@ -372,27 +372,27 @@ void HexView::drawCaretLine(const CaretDrawInfo &info)
 	info.painter.fillRect(x, info.y, 2, config.byteHeight(), brush);
 }
 
-void HexView::drawCaretBlock(CaretDrawInfo &info)
+void HexView::drawCaretBlock(const CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
-		if (cursor->HighNibble) {
-			// Draw higher
+		if (cursor->HighNibble || cursor->Selected) {
+			// Draw block byte
 			QBrush brush(config.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
 			info.painter.setPen(config.Colors[Color::CaretText]);
 			info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
 			info.painter.drawText(config.x(info.x) + config.ByteMargin.left(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignCenter, info.hex);
 		} else {
-			// Draw lowwer
+			// Draw block lowwer nibble
 			QBrush brush(config.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
 			info.painter.setPen(config.Colors[Color::CaretText]);
 			info.painter.fillRect(config.x(info.x) + config.ByteMargin.left() + config.charWidth(), info.y, config.charWidth() + config.ByteMargin.right(), config.byteHeight(), brush);
-			info.hex.remove(0, 1);
-			info.painter.drawText(config.x(info.x) + config.ByteMargin.left() + config.charWidth(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignLeft, info.hex);
+			QString low(info.hex[1]);
+			info.painter.drawText(config.x(info.x) + config.ByteMargin.left() + config.charWidth(), info.y + config.ByteMargin.top(), config.charWidth(2), config.charHeight(), Qt::AlignLeft, low);
 		}
 	} else {
-		// Draw caret without data
+		// Draw block without data
 		QBrush brush(config.Colors[Color::CaretBackground]);
 		info.painter.fillRect(config.x(info.x), info.y, config.byteWidth(), config.byteHeight(), brush);
 	}
