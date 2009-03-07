@@ -5,11 +5,10 @@
 #include <QFontMetrics>
 #include "../view.h"
 #include "../highlight.h"
-
+#include "scursor.h"
 
 namespace Standard {
 
-	class Cursor;
 	class HexConfig
 	{
 	public:
@@ -109,16 +108,18 @@ namespace Standard {
 		{
 			public:
 				QPainter &painter;
+				CaretShape shape;
 				QString hex;
 				quint64 pos;
 				bool caret_middle;
 				int x;
 				int y;
 			public:
-				CaretDrawInfo(QPainter &p, quint64 pos, int x, int y, bool caret_middle)
+				CaretDrawInfo(QPainter &p, CaretShape shape, quint64 pos, int x, int y, bool caret_middle)
 					: painter(p)
 				{
 					this->pos = pos;
+					this->shape = shape;
 					this->x = x;
 					this->y = y;
 					this->caret_middle = caret_middle;
@@ -144,22 +145,18 @@ namespace Standard {
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		bool isSelected(quint64 pos);
 		void drawSelected(bool reset = false);
-		void drawCaret(quint64 pos, int ymax);
-		void drawCaretShape(CaretDrawInfo info);
-		void drawCaretLine(const CaretDrawInfo &);
-		void drawCaretUnderbar(const CaretDrawInfo &);
-		void drawCaretFrame(const CaretDrawInfo &);
-		void drawCaretBlock(CaretDrawInfo &);
 
 		void byteToHex(uchar c, QString &h);
 		quint64 posAt(const QPoint &pos);
 
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
-
-	signals:
-		//connect to drawCaret(visible, pos);
-		void caretChanged(bool visible, quint64 pos);
+		void drawCaret(CaretShape shape, quint64 pos, int height_max);
+		void drawCaretShape(CaretDrawInfo info);
+		void drawCaretLine(const CaretDrawInfo &);
+		void drawCaretUnderbar(const CaretDrawInfo &);
+		void drawCaretFrame(const CaretDrawInfo &);
+		void drawCaretBlock(CaretDrawInfo &);
 
 	protected:
 		// Main components

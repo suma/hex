@@ -14,6 +14,7 @@ namespace Standard {
 	};
 
 	enum CaretShape {
+		CARET_NONE,
 		CARET_LINE,
 		CARET_BLOCK,
 		CARET_FRAME,
@@ -54,7 +55,8 @@ namespace Standard {
 		bool CaretHigh;
 	
 		// for Caret
-		int CaretShape;
+		CaretShape CaretVisibleShape;
+		CaretShape CaretInvisibleShape;
 		int CaretTimerId;
 		bool HexCaretVisible;
 		bool StrCaretVisible;
