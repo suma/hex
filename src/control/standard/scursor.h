@@ -20,6 +20,14 @@ namespace Standard {
 		CARET_UNDERBAR,
 	};
 
+	enum Move {
+	};
+
+	enum MoveMode {
+		MoveAnchor,
+		KeepAnchor,
+	};
+
 	class Cursor
 	{
 	public:
@@ -63,6 +71,8 @@ namespace Standard {
 		void Down(uint = 1);
 		void PageUp(uint = 1);
 		void PageDown(uint = 1);
+
+		//void movePosition(qint64 diff, );
 
 	private:
 		void refreshTopByUp();

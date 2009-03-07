@@ -1,2 +1,2 @@
 #/bin/sh
-./hex.app/Contents/MacOS/hex
+./build/hex.app/Contents/MacOS/hex

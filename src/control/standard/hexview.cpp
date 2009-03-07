@@ -99,7 +99,7 @@ HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 
 void HexView::resizeEvent(QResizeEvent *rs)
 {
-	QSize size(min(rs->size().width(), config.maxWidth()), rs->size().height());
+	QSize size(qMin(rs->size().width(), config.maxWidth()), rs->size().height());
 	QResizeEvent resize(size, rs->oldSize());
 	View::resizeEvent(&resize);
 	pix_.fill(config.Colors[Color::Background]);
@@ -152,20 +152,20 @@ void HexView::drawView(int type, int line_start, int end)
 	case DRAW_AFTER:
 		y_top += config.byteHeight() * line_start;
 		y     += config.byteHeight() * line_start;
-		max_y = max(y + config.byteHeight(), height());
+		max_y = qMax(y + config.byteHeight(), height());
 		count_line = config.drawableLines(max_y - y);
 		break;
 	case DRAW_RANGE:
 		y_top += config.byteHeight() * line_start;
 		y     += config.byteHeight() * line_start;
-		max_y = min(y + config.byteHeight() * end, height());
+		max_y = qMin(y + config.byteHeight() * end, height());
 		count_line = config.drawableLines(max_y - y);
 		break;
 	}
 
 	// Get top position of view
 	const quint64 top = (cursor->Top + line_start) * HexConfig::Num;
-	const uint size = min(document->length() - top, (quint64)HexConfig::Num * count_line);
+	const uint size = qMin(document->length() - top, (quint64)HexConfig::Num * count_line);
 	if (size == 0) {
 		return;
 	}
@@ -173,7 +173,7 @@ void HexView::drawView(int type, int line_start, int end)
 	// Draw empty area(after end line)
 	if (type == DRAW_ALL || type == DRAW_AFTER) {
 		QBrush brush(config.Colors[Color::Background]);
-		const int y_start = y_top + max(0, count_line - 1) * config.byteHeight();
+		const int y_start = y_top + qMax(0, count_line - 1) * config.byteHeight();
 		painter.fillRect(0, y_start, width(), height(), brush);
 	}
 
@@ -198,7 +198,7 @@ void HexView::drawView(int type, int line_start, int end)
 	drawLines(painter, dcolors_, y_top, 0, x_count_max);
 
 	// Update screen buffer
-	const int draw_width  = min(width(), config.maxWidth());
+	const int draw_width  = qMin(width(), config.maxWidth());
 	const int draw_height = count_line * config.byteHeight();
 	painter.end();
 	update(0, y_top, draw_width, draw_height);
@@ -210,10 +210,10 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 		return;
 	}
 
-	sel_begin = min(cursor->SelBegin, cursor->SelEnd);
-	sel_end   = max(cursor->SelBegin, cursor->SelEnd);
+	sel_begin = qMin(cursor->SelBegin, cursor->SelEnd);
+	sel_end   = qMax(cursor->SelBegin, cursor->SelEnd);
 
-	if (top <= sel_end && sel_begin <= max(top + (HexConfig::Num * count_line), top + size)) {
+	if (top <= sel_end && sel_begin <= qMax(top + (HexConfig::Num * count_line), top + size)) {
 		selected = true;
 	} else {
 		selected = false;
@@ -222,8 +222,8 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 
 inline bool HexView::isSelected(quint64 pos)
 {
-	const quint64 sel_begin = min(cursor->SelBegin, cursor->SelEnd);
-	const quint64 sel_end   = max(cursor->SelBegin, cursor->SelEnd);
+	const quint64 sel_begin = qMin(cursor->SelBegin, cursor->SelEnd);
+	const quint64 sel_end   = qMax(cursor->SelBegin, cursor->SelEnd);
 	return sel_begin <= pos && pos <  sel_end;
 }
 
@@ -459,7 +459,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 
 		// Set begin position
 		cursor->SelEndOld = cursor->Position;
-		cursor->SelBegin = cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+		cursor->SelBegin = cursor->SelEnd = cursor->Position = posAt(ev->pos());
 
 		// Set caret visible
 		cursor->Toggle = true;
@@ -497,7 +497,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	}
 
 	// Set moved position
-	cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+	cursor->SelEnd = cursor->Position = posAt(ev->pos());
 
 	// Refresh flag
 	cursor->refreshSelected();
@@ -525,7 +525,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 	releaseMouse();
 
 	// Set moved position
-	cursor->SelEnd = moveByMouse(ev->pos().x(), ev->pos().y());
+	cursor->SelEnd = cursor->Position = posAt(ev->pos());
 	cursor->refreshSelected();
 
 	// Set caret invisible
@@ -541,11 +541,10 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 	}
 }
 
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-quint64 HexView::moveByMouse(int xx, int yy)
+quint64 HexView::posAt(const QPoint &pos)
 {
-	int x = config.XToPos(xx);
-	int y = config.YToLine(yy);
+	int x = config.XToPos(pos.x());
+	int y = config.YToLine(pos.y());
 
 	if (x < 0) {
 		x = 0;
@@ -554,10 +553,8 @@ quint64 HexView::moveByMouse(int xx, int yy)
 		x = y = 0;
 	}
 
-	cursor->Position = MIN((cursor->Top + y) * HexConfig::Num + x, document->length());
-	return cursor->Position;
+	return qMin((cursor->Top + y) * HexConfig::Num + x, document->length());
 }
-#undef MIN
 
 void HexView::drawSelected(bool reset)
 {
@@ -565,8 +562,8 @@ void HexView::drawSelected(bool reset)
 	if (reset && cursor->Selected) {
 		//-- Reset selected lines
 		// Get selected lines
-		begin = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
-		end   = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+		begin = qMin(qMin(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+		end   = qMax(qMax(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
 		const int begin_line = begin / HexConfig::Num - cursor->Top;
 		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
 		cursor->Selected = false;
@@ -578,12 +575,12 @@ void HexView::drawSelected(bool reset)
 		if ((cursor->SelBegin < cursor->SelEndOld && cursor->SelBegin >= cursor->SelEnd ||
 			cursor->SelBegin >= cursor->SelEndOld && cursor->SelBegin < cursor->SelEnd)) {
 			// Crossing between begin and end
-			begin = min(min(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
-			end   = max(max(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+			begin = qMin(qMin(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+			end   = qMax(qMax(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
 		} else {
 			// Minimum range
-			begin = min(cursor->SelEnd, cursor->SelEndOld);
-			end   = max(cursor->SelEnd, cursor->SelEndOld);
+			begin = qMin(cursor->SelEnd, cursor->SelEndOld);
+			end   = qMax(cursor->SelEnd, cursor->SelEndOld);
 		}
 
 		// Get redrawing lines

@@ -126,19 +126,20 @@ namespace Standard {
 		};
 
 	protected:
+		void resizeEvent(QResizeEvent *);
+		void mousePressEvent(QMouseEvent*);
+		void mouseMoveEvent(QMouseEvent*);
+		void mouseReleaseEvent(QMouseEvent*);
+		void timerEvent(QTimerEvent *);
+		void keyPressEvent(QKeyEvent *);
+
+	protected:
 
 		void drawView();
 		void drawView(int type, int = 0, int = 0);
 		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
-		void resizeEvent(QResizeEvent *);
-		void mousePressEvent(QMouseEvent*);
-		void mouseMoveEvent(QMouseEvent*);
-		void mouseReleaseEvent(QMouseEvent*);
-		void timerEvent(QTimerEvent *);
-
-		void keyPressEvent(QKeyEvent *);
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		bool isSelected(quint64 pos);
@@ -151,9 +152,8 @@ namespace Standard {
 		void drawCaretBlock(CaretDrawInfo &);
 
 		void byteToHex(uchar c, QString &h);
-		quint64 moveByMouse(int x, int y);
+		quint64 posAt(const QPoint &pos);
 
-	public slots:
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
 
