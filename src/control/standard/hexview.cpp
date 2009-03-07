@@ -15,19 +15,19 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: Margin(2, 2, 3, 3)
-	, ByteMargin(2, 0, 2, 0)
+	, ByteMargin(3, 0, 2, 0)
 	, Font("Monaco", 17)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
 	, FontMetrics(Font)
 {
 	// Coloring
-	Colors[Color::Background] = QColor(0xCE,0xFF,0xCE);
+	Colors[Color::Background] = QColor(0xEF,0xEF,0xEF);
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
-	Colors[Color::SelText] = QColor(0,0x40,0x40);
+	Colors[Color::SelText] = QColor(0,0,0);
 	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0);
-	Colors[Color::CaretText] = QColor(0,0,0);
+	Colors[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
 
 	// Font
 	Font.setFixedPitch(true);
@@ -37,6 +37,8 @@ HexConfig::HexConfig()
 
 void HexConfig::update()
 {
+	// TODO: set ByteMargin value(left=charWidth/2, right=charWidth/2)
+
 	// Pos
 	x_begin[0] = Margin.left() + ByteMargin.left();
 	for (int i = 1; i < Num; i++) {
@@ -297,6 +299,11 @@ void HexView::drawCaret(bool visible)
 
 void HexView::drawCaret(bool visible, quint64 pos)
 {
+	// Check out of range
+	if (!(config.top() + config.byteHeight() < height())) {
+		return;
+	}
+
 	// Redraw line
 	const quint64 line = cursor->Position / HexConfig::Num;
 	if (cursor->Top <= line && line - cursor->Top < (unsigned int)config.drawableLines(height())) {
@@ -306,18 +313,6 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	// Shape
 	const CaretShape shape = visible ? cursor->CaretVisibleShape : cursor->CaretInvisibleShape;
 	if (shape == CARET_NONE) {
-		return;
-	}
-
-	// Draw
-	drawCaret(shape, pos, height());
-}
-
-
-void HexView::drawCaret(CaretShape shape, quint64 pos, int height_max)
-{
-	// Check out of range
-	if (!(config.top() + config.byteHeight() < height_max)) {
 		return;
 	}
 
@@ -368,7 +363,7 @@ void HexView::drawCaretShape(CaretDrawInfo info)
 void HexView::drawCaretLine(const CaretDrawInfo &info)
 {
 	int x;
-	if (cursor->CaretHigh || !info.caret_middle) {
+	if (cursor->HighNibble || !info.caret_middle) {
 		x = config.x(info.x);
 	} else {
 		x = config.x(info.x) + config.ByteMargin.left() + config.charWidth();
@@ -380,7 +375,7 @@ void HexView::drawCaretLine(const CaretDrawInfo &info)
 void HexView::drawCaretBlock(CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
-		if (cursor->CaretHigh) {
+		if (cursor->HighNibble) {
 			// Draw higher
 			QBrush brush(config.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
@@ -406,7 +401,7 @@ void HexView::drawCaretBlock(CaretDrawInfo &info)
 void HexView::drawCaretFrame(const CaretDrawInfo &info)
 {
 	int width, x;
-	if (cursor->CaretHigh || !info.caret_middle) {
+	if (cursor->HighNibble || !info.caret_middle) {
 		width = config.byteWidth() - 1;
 		x = config.x(info.x);
 	} else {
@@ -420,7 +415,7 @@ void HexView::drawCaretFrame(const CaretDrawInfo &info)
 void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
 {
 	int width, x;
-	if (cursor->CaretHigh || !info.caret_middle) {
+	if (cursor->HighNibble || !info.caret_middle) {
 		width = config.byteWidth() - 1;
 		x = config.x(info.x);
 	} else {
@@ -618,6 +613,17 @@ void HexView::timerEvent(QTimerEvent *ev)
 
 void HexView::keyPressEvent(QKeyEvent *ev)
 {
+	if (ev == QKeySequence::SelectAll) {
+		//ev->accept();
+		//all
+		return;
+	} else if (ev == QKeySequence::Undo) {
+		return;
+	} else if (ev == QKeySequence::Redo) {
+		return;
+	}
+
+
 	// TODO: support keyboard remap
 	if (ev->modifiers() == Qt::NoModifier) {
 		qDebug("keypress:[%s]", ev->text().toStdString().c_str());

@@ -151,7 +151,6 @@ namespace Standard {
 
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
-		void drawCaret(CaretShape shape, quint64 pos, int height_max);
 		void drawCaretShape(CaretDrawInfo info);
 		void drawCaretLine(const CaretDrawInfo &);
 		void drawCaretUnderbar(const CaretDrawInfo &);

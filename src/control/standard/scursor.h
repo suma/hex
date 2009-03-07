@@ -22,6 +22,9 @@ namespace Standard {
 	};
 
 	enum Move {
+		OriginBegin,
+		OriginEnd,
+		OriginCurrent,
 	};
 
 	enum MoveMode {
@@ -52,7 +55,7 @@ namespace Standard {
 		quint64 SelEndOld;	// old
 		bool Selected;		// Begin != End
 		bool Toggle;
-		bool CaretHigh;
+		bool HighNibble;
 	
 		// for Caret
 		CaretShape CaretVisibleShape;
