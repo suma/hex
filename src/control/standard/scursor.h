@@ -68,6 +68,15 @@ namespace Standard {
 	
 	public:
 
+		/*
+		quint64 getSelectBegin();
+		quint64 getSelectEnd();
+		quint64 getSelectEndOld();
+		void setSelectBegin(quint64);
+		void setSelectEnd(quint64);
+		void setSelectEndOld(quint64);
+		*/
+
 		void setHexCaretVisible(bool t);
 		void turnHexCaretVisible();
 		void setTextCaretVisible(bool t);

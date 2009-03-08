@@ -104,6 +104,13 @@ namespace Standard {
 		void setCaretBlink(bool enable);
 
 	protected:
+		enum DrawMode {
+			DRAW_ALL = 0,
+			DRAW_LINE,
+			DRAW_AFTER,
+			DRAW_RANGE,	// [begin, end)
+		};
+
 		class CaretDrawInfo
 		{
 			public:
@@ -137,7 +144,7 @@ namespace Standard {
 	protected:
 
 		void drawView();
-		void drawView(int type, int = 0, int = 0);
+		void drawView(DrawMode mode, int = 0, int = 0);
 		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 

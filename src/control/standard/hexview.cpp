@@ -84,13 +84,6 @@ int HexConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-enum {
-	DRAW_ALL = 0,
-	DRAW_LINE,
-	DRAW_AFTER,
-	DRAW_RANGE,	// [begin, end)
-};
-
 HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor(new Cursor(doc, this))
@@ -113,9 +106,9 @@ void HexView::drawView()
 	drawView(DRAW_ALL);
 }
 
-void HexView::drawView(int type, int line_start, int end)
+void HexView::drawView(DrawMode mode, int line_start, int end)
 {
-	qDebug("refresh event type:%d line:%d end:%d", type, line_start, end);
+	qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
 	qDebug(" end:%llu endOld:%llu pos:%llu", cursor->SelEnd, cursor->SelEndOld, cursor->Position);
 
 	// FIXME: refactoring refresh event
@@ -139,43 +132,43 @@ void HexView::drawView(int type, int line_start, int end)
 	// Get draw range
 	int y_top = config.top();
 	int y = config.top() + config.byteMargin().top();
-	int count_line, max_y;
+	int count_draw_line, max_y;
 
 	// Get minumum drawing area
-	switch (type) {
+	switch (mode) {
 	case DRAW_ALL:
-		count_line = config.drawableLines(height());
+		count_draw_line = config.drawableLines(height());
 		break;
 	case DRAW_LINE:
 		y_top += config.byteHeight() * line_start;
 		y     += config.byteHeight() * line_start;
-		count_line = 1;
+		count_draw_line = 1;
 		break;
 	case DRAW_AFTER:
 		y_top += config.byteHeight() * line_start;
 		y     += config.byteHeight() * line_start;
 		max_y = qMax(y + config.byteHeight(), height());
-		count_line = config.drawableLines(max_y - y);
+		count_draw_line = config.drawableLines(max_y - y);
 		break;
 	case DRAW_RANGE:
 		y_top += config.byteHeight() * line_start;
 		y     += config.byteHeight() * line_start;
 		max_y = qMin(y + config.byteHeight() * end, height());
-		count_line = config.drawableLines(max_y - y);
+		count_draw_line = config.drawableLines(max_y - y);
 		break;
 	}
 
 	// Get top position of view
 	const quint64 top = (cursor->Top + line_start) * HexConfig::Num;
-	const uint size = qMin(document->length() - top, (quint64)HexConfig::Num * count_line);
+	const uint size = qMin(document->length() - top, (quint64)HexConfig::Num * count_draw_line);
 	if (size == 0) {
 		return;
 	}
 
 	// Draw empty area(after end line)
-	if (type == DRAW_ALL || type == DRAW_AFTER) {
+	if (mode == DRAW_ALL || mode == DRAW_AFTER) {
 		QBrush brush(config.Colors[Color::Background]);
-		const int y_start = y_top + qMax(0, count_line - 1) * config.byteHeight();
+		const int y_start = y_top + qMax(0, count_draw_line - 1) * config.byteHeight();
 		painter.fillRect(0, y_start, width(), height(), brush);
 	}
 
@@ -188,7 +181,7 @@ void HexView::drawView(int type, int line_start, int end)
 	// Get selectead area
 	bool selected = false;
 	quint64 sel_begin = 0, sel_end = 0;
-	isSelected(selected, sel_begin, sel_end, top, count_line, size);
+	isSelected(selected, sel_begin, sel_end, top, count_draw_line, size);
 
 	// TODO: Adding cache class for color highligh data
 	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
@@ -201,12 +194,12 @@ void HexView::drawView(int type, int line_start, int end)
 
 	// Update screen buffer
 	const int draw_width  = qMin(width(), config.maxWidth());
-	const int draw_height = count_line * config.byteHeight();
+	const int draw_height = count_draw_line * config.byteHeight();
 	painter.end();
 	update(0, y_top, draw_width, draw_height);
 }
 
-inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_line, uint size)
+inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
 {
 	if (!cursor->Selected) {
 		return;
@@ -215,7 +208,7 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 	sel_begin = qMin(cursor->SelBegin, cursor->SelEnd);
 	sel_end   = qMax(cursor->SelBegin, cursor->SelEnd);
 
-	if (top <= sel_end && sel_begin <= qMax(top + (HexConfig::Num * count_line), top + size)) {
+	if (top <= sel_end && sel_begin <= qMax(top + (HexConfig::Num * count_draw_line), top + size)) {
 		selected = true;
 	} else {
 		selected = false;
@@ -551,12 +544,15 @@ quint64 HexView::posAt(const QPoint &pos)
 
 void HexView::drawSelected(bool reset)
 {
+	const quint64 SelBegin = cursor->SelBegin;
+	const quint64 SelEnd = cursor->SelEnd;
+	const quint64 SelEndOld = cursor->SelEndOld;
 	quint64 begin, end;
 	if (reset && cursor->Selected) {
 		//-- Reset selected lines
 		// Get selected lines
-		begin = qMin(qMin(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
-		end   = qMax(qMax(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+		begin = qMin(qMin(SelBegin, SelEnd), SelEndOld);
+		end   = qMax(qMax(SelBegin, SelEnd), SelEndOld);
 		const int begin_line = begin / HexConfig::Num - cursor->Top;
 		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
 		cursor->Selected = false;
@@ -565,15 +561,15 @@ void HexView::drawSelected(bool reset)
 		drawView(DRAW_RANGE, begin_line, end_line);
 	} else if (cursor->selMoved()) {
 		// Selected range is changing
-		if ((cursor->SelBegin < cursor->SelEndOld && cursor->SelBegin >= cursor->SelEnd ||
-			cursor->SelBegin >= cursor->SelEndOld && cursor->SelBegin < cursor->SelEnd)) {
+		if ((SelBegin < SelEndOld && SelBegin >= SelEnd ||
+			SelBegin >= SelEndOld && SelBegin < SelEnd)) {
 			// Crossing between begin and end
-			begin = qMin(qMin(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
-			end   = qMax(qMax(cursor->SelBegin, cursor->SelEnd), cursor->SelEndOld);
+			begin = qMin(qMin(SelBegin, SelEnd), SelEndOld);
+			end   = qMax(qMax(SelBegin, SelEnd), SelEndOld);
 		} else {
 			// Minimum range
-			begin = qMin(cursor->SelEnd, cursor->SelEndOld);
-			end   = qMax(cursor->SelEnd, cursor->SelEndOld);
+			begin = qMin(SelEnd, SelEndOld);
+			end   = qMax(SelEnd, SelEndOld);
 		}
 
 		// Get redrawing lines
