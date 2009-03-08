@@ -62,12 +62,18 @@ namespace Standard {
 		CaretShape CaretInvisibleShape;
 		int CaretTimerId;
 		bool HexCaretVisible;
-		bool StrCaretVisible;
+		bool TextCaretVisible;
 
 		//QColor StrCaretColor;
 	
 	public:
 
+		void setHexCaretVisible(bool t);
+		void turnHexCaretVisible();
+		void setTextCaretVisible(bool t);
+		void turnTextCaretVisible();
+
+	public:
 		void Home();
 		void End();
 		void Left(uint = 1);
@@ -85,6 +91,27 @@ namespace Standard {
 
 	};
 
+	inline void Cursor::setHexCaretVisible(bool t)
+	{
+		HexCaretVisible = t;
+	}
+
+	inline void Cursor::turnHexCaretVisible()
+	{
+		HexCaretVisible = !HexCaretVisible;
+	}
+
+	inline void Cursor::setTextCaretVisible(bool t)
+	{
+		TextCaretVisible = t;
+	}
+
+	inline void Cursor::turnTextCaretVisible()
+	{
+		TextCaretVisible = !TextCaretVisible;
+	}
 }
+
+
 
 #endif

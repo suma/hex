@@ -20,10 +20,10 @@ Cursor::Cursor(Document *Doc, HexView *View)
 	, Toggle(false)
 	, HighNibble(true)
 	, CaretVisibleShape(CARET_BLOCK)
-	, CaretInvisibleShape(CARET_NONE)
+	, CaretInvisibleShape(CARET_FRAME)
 	, CaretTimerId(0)
 	, HexCaretVisible(true)
-	, StrCaretVisible(true)
+	, TextCaretVisible(true)
 {
 }
 

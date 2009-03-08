@@ -501,7 +501,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	//-- Redraw caret if caret selection moved
 	if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
 		drawCaret();
-		cursor->HexCaretVisible = false;
+		cursor->setHexCaretVisible(false);
 	}
 }
 
@@ -530,7 +530,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 	//-- Redraw caret if selection moved
 	if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
 		drawCaret();
-		cursor->HexCaretVisible = false;
+		cursor->setHexCaretVisible(false);
 	}
 }
 
@@ -607,7 +607,7 @@ void HexView::timerEvent(QTimerEvent *ev)
 	if (cursor->CaretTimerId == ev->timerId()) {
 		// Caret blink
 		drawCaret(cursor->HexCaretVisible);
-		cursor->HexCaretVisible = !cursor->HexCaretVisible;
+		cursor->turnHexCaretVisible();
 	}
 }
 
