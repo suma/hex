@@ -69,9 +69,6 @@ protected:
 	void resizeEvent(QResizeEvent*);
 	void getDrawColors(const DrawInfo &di, DCIList &ci);
 
-protected:
-	virtual void drawView() = 0;
-
 };
 
 

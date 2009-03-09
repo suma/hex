@@ -21,12 +21,6 @@ namespace Standard {
 		CARET_UNDERBAR,
 	};
 
-	enum Move {
-		OriginBegin,
-		OriginEnd,
-		OriginCurrent,
-	};
-
 	enum MoveMode {
 		MoveAnchor,
 		KeepAnchor,
@@ -92,13 +86,29 @@ namespace Standard {
 		void PageUp(uint = 1);
 		void PageDown(uint = 1);
 
-		//void movePosition(qint64 diff, );
+		void movePosition(quint64 pos, bool sel, bool hold_vpos);
+		void moveRelativePosition(qint64 pos, bool sel, bool hold_vpos);
 
 	private:
 		void refreshTopByUp();
 		void refreshTopByDown();
 
 	};
+
+	inline void Cursor::refreshSelected()
+	{
+		Selected = SelBegin != SelEnd;
+	}
+
+	inline bool Cursor::selMoved()
+	{
+		return SelEnd != SelEndOld;
+	}
+
+	inline void Cursor::resetSelection()
+	{
+		SelBegin = SelEnd;
+	}
 
 	inline void Cursor::setHexCaretVisible(bool t)
 	{

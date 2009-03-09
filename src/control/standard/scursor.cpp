@@ -27,21 +27,6 @@ Cursor::Cursor(Document *Doc, HexView *View)
 {
 }
 
-void Cursor::refreshSelected()
-{
-	Selected = SelBegin != SelEnd;
-}
-
-bool Cursor::selMoved()
-{
-	return SelEnd != SelEndOld;
-}
-
-void Cursor::resetSelection()
-{
-	SelBegin = SelEnd;
-}
-
 void Cursor::Home()
 {
 	Top = 0;
@@ -117,11 +102,70 @@ void Cursor::PageDown(uint)
 
 void Cursor::refreshTopByUp()
 {
-	const quint64 pos_line = Position / HexConfig::Num;
+	Top = qMin(Position / HexConfig::Num, Top);
+}
 
-	if (pos_line < Top) {
-		Top = pos_line;
+void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
+{
+	// 移動で選択操作をするとき
+	// 1.古い位置のキャレットを消す描画 2.カーソル位置を更新する 3.選択範囲の行のみ再描画 4. キャレット描画　という流れになるようだ。選択じゃないときは少しプロセスが減る。
+	// 移動だけのときは
+	// 1.カーソル位置移動 2.古いカーソル位置の再描画（必要があれば） 3. キャレット再描画
+
+	Q_ASSERT(pos <= document->length());
+	
+	const quint64 old_top = Top;
+	SelEndOld = pos;
+
+	if (!Selected) {
+		if (sel) {
+			// begin selection
+			SelEndOld = Position;
+			SelBegin = SelEnd = pos;
+			if (view->getConfig().EnableCaret && SelEnd != SelEndOld) {
+				const int line = (SelEndOld / HexConfig::Num) - Top;
+				if (line <= view->getConfig().drawableLines(view->height())) {
+					view->drawView(HexView::DRAW_RANGE, line, line + 1);
+				}
+			}
+
+			view->drawCaret();
+		} else {
+			// normal move
+			//   only redrawCaret
+		}
+	} else {
+		if (sel) {
+			// move selection
+		} else {
+			// end selection
+		}
 	}
+	// if !selected
+	// 	drawSelected(true)
+	// 	selEnd = pos = newpos
+	// 	redrawCaret
+	// f refresh =>
+	// 	selEnd= Pos = newPos
+	// 	drawSelected(false);
+	// 	drawCaret
+
+	if (!sel) {
+		resetSelection();
+	}
+
+	if (old_top == Top) {
+		if (!sel && Selected) {
+			// beginning selection
+			//drawSelected(true);
+		} else {
+			//drawSelected(false);
+		}
+	}
+}
+
+void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
+{
 }
 
 void Cursor::refreshTopByDown()

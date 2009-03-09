@@ -103,7 +103,7 @@ namespace Standard {
 		HexConfig & getConfig() { return config; }
 		void setCaretBlink(bool enable);
 
-	protected:
+	public:
 		enum DrawMode {
 			DRAW_ALL = 0,
 			DRAW_LINE,
@@ -111,6 +111,7 @@ namespace Standard {
 			DRAW_RANGE,	// [begin, end)
 		};
 
+	protected:
 		class CaretDrawInfo
 		{
 			public:
@@ -141,10 +142,10 @@ namespace Standard {
 		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
 
-	protected:
 
-		void drawView();
-		void drawView(DrawMode mode, int = 0, int = 0);
+	public:
+		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
+	protected:
 		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
@@ -156,8 +157,10 @@ namespace Standard {
 		void byteToHex(uchar c, QString &h);
 		quint64 posAt(const QPoint &pos);
 
+	public:
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
+	protected:
 		void drawCaretShape(CaretDrawInfo info);
 		void drawCaretLine(const CaretDrawInfo &);
 		void drawCaretFrame(const CaretDrawInfo &);

@@ -101,11 +101,6 @@ void HexView::resizeEvent(QResizeEvent *rs)
 	drawView();
 }
 
-void HexView::drawView()
-{
-	drawView(DRAW_ALL);
-}
-
 void HexView::drawView(DrawMode mode, int line_start, int end)
 {
 	qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
