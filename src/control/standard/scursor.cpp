@@ -1,4 +1,5 @@
 
+#include <QtGlobal>
 #include <algorithm>
 #include <limits>
 #include "scursor.h"
@@ -136,7 +137,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			//-- Normal move --
 			//   only redrawCaret
 			quint64 top = Top;
-			int vpos_line;
+			uint vpos_line = 0;
 			if (hold_vpos) {
 				vpos_line = Top - Position / HexConfig::Num;
 			}
@@ -157,6 +158,23 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 
 			if (hold_vpos) {
 				// TODO: implement holding virtual caret position
+				const uint vpos_line_now = top - pos / HexConfig::Num;
+				const uint diff = qAbs(qMax(vpos_line, vpos_line_now) - qMin(vpos_line, vpos_line_now));
+				if (vpos_line < vpos_line_now) {
+					if (diff < top) {
+						top -= diff;
+					} else {
+						top = 0;
+					}
+				} else {
+					const uint count_line = view->getConfig().drawableLines(view->height()) - 1;
+					const quint64 max_top = document->length() / HexConfig::Num - count_line;
+					if (top < numeric_limits<quint64>::max() - diff && top + diff <= max_top) {
+						top += diff;
+					} else {
+						top = max_top;
+					}
+				}
 			}
 
 			if (Top == top && Position != pos) {
@@ -223,8 +241,9 @@ void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 			okPos = Position - abs;
 		}
 	} else {
-		okPos = Position + abs;
-		if (okPos < Position || okPos < abs || document->length() < okPos) {	// check overed
+		if (Position < numeric_limits<quint64>::max() - abs && Position + abs <= document->length()) {
+			okPos = Position + abs;
+		} else {
 			okPos = document->length();
 		}
 	}
