@@ -156,7 +156,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			}
 
 			if (hold_vpos) {
-				//Top;
+				// TODO: implement holding virtual caret position
 			}
 
 			if (Top == top && Position != pos) {
