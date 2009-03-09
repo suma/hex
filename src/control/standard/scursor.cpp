@@ -137,7 +137,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			//-- Normal move --
 			//   only redrawCaret
 			quint64 top = Top;
-			uint vpos_line = 0;
+			int vpos_line = 0;
 			if (hold_vpos) {
 				vpos_line = Top - Position / HexConfig::Num;
 			}
@@ -157,9 +157,8 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			}
 
 			if (hold_vpos) {
-				// TODO: implement holding virtual caret position
-				const uint vpos_line_now = top - pos / HexConfig::Num;
-				const uint diff = qAbs(qMax(vpos_line, vpos_line_now) - qMin(vpos_line, vpos_line_now));
+				const int vpos_line_now = top - pos / HexConfig::Num;
+				const uint diff = qAbs(vpos_line - vpos_line_now);
 				if (vpos_line < vpos_line_now) {
 					if (diff < top) {
 						top -= diff;
@@ -183,6 +182,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			}
 
 			SelEndOld = SelEnd = SelBegin = Position = pos;
+			//qDebug("Top:%llu, top:%llu", Top, top);
 			if (Top != top) {
 				Top = top;
 				view->drawView();

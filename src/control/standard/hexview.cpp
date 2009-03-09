@@ -103,7 +103,7 @@ void HexView::resizeEvent(QResizeEvent *rs)
 
 void HexView::drawView(DrawMode mode, int line_start, int end)
 {
-	//qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
+	qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
 	//qDebug(" end:%llu endOld:%llu pos:%llu", cursor->SelEnd, cursor->SelEndOld, cursor->Position);
 
 	// FIXME: refactoring refresh event
