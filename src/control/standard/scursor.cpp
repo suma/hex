@@ -17,7 +17,7 @@ Cursor::Cursor(Document *Doc, HexView *View)
 	, SelEnd(0)
 	, SelEndOld(0)
 	, Selected(false)
-	, Toggle(false)
+	, Selection(false)
 	, HighNibble(true)
 	, CaretVisibleShape(CARET_BLOCK)
 	, CaretInvisibleShape(CARET_FRAME)
@@ -116,10 +116,10 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	
 	const quint64 old_top = Top;
 
-	if (!Selected) {
+
+	if (!Selection) {
 		if (sel) {
-			qDebug("Cursor::movePosition() - move Cursor::Selected:%d", Selected);
-			// # begin selection
+			// # Begin selection
 			// Draw selected lines
 			view->drawSelected(true);
 
@@ -136,15 +136,48 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			}
 
 			view->drawCaret();
+
+			setSelection(true);
 		} else {
 			// normal move
 			//   only redrawCaret
 		}
 	} else {
 		if (sel) {
-			// move selection
+			// # Move selection
+			// Set moved position to OLD
+			SelEndOld = SelEnd;
+
+			// Set moved position
+			SelEnd = Position = pos;
+
+			// Refresh flag
+			refreshSelected();
+
+			// Redraw updated lines
+			view->drawSelected(false);
+
+			//-- Redraw caret if caret selection moved
+			if (view->getConfig().EnableCaret && SelEnd != SelEndOld) {
+				view->drawCaret();
+				setHexCaretVisible(false);
+			}
 		} else {
-			// end selection
+			// # End selection
+			// Set moved position
+			SelEnd = Position = pos;
+			refreshSelected();
+
+			setSelection(false);
+
+			// Redraw updated lines
+			view->drawSelected(false);
+
+			//-- Redraw caret if selection moved
+			if (view->getConfig().EnableCaret && SelEnd != SelEndOld) {
+				view->drawCaret();
+				setHexCaretVisible(false);
+			}
 		}
 	}
 	// if !selected
@@ -155,10 +188,6 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	// 	selEnd= Pos = newPos
 	// 	drawSelected(false);
 	// 	drawCaret
-
-	if (!sel) {
-		//resetSelection();
-	}
 
 	if (old_top == Top) {
 		if (!sel && Selected) {

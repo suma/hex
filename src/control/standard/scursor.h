@@ -32,7 +32,6 @@ namespace Standard {
 		Cursor(Document *, HexView *);
 		void refreshSelected();
 		bool selMoved();
-		void resetSelection();
 
 	private:
 		Document *document;
@@ -48,7 +47,7 @@ namespace Standard {
 		quint64 SelEnd;		// pos(not line)
 		quint64 SelEndOld;	// old
 		bool Selected;		// Begin != End
-		bool Toggle;
+		bool Selection;
 		bool HighNibble;
 	
 		// for Caret
@@ -71,6 +70,7 @@ namespace Standard {
 		void setSelectEndOld(quint64);
 		*/
 
+		void setSelection(bool);
 		void setHexCaretVisible(bool t);
 		void turnHexCaretVisible();
 		void setTextCaretVisible(bool t);
@@ -105,9 +105,9 @@ namespace Standard {
 		return SelEnd != SelEndOld;
 	}
 
-	inline void Cursor::resetSelection()
+	inline void Cursor::setSelection(bool t)
 	{
-		SelBegin = SelEnd;
+		Selection = t;
 	}
 
 	inline void Cursor::setHexCaretVisible(bool t)

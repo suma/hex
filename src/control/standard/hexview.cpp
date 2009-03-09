@@ -436,7 +436,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cursor->Position, cursor->SelEnd, cursor->SelEndOld, cursor->SelEnd / HexConfig::Num);
 
-#if 1
+#if 0
 		// Draw selected lines
 		drawSelected(true);
 
@@ -445,7 +445,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		cursor->SelBegin = cursor->SelEnd = cursor->Position = posAt(ev->pos());
 
 		// Set caret visible
-		cursor->Toggle = true;
+		cursor->Selection = true;
 
 		//-- Redraw lines if caret moved
 		if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
@@ -457,7 +457,6 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 
 		drawCaret();
 #else
-		cursor->Toggle = true;
 		cursor->movePosition(posAt(ev->pos()), true, false);
 #endif
 
@@ -470,12 +469,12 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
 	// Check mouse captured
-	if (!cursor->Toggle) {
+	if (!cursor->Selection) {
 		return;
 	}
 
 	qDebug("mouse move");
-
+#if 0
 	// Set moved position to OLD
 	cursor->SelEndOld = cursor->SelEnd;
 
@@ -498,12 +497,19 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		drawCaret();
 		cursor->setHexCaretVisible(false);
 	}
+#else
+	// FIXME: move down automatically
+	if (height() < ev->pos().y()) {
+		return;
+	}
+	cursor->movePosition(posAt(ev->pos()), true, false);
+#endif
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *ev)
 {
 	// Check mouse captured
-	if (!cursor->Toggle) {
+	if (!cursor->Selection) {
 		return;
 	}
 
@@ -511,13 +517,12 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 
 	// End mouse capture
 	releaseMouse();
-
+#if 0
 	// Set moved position
 	cursor->SelEnd = cursor->Position = posAt(ev->pos());
 	cursor->refreshSelected();
 
-	// Set caret invisible
-	cursor->Toggle = false;
+	cursor->Selection = false;
 
 	// Redraw updated lines
 	drawSelected(false);
@@ -527,6 +532,9 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		drawCaret();
 		cursor->setHexCaretVisible(false);
 	}
+#else
+	cursor->movePosition(posAt(ev->pos()), false, false);
+#endif
 }
 
 quint64 HexView::posAt(const QPoint &pos)
@@ -671,7 +679,6 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	cursor->SelEndOld = cursor->SelEnd;
 
 	if (ev->modifiers() != Qt::SHIFT) {
-		cursor->resetSelection();
 	}
 
 	// FIXME: refactoring refresh event
