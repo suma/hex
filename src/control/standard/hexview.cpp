@@ -162,6 +162,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 
 	// Draw empty area(after end line)
 	if (mode == DRAW_ALL || mode == DRAW_AFTER) {
+		//qDebug("draw empty area DRAW_ALL or DRAW_AFTER");
 		QBrush brush(config.Colors[Color::Background]);
 		const int y_start = y_top + qMax(0, count_draw_line - 1) * config.byteHeight();
 		painter.fillRect(0, y_start, width(), height(), brush);
@@ -183,7 +184,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	getDrawColors(di, dcolors_);
 
 	// Draw lines
-	qDebug("x:%d", (width() - config.Margin.left()) / config.byteWidth());
+	//qDebug("x:%d", (width() - config.Margin.left()) / config.byteWidth());
 	const int x_count_max = (width() - config.Margin.left()) / config.byteWidth() + 1;
 	drawLines(painter, dcolors_, y_top, 0, x_count_max);
 
@@ -269,7 +270,7 @@ COUNTUP:// Count up
 
 	// Draw empty area(after end line)
 	if (0 < x && x < x_end && x < HexConfig::Num) {
-		qDebug("empty: %d", x);
+		//qDebug("empty: %d", x);
 		QBrush brush(config.Colors[Color::Background]);
 		painter.fillRect(config.x(x), y, width(), config.byteHeight(), brush);
 	}
@@ -436,33 +437,10 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		//qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cursor->Position, cursor->SelEnd, cursor->SelEndOld, cursor->SelEnd / HexConfig::Num);
 
-#if 0
-		// Draw selected lines
-		drawSelected(true);
-
-		// Set begin position
-		cursor->SelEndOld = cursor->Position;
-		cursor->SelBegin = cursor->SelEnd = cursor->Position = posAt(ev->pos());
-
-		// Set caret visible
-		cursor->Selection = true;
-
-		//-- Redraw lines if caret moved
-		if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
-			const int pos = (cursor->SelEndOld / HexConfig::Num) - cursor->Top;
-			if (pos <= config.drawableLines(height())) {
-				drawView(DRAW_RANGE, pos, pos + 1);
-			}
-		}
-
-		drawCaret();
-#else
 		cursor->movePosition(posAt(ev->pos()), true, false);
-#endif
 
 		// Start mouse capture
 		grabMouse();
-		//qDebug("end PressEvent");
 	}
 }
 
@@ -473,37 +451,11 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		return;
 	}
 
-	//qDebug("mouse move");
-#if 0
-	// Set moved position to OLD
-	cursor->SelEndOld = cursor->SelEnd;
-
-	// FIXME: move down automatically
-	if (height() < ev->pos().y()) {
-		return;
-	}
-
-	// Set moved position
-	cursor->SelEnd = cursor->Position = posAt(ev->pos());
-
-	// Refresh flag
-	cursor->refreshSelected();
-
-	// Redraw updated lines
-	drawSelected(false);
-
-	//-- Redraw caret if caret selection moved
-	if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
-		drawCaret();
-		cursor->setHexCaretVisible(false);
-	}
-#else
 	// FIXME: move down automatically
 	if (height() < ev->pos().y()) {
 		return;
 	}
 	cursor->movePosition(posAt(ev->pos()), true, false);
-#endif
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *ev)
@@ -517,24 +469,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 
 	// End mouse capture
 	releaseMouse();
-#if 0
-	// Set moved position
-	cursor->SelEnd = cursor->Position = posAt(ev->pos());
-	cursor->refreshSelected();
-
-	cursor->Selection = false;
-
-	// Redraw updated lines
-	drawSelected(false);
-
-	//-- Redraw caret if selection moved
-	if (config.EnableCaret && cursor->SelEnd != cursor->SelEndOld) {
-		drawCaret();
-		cursor->setHexCaretVisible(false);
-	}
-#else
 	cursor->movePosition(posAt(ev->pos()), false, false);
-#endif
 }
 
 quint64 HexView::posAt(const QPoint &pos)
@@ -644,7 +579,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		cursor->movePosition(0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
-		cursor->End();
+		cursor->movePosition(document->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
 		cursor->moveRelativePosition(-1, keepAnchor, false);

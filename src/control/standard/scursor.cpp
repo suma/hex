@@ -138,18 +138,17 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			quint64 top = Top;
 			int vpos_line;
 			if (hold_vpos) {
-				vpos_line = (Top - Position) / HexConfig::Num;
+				vpos_line = Top - Position / HexConfig::Num;
 			}
 
 			const bool goDown = Position < pos;
 
 			if (goDown) {
-				const int count_line = view->getConfig().drawableLines(view->height()) - 1;
+				const uint count_line = view->getConfig().drawableLines(view->height()) - 1;
 				const quint64 pos_line = pos / HexConfig::Num;
 
 				// if Top + count_line < pos_line then Pos is invisible
 				if (count_line <= pos_line && Top <= pos_line - count_line) {
-					qDebug("Top:%llu, pos_line:%llu, count_line:%d", pos_line, count_line);
 					top = pos_line - count_line + 1;
 				}
 			} else {
@@ -161,15 +160,12 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			}
 
 			if (Top == top && Position != pos) {
-				qDebug("---- disable caret");
-				const int line = (SelEndOld / HexConfig::Num) - Top;
+				const int line = (Position / HexConfig::Num) - Top;
 				view->drawView(HexView::DRAW_RANGE, line, line + 1);
 			}
 
 			SelEndOld = SelEnd = SelBegin = Position = pos;
-			qDebug("Top:%llu, Pos:%llu, top:%llu", Top, Position, top);
 			if (Top != top) {
-				qDebug("---- draw all");
 				Top = top;
 				view->drawView();
 			}
@@ -232,13 +228,13 @@ void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 			okPos = document->length();
 		}
 	}
-	qDebug("pos:%lld, abs:%llu, okPos: %llu", pos, abs, okPos);
+	//qDebug("pos:%lld, abs:%llu, okPos: %llu", pos, abs, okPos);
 	movePosition(okPos, sel, hold_vpos);
 }
 
 void Cursor::refreshTopByDown()
 {
-	const int count_line = view->getConfig().drawableLines(view->height()) - 1;
+	const uint count_line = view->getConfig().drawableLines(view->height()) - 1;
 	const quint64 pos_line = Position / HexConfig::Num;
 
 	// if Top + count_line < pos_line then Pos is invisible
