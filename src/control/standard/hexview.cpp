@@ -435,6 +435,8 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
 		qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cursor->Position, cursor->SelEnd, cursor->SelEndOld, cursor->SelEnd / HexConfig::Num);
+
+#if 1
 		// Draw selected lines
 		drawSelected(true);
 
@@ -454,9 +456,14 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		}
 
 		drawCaret();
+#else
+		cursor->Toggle = true;
+		cursor->movePosition(posAt(ev->pos()), true, false);
+#endif
 
 		// Start mouse capture
 		grabMouse();
+		qDebug("end PressEvent");
 	}
 }
 

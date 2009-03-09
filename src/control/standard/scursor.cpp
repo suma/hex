@@ -115,13 +115,19 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	Q_ASSERT(pos <= document->length());
 	
 	const quint64 old_top = Top;
-	SelEndOld = pos;
 
 	if (!Selected) {
 		if (sel) {
-			// begin selection
+			qDebug("Cursor::movePosition() - move Cursor::Selected:%d", Selected);
+			// # begin selection
+			// Draw selected lines
+			view->drawSelected(true);
+
+			// Set begin position
 			SelEndOld = Position;
-			SelBegin = SelEnd = pos;
+			SelBegin = SelEnd = Position = pos;
+
+			//-- Redraw lines if caret moved
 			if (view->getConfig().EnableCaret && SelEnd != SelEndOld) {
 				const int line = (SelEndOld / HexConfig::Num) - Top;
 				if (line <= view->getConfig().drawableLines(view->height())) {
@@ -151,7 +157,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	// 	drawCaret
 
 	if (!sel) {
-		resetSelection();
+		//resetSelection();
 	}
 
 	if (old_top == Top) {

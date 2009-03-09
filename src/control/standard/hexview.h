@@ -152,7 +152,9 @@ namespace Standard {
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		bool isSelected(quint64 pos);
+	public:
 		void drawSelected(bool reset = false);
+	protected:
 
 		void byteToHex(uchar c, QString &h);
 		quint64 posAt(const QPoint &pos);
