@@ -103,8 +103,8 @@ void HexView::resizeEvent(QResizeEvent *rs)
 
 void HexView::drawView(DrawMode mode, int line_start, int end)
 {
-	qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
-	qDebug(" end:%llu endOld:%llu pos:%llu", cursor->SelEnd, cursor->SelEndOld, cursor->Position);
+	//qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
+	//qDebug(" end:%llu endOld:%llu pos:%llu", cursor->SelEnd, cursor->SelEndOld, cursor->Position);
 
 	// FIXME: refactoring refresh event
 	QPainter painter;
@@ -434,7 +434,7 @@ void HexView::byteToHex(uchar c, QString &h)
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
-		qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cursor->Position, cursor->SelEnd, cursor->SelEndOld, cursor->SelEnd / HexConfig::Num);
+		//qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cursor->Position, cursor->SelEnd, cursor->SelEndOld, cursor->SelEnd / HexConfig::Num);
 
 #if 0
 		// Draw selected lines
@@ -462,7 +462,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 
 		// Start mouse capture
 		grabMouse();
-		qDebug("end PressEvent");
+		//qDebug("end PressEvent");
 	}
 }
 
@@ -473,7 +473,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 		return;
 	}
 
-	qDebug("mouse move");
+	//qDebug("mouse move");
 #if 0
 	// Set moved position to OLD
 	cursor->SelEndOld = cursor->SelEnd;
@@ -513,7 +513,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *ev)
 		return;
 	}
 
-	qDebug("mouse release");
+	//qDebug("mouse release");
 
 	// End mouse capture
 	releaseMouse();
@@ -632,37 +632,37 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 
 	// TODO: support keyboard remap
 	if (ev->modifiers() == Qt::NoModifier) {
-		qDebug("keypress:[%s]", ev->text().toStdString().c_str());
+		//qDebug("keypress:[%s]", ev->text().toStdString().c_str());
 	} else {
-		qDebug("keypress:[%s] with modifier", ev->text().toStdString().c_str());
+		//qDebug("keypress:[%s] with modifier", ev->text().toStdString().c_str());
 	}
 
-	quint64 old = cursor->SelEnd;
-	quint64 oldT = cursor->Top;
+	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
 	case Qt::Key_Home:
-		cursor->Home();
+		//cursor->Home();
+		cursor->movePosition(0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
 		cursor->End();
 		break;
 	case Qt::Key_Left:
-		cursor->Left();
+		cursor->moveRelativePosition(-1, keepAnchor, false);
 		break;
 	case Qt::Key_Right:
-		cursor->Right();
+		cursor->moveRelativePosition(1, keepAnchor, false);
 		break;
 	case Qt::Key_Up:
-		cursor->Up();
+		cursor->moveRelativePosition(-16, keepAnchor, false);
 		break;
 	case Qt::Key_Down:
-		cursor->Down();
+		cursor->moveRelativePosition(16, keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
-		cursor->PageUp();
+		cursor->moveRelativePosition(-16 * 15, keepAnchor, false);
 		break;
 	case Qt::Key_PageDown:
-		cursor->PageDown();
+		cursor->moveRelativePosition(16 * 15, keepAnchor, false);
 		break;
 	case Qt::Key_Backspace:
 		qDebug("key backspace");
@@ -675,16 +675,6 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	default:
 		return;
-	}
-	cursor->SelEndOld = cursor->SelEnd;
-
-	if (ev->modifiers() != Qt::SHIFT) {
-	}
-
-	// FIXME: refactoring refresh event
-	if (cursor->SelEnd != old || cursor->Top != oldT) {
-		drawView();
-		drawCaret();
 	}
 
 	if (ev->modifiers() != Qt::NoModifier) {

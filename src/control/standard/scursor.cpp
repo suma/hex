@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include <limits>
 #include "scursor.h"
 #include "../document.h"
 #include "hexview.h"
@@ -107,19 +108,12 @@ void Cursor::refreshTopByUp()
 
 void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 {
-	// 移動で選択操作をするとき
-	// 1.古い位置のキャレットを消す描画 2.カーソル位置を更新する 3.選択範囲の行のみ再描画 4. キャレット描画　という流れになるようだ。選択じゃないときは少しプロセスが減る。
-	// 移動だけのときは
-	// 1.カーソル位置移動 2.古いカーソル位置の再描画（必要があれば） 3. キャレット再描画
-
 	Q_ASSERT(pos <= document->length());
+	// FIXME: replace drawView/drawCaret callings to udpate event
 	
-	const quint64 old_top = Top;
-
-
 	if (!Selection) {
 		if (sel) {
-			// # Begin selection
+			//-- Begin selection --
 			// Draw selected lines
 			view->drawSelected(true);
 
@@ -139,12 +133,52 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 
 			setSelection(true);
 		} else {
-			// normal move
+			//-- Normal move --
 			//   only redrawCaret
+			quint64 top = Top;
+			int vpos_line;
+			if (hold_vpos) {
+				vpos_line = (Top - Position) / HexConfig::Num;
+			}
+
+			const bool goDown = Position < pos;
+
+			if (goDown) {
+				const int count_line = view->getConfig().drawableLines(view->height()) - 1;
+				const quint64 pos_line = pos / HexConfig::Num;
+
+				// if Top + count_line < pos_line then Pos is invisible
+				if (count_line <= pos_line && Top <= pos_line - count_line) {
+					qDebug("Top:%llu, pos_line:%llu, count_line:%d", pos_line, count_line);
+					top = pos_line - count_line + 1;
+				}
+			} else {
+				top = qMin(pos / HexConfig::Num, Top);
+			}
+
+			if (hold_vpos) {
+				//Top;
+			}
+
+			if (Top == top && Position != pos) {
+				qDebug("---- disable caret");
+				const int line = (SelEndOld / HexConfig::Num) - Top;
+				view->drawView(HexView::DRAW_RANGE, line, line + 1);
+			}
+
+			SelEndOld = SelEnd = SelBegin = Position = pos;
+			qDebug("Top:%llu, Pos:%llu, top:%llu", Top, Position, top);
+			if (Top != top) {
+				qDebug("---- draw all");
+				Top = top;
+				view->drawView();
+			}
+
+			view->drawCaret();
 		}
 	} else {
 		if (sel) {
-			// # Move selection
+			//-- Move selection
 			// Set moved position to OLD
 			SelEndOld = SelEnd;
 
@@ -157,13 +191,13 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			// Redraw updated lines
 			view->drawSelected(false);
 
-			//-- Redraw caret if caret selection moved
+			//-- Redraw caret if caret selection moved --
 			if (view->getConfig().EnableCaret && SelEnd != SelEndOld) {
 				view->drawCaret();
 				setHexCaretVisible(false);
 			}
 		} else {
-			// # End selection
+			//-- End selection --
 			// Set moved position
 			SelEnd = Position = pos;
 			refreshSelected();
@@ -180,27 +214,26 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			}
 		}
 	}
-	// if !selected
-	// 	drawSelected(true)
-	// 	selEnd = pos = newpos
-	// 	redrawCaret
-	// f refresh =>
-	// 	selEnd= Pos = newPos
-	// 	drawSelected(false);
-	// 	drawCaret
-
-	if (old_top == Top) {
-		if (!sel && Selected) {
-			// beginning selection
-			//drawSelected(true);
-		} else {
-			//drawSelected(false);
-		}
-	}
 }
 
 void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 {
+	quint64 abs = static_cast<quint64>(qAbs(pos));
+	quint64 okPos = 0;
+	if (pos < 0) {
+		if (Position < abs) {
+			okPos = 0;
+		} else {
+			okPos = Position - abs;
+		}
+	} else {
+		okPos = Position + abs;
+		if (okPos < Position || okPos < abs || document->length() < okPos) {	// check overed
+			okPos = document->length();
+		}
+	}
+	qDebug("pos:%lld, abs:%llu, okPos: %llu", pos, abs, okPos);
+	movePosition(okPos, sel, hold_vpos);
 }
 
 void Cursor::refreshTopByDown()
