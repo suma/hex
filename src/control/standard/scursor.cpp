@@ -73,22 +73,37 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 		}
 	}
 
-	if (!sel) {
-		PositionAnchor = pos;
-	}
 	Position = pos;
+	PositionAnchor = sel ? PositionAnchor : Position;
 
 	if (Top == oldTop) {
-		int line_pos, line_anchor;
-		if (Position != oldPos) {
-			view->drawView(HexView::DRAW_LINE, oldPos / HexConfig::Num - oldTop);
+		if (!sel && oldSelection) {
+			//qDebug("A");
+			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
+		} else if (oldSelection && Position != oldPos) {
+			quint64 begin, end;
+			if (PositionAnchor < oldPos && PositionAnchor >= Position ||
+				PositionAnchor >=oldPos && PositionAnchor < Position) {
+				// Crossing between begin and end
+				begin = qMin(qMin(Position, PositionAnchor), oldPos);
+				end   = qMax(qMax(Position, PositionAnchor), oldPos);
+				//qDebug("B - crossing %llu, %llu", begin/16, end/16);
+			} else {
+				// Minimum range
+				if (Position < oldPos) {
+					begin = qMin(Position, oldPos);
+					end   = qMax(qMax(Position, oldPos), PositionAnchor);
+				} else {
+					begin = qMin(qMin(Position, oldPos), PositionAnchor);
+					end   = qMax(Position, oldPos);
+				}
+				//qDebug("C - Pos:%llu, oldPos:%llu Anch:%llu oldAnch:%llu", Position/16, oldPos/16, PositionAnchor/15, oldPosAnchor/16);
+				//qDebug("C - minimum %llu, %llu", begin, end);
+			}
+			redrawSelection(begin, end);
 		}
-		if (oldSelection) {
-			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor), oldTop);
-		}
-		if (hasSelection()) {
-			redrawSelection(qMin(Position, PositionAnchor), qMax(Position, PositionAnchor), Top);
-		}
+		// 
+		view->drawView(HexView::DRAW_LINE, oldPos / HexConfig::Num - Top);
 	} else {
 		view->drawView();
 	}
@@ -99,37 +114,36 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 
 void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 {
-	quint64 abs = static_cast<quint64>(qAbs(pos));
+	quint64 diff = static_cast<quint64>(qAbs(pos));
 	quint64 okPos = 0;
 	if (pos < 0) {
-		if (Position < abs) {
+		if (Position < diff) {
 			okPos = 0;
 		} else {
-			okPos = Position - abs;
+			okPos = Position - diff;
 		}
 	} else {
-		if (Position < numeric_limits<quint64>::max() - abs && Position + abs <= document->length()) {
-			okPos = Position + abs;
+		if (Position < numeric_limits<quint64>::max() - diff && Position + diff <= document->length()) {
+			okPos = Position + diff;
 		} else {
 			okPos = document->length();
 		}
 	}
-	//qDebug("pos:%lld, abs:%llu, okPos: %llu", pos, abs, okPos);
+	//qDebug("pos:%lld, diff:%llu, okPos: %llu", pos, diff, okPos);
 	movePosition(okPos, sel, hold_vpos);
 }
 
-void Cursor::redrawSelection(quint64 begin, quint64 end, quint64 top)
+void Cursor::redrawSelection(quint64 begin, quint64 end)
 {
-	qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, top);
+	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
 	int beginLine, endLine;
 	begin /= HexConfig::Num;
 	end   /= HexConfig::Num;
 
-	Q_ASSERT(end > top);
+	beginLine = qMax(begin, Top) - Top;
+	endLine   = qMax(end, Top) - Top;
 
-	beginLine = qMax(begin, top) - top;
-	endLine   = end - top;
-
+	//qDebug("redrawSelection %d, %d, Top:%llu", beginLine, endLine, Top);
 	view->drawView(HexView::DRAW_RANGE, beginLine, endLine + 1);
 }
 

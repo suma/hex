@@ -144,7 +144,9 @@ namespace Standard {
 
 
 	public:
+		// TODO change signal
 		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
+
 	protected:
 		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
@@ -152,8 +154,6 @@ namespace Standard {
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		bool isSelected(quint64 pos);
-	public:
-		void drawSelected(bool reset = false);
 	protected:
 
 		void byteToHex(uchar c, QString &h);

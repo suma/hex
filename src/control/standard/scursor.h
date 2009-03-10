@@ -81,7 +81,7 @@ namespace Standard {
 		void moveRelativePosition(qint64 pos, bool sel, bool hold_vpos);
 
 	private:
-		void redrawSelection(quint64, quint64, quint64 top);
+		void redrawSelection(quint64, quint64);
 
 	};
 

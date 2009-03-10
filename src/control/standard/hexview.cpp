@@ -435,7 +435,6 @@ void HexView::byteToHex(uchar c, QString &h)
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
-		//qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cursor->Position, cursor->SelEnd, cursor->SelEndOld, cursor->SelEnd / HexConfig::Num);
 
 		cursor->movePosition(posAt(ev->pos()), false, false);
 
@@ -453,13 +452,12 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	cursor->movePosition(posAt(ev->pos()), true, false);
 }
 
-void HexView::mouseReleaseEvent(QMouseEvent *ev)
+void HexView::mouseReleaseEvent(QMouseEvent *)
 {
 	//qDebug("mouse release");
 
 	// End mouse capture
 	releaseMouse();
-	//cursor->movePosition(posAt(ev->pos()), true, false);
 }
 
 quint64 HexView::posAt(const QPoint &pos)
@@ -475,46 +473,6 @@ quint64 HexView::posAt(const QPoint &pos)
 	}
 
 	return qMin((cursor->Top + y) * HexConfig::Num + x, document->length());
-}
-
-void HexView::drawSelected(bool reset)
-{
-	/*
-	const quint64 SelBegin = cursor->SelBegin;
-	const quint64 SelEnd = cursor->SelEnd;
-	const quint64 SelEndOld = cursor->SelEndOld;
-	quint64 begin, end;
-	if (reset && cursor->Selected) {
-		//-- Reset selected lines
-		// Get selected lines
-		begin = qMin(qMin(SelBegin, SelEnd), SelEndOld);
-		end   = qMax(qMax(SelBegin, SelEnd), SelEndOld);
-		const int begin_line = begin / HexConfig::Num - cursor->Top;
-		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
-		cursor->Selected = false;
-
-		// Redraw lines
-		drawView(DRAW_RANGE, begin_line, end_line);
-	} else if (cursor->selMoved()) {
-		// Selected range is changing
-		if ((SelBegin < SelEndOld && SelBegin >= SelEnd ||
-			SelBegin >= SelEndOld && SelBegin < SelEnd)) {
-			// Crossing between begin and end
-			begin = qMin(qMin(SelBegin, SelEnd), SelEndOld);
-			end   = qMax(qMax(SelBegin, SelEnd), SelEndOld);
-		} else {
-			// Minimum range
-			begin = qMin(SelEnd, SelEndOld);
-			end   = qMax(SelEnd, SelEndOld);
-		}
-
-		// Get redrawing lines
-		const int begin_line = begin / HexConfig::Num - cursor->Top;
-		const int end_line   = end   / HexConfig::Num - cursor->Top + 1;
-		// Redraw lines
-		drawView(DRAW_RANGE, begin_line, end_line);
-	}
-	*/
 }
 
 // Enable caret blink
