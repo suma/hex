@@ -77,14 +77,6 @@ namespace Standard {
 		void turnTextCaretVisible();
 
 	public:
-		void Home();
-		void End();
-		void Left(uint = 1);
-		void Right(uint = 1);
-		void Up(uint = 1);
-		void Down(uint = 1);
-		void PageUp(uint = 1);
-		void PageDown(uint = 1);
 
 		void movePosition(quint64 pos, bool sel, bool hold_vpos);
 		void moveRelativePosition(qint64 pos, bool sel, bool hold_vpos);
