@@ -15,11 +15,7 @@ Cursor::Cursor(Document *Doc, HexView *View)
 	, view(View)
 	, Top(0)
 	, Position(0)
-	, SelBegin(0)
-	, SelEnd(0)
-	, SelEndOld(0)
-	, Selected(false)
-	, Selection(false)
+	, PositionAnchor(0)
 	, HighNibble(true)
 	, CaretVisibleShape(CARET_BLOCK)
 	, CaretInvisibleShape(CARET_FRAME)
@@ -34,50 +30,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	Q_ASSERT(pos <= document->length());
 	// FIXME: replace drawView/drawCaret callings to udpate event
 	
-	if (!Selection) {
-		if (sel) {
-			beginSelection(pos, sel, hold_vpos);
-		} else {
-			noSelection(pos, sel, hold_vpos);
-		}
-	} else {
-		if (sel) {
-			moveSelection(pos, sel, hold_vpos);
-		} else {
-			endSelection(pos, sel, hold_vpos);
-		}
-	}
-}
-void Cursor::beginSelection(quint64 pos, bool sel, bool hold_vpos)
-{
-	qDebug("Cursor - beginSelection");
-	//-- Begin selection --
-	// Draw selected lines
-	view->drawSelected(true);
-
-	// Set begin position
-	SelEndOld = Position;
-	SelBegin = SelEnd = Position = pos;
-	qDebug("EndOld:%llu, Pos:%llu", SelEndOld, pos);
-
-	//-- Redraw lines if caret moved
-	if (view->getConfig().EnableCaret && SelEnd != SelEndOld) {
-		const int line = (SelEndOld / HexConfig::Num) - Top;
-		if (line <= view->getConfig().drawableLines(view->height())) {
-			view->drawView(HexView::DRAW_RANGE, line, line + 1);
-		}
-	}
-
-	view->drawCaret();
-
-	setSelection(true);
-}
-
-void Cursor::noSelection(quint64 pos, bool sel, bool hold_vpos)
-{
-	qDebug("Cursor - noSelection");
-	//-- Normal move --
-	//   only redrawCaret
+	const quint64 oldPos = Position;
 	quint64 top = Top;
 	int vpos_line = 0;
 	if (hold_vpos) {
@@ -85,6 +38,7 @@ void Cursor::noSelection(quint64 pos, bool sel, bool hold_vpos)
 	}
 
 	const bool goDown = Position < pos;
+	bool hasSelection = Position != PositionAnchor;
 
 	if (goDown) {
 		const uint count_line = view->getConfig().drawableLines(view->height()) - 1;
@@ -118,14 +72,17 @@ void Cursor::noSelection(quint64 pos, bool sel, bool hold_vpos)
 		}
 	}
 
-	if (Top == top && Position != pos) {
-		const int line = (Position / HexConfig::Num) - Top;
-		view->drawView(HexView::DRAW_RANGE, line, line + 1);
+	if (!sel) {
+		PositionAnchor = pos;
 	}
-
-	SelEndOld = SelEnd = SelBegin = Position = pos;
-	//qDebug("Top:%llu, top:%llu", Top, top);
-	if (Top != top) {
+	Position = pos;
+	if (Top == top) {
+	   if ((Position != oldPos || hasSelection)) {
+			const int line_old_pos = (oldPos / HexConfig::Num) - Top;
+			const int line_anchor = (PositionAnchor / HexConfig::Num) - Top;
+			view->drawView(HexView::DRAW_RANGE, qMin(line_old_pos, line_anchor), qMax(line_old_pos, line_anchor) + 1);
+	   }
+	} else {
 		Top = top;
 		view->drawView();
 	}
@@ -133,48 +90,6 @@ void Cursor::noSelection(quint64 pos, bool sel, bool hold_vpos)
 	view->drawCaret();
 }
 
-void Cursor::moveSelection(quint64 pos, bool sel, bool hold_vpos)
-{
-	qDebug("Cursor - moveSelection");
-	//-- Move selection
-	// Set moved position to OLD
-	SelEndOld = SelEnd;
-
-	// Set moved position
-	SelEnd = Position = pos;
-
-	// Refresh flag
-	refreshSelected();
-
-	// Redraw updated lines
-	view->drawSelected(false);
-
-	//-- Redraw caret if caret selection moved --
-	if (view->getConfig().EnableCaret && SelEnd != SelEndOld) {
-		view->drawCaret();
-		setHexCaretVisible(false);
-	}
-}
-
-void Cursor::endSelection(quint64 pos, bool sel, bool hold_vpos)
-{
-	qDebug("Cursor - endSelection");
-	//-- End selection --
-	// Set moved position
-	SelEnd = Position = pos;
-	refreshSelected();
-
-	setSelection(false);
-
-	// Redraw updated lines
-	view->drawSelected(false);
-
-	//-- Redraw caret if selection moved
-	if (view->getConfig().EnableCaret && SelEnd != SelEndOld) {
-		view->drawCaret();
-		setHexCaretVisible(false);
-	}
-}
 
 void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 {

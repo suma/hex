@@ -197,12 +197,12 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 
 inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
 {
-	if (!cursor->Selected) {
+	if (!cursor->hasSelection()) {
 		return;
 	}
 
-	sel_begin = qMin(cursor->SelBegin, cursor->SelEnd);
-	sel_end   = qMax(cursor->SelBegin, cursor->SelEnd);
+	sel_begin = qMin(cursor->Position, cursor->PositionAnchor);
+	sel_end   = qMax(cursor->Position, cursor->PositionAnchor);
 
 	if (top <= sel_end && sel_begin <= qMax(top + (HexConfig::Num * count_draw_line), top + size)) {
 		selected = true;
@@ -213,8 +213,8 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 
 inline bool HexView::isSelected(quint64 pos)
 {
-	const quint64 sel_begin = qMin(cursor->SelBegin, cursor->SelEnd);
-	const quint64 sel_end   = qMax(cursor->SelBegin, cursor->SelEnd);
+	const quint64 sel_begin = qMin(cursor->Position, cursor->PositionAnchor);
+	const quint64 sel_end   = qMax(cursor->Position, cursor->PositionAnchor);
 	return sel_begin <= pos && pos <  sel_end;
 }
 
@@ -364,7 +364,7 @@ void HexView::drawCaretLine(const CaretDrawInfo &info)
 void HexView::drawCaretBlock(const CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
-		if (cursor->HighNibble || cursor->Selected) {
+		if (cursor->HighNibble || cursor->hasSelection()) {
 			// Draw block byte
 			QBrush brush(config.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
@@ -437,7 +437,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		//qDebug("mosue press pos:%llu end:%llu endO:%llu el:%llu", cursor->Position, cursor->SelEnd, cursor->SelEndOld, cursor->SelEnd / HexConfig::Num);
 
-		cursor->movePosition(posAt(ev->pos()), true, false);
+		cursor->movePosition(posAt(ev->pos()), false, false);
 
 		// Start mouse capture
 		grabMouse();
@@ -446,11 +446,6 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	// Check mouse captured
-	if (!cursor->Selection) {
-		return;
-	}
-
 	// FIXME: move down automatically
 	if (height() < ev->pos().y()) {
 		return;
@@ -460,16 +455,11 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 
 void HexView::mouseReleaseEvent(QMouseEvent *ev)
 {
-	// Check mouse captured
-	if (!cursor->Selection) {
-		return;
-	}
-
 	//qDebug("mouse release");
 
 	// End mouse capture
 	releaseMouse();
-	cursor->movePosition(posAt(ev->pos()), false, false);
+	//cursor->movePosition(posAt(ev->pos()), true, false);
 }
 
 quint64 HexView::posAt(const QPoint &pos)
@@ -489,6 +479,7 @@ quint64 HexView::posAt(const QPoint &pos)
 
 void HexView::drawSelected(bool reset)
 {
+	/*
 	const quint64 SelBegin = cursor->SelBegin;
 	const quint64 SelEnd = cursor->SelEnd;
 	const quint64 SelEndOld = cursor->SelEndOld;
@@ -523,6 +514,7 @@ void HexView::drawSelected(bool reset)
 		// Redraw lines
 		drawView(DRAW_RANGE, begin_line, end_line);
 	}
+	*/
 }
 
 // Enable caret blink

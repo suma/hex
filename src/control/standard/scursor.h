@@ -41,13 +41,11 @@ namespace Standard {
 
 		quint64 Top;		// Number of Line
 		quint64 Position;	// pos(not line)
+		quint64 PositionAnchor;
 
 		// Selected: [SelBegin, SelEnd]
-		quint64 SelBegin;	// pos(not line)
-		quint64 SelEnd;		// pos(not line)
-		quint64 SelEndOld;	// old
-		bool Selected;		// Begin != End
-		bool Selection;
+		//bool Selected;		// Begin != End
+		//bool Selection;
 		bool HighNibble;
 	
 		// for Caret
@@ -70,6 +68,7 @@ namespace Standard {
 		void setSelectEndOld(quint64);
 		*/
 
+		bool hasSelection();
 		void setSelection(bool);
 		void setHexCaretVisible(bool t);
 		void turnHexCaretVisible();
@@ -81,27 +80,11 @@ namespace Standard {
 		void movePosition(quint64 pos, bool sel, bool hold_vpos);
 		void moveRelativePosition(qint64 pos, bool sel, bool hold_vpos);
 
-	private:
-		inline void beginSelection(quint64 pos, bool sel, bool hold_vpos);
-		inline void noSelection(quint64 pos, bool sel, bool hold_vpos);
-		inline void moveSelection(quint64 pos, bool sel, bool hold_vpos);
-		inline void endSelection(quint64 pos, bool sel, bool hold_vpos);
-
 	};
 
-	inline void Cursor::refreshSelected()
+	inline bool Cursor::hasSelection()
 	{
-		Selected = SelBegin != SelEnd;
-	}
-
-	inline bool Cursor::selMoved()
-	{
-		return SelEnd != SelEndOld;
-	}
-
-	inline void Cursor::setSelection(bool t)
-	{
-		Selection = t;
+		return Position != PositionAnchor;
 	}
 
 	inline void Cursor::setHexCaretVisible(bool t)
