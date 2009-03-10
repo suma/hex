@@ -78,31 +78,14 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 
 	if (Top == oldTop) {
 		if (!sel && oldSelection) {
-			//qDebug("A");
+			// Clear selection
 			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
-		} else if (oldSelection && Position != oldPos) {
-			quint64 begin, end;
-			if (PositionAnchor < oldPos && PositionAnchor >= Position ||
-				PositionAnchor >=oldPos && PositionAnchor < Position) {
-				// Crossing between begin and end
-				begin = qMin(qMin(Position, PositionAnchor), oldPos);
-				end   = qMax(qMax(Position, PositionAnchor), oldPos);
-				//qDebug("B - crossing %llu, %llu", begin/16, end/16);
-			} else {
-				// Minimum range
-				if (Position < oldPos) {
-					begin = qMin(Position, oldPos);
-					end   = qMax(qMax(Position, oldPos), PositionAnchor);
-				} else {
-					begin = qMin(qMin(Position, oldPos), PositionAnchor);
-					end   = qMax(Position, oldPos);
-				}
-				//qDebug("C - Pos:%llu, oldPos:%llu Anch:%llu oldAnch:%llu", Position/16, oldPos/16, PositionAnchor/15, oldPosAnchor/16);
-				//qDebug("C - minimum %llu, %llu", begin, end);
-			}
+		} else if (Position != oldPos) {
+			// Draw/Redraw selection
+			quint64 begin = qMin(qMin(Position, PositionAnchor), oldPos);
+			quint64 end   = qMax(qMax(Position, PositionAnchor), oldPos);
 			redrawSelection(begin, end);
 		}
-		// 
 		view->drawView(HexView::DRAW_LINE, oldPos / HexConfig::Num - Top);
 	} else {
 		view->drawView();
