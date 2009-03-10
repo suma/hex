@@ -82,8 +82,10 @@ namespace Standard {
 		void moveRelativePosition(qint64 pos, bool sel, bool hold_vpos);
 
 	private:
-		void refreshTopByUp();
-		void refreshTopByDown();
+		inline void beginSelection(quint64 pos, bool sel, bool hold_vpos);
+		inline void noSelection(quint64 pos, bool sel, bool hold_vpos);
+		inline void moveSelection(quint64 pos, bool sel, bool hold_vpos);
+		inline void endSelection(quint64 pos, bool sel, bool hold_vpos);
 
 	};
 
