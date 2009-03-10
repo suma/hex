@@ -74,11 +74,14 @@ namespace Standard {
 		void turnHexCaretVisible();
 		void setTextCaretVisible(bool t);
 		void turnTextCaretVisible();
-
+	
 	public:
 
 		void movePosition(quint64 pos, bool sel, bool hold_vpos);
 		void moveRelativePosition(qint64 pos, bool sel, bool hold_vpos);
+
+	private:
+		void redrawSelection(quint64, quint64, quint64 top);
 
 	};
 

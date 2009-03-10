@@ -30,44 +30,45 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	Q_ASSERT(pos <= document->length());
 	// FIXME: replace drawView/drawCaret callings to udpate event
 	
+	const quint64 oldTop = Top;
 	const quint64 oldPos = Position;
-	quint64 top = Top;
+	const quint64 oldPosAnchor = PositionAnchor;
+	const bool oldSelection = hasSelection();
+
 	int vpos_line = 0;
 	if (hold_vpos) {
 		vpos_line = Top - Position / HexConfig::Num;
 	}
 
 	const bool goDown = Position < pos;
-	bool hasSelection = Position != PositionAnchor;
-
 	if (goDown) {
 		const uint count_line = view->getConfig().drawableLines(view->height()) - 1;
 		const quint64 pos_line = pos / HexConfig::Num;
 
 		// if Top + count_line < pos_line then Pos is invisible
 		if (count_line <= pos_line && Top <= pos_line - count_line) {
-			top = pos_line - count_line + 1;
+			Top = pos_line - count_line + 1;
 		}
 	} else {
-		top = qMin(pos / HexConfig::Num, Top);
+		Top = qMin(pos / HexConfig::Num, Top);
 	}
 
 	if (hold_vpos) {
-		const int vpos_line_now = top - pos / HexConfig::Num;
+		const int vpos_line_now = Top - pos / HexConfig::Num;
 		const uint diff = qAbs(vpos_line - vpos_line_now);
 		if (vpos_line < vpos_line_now) {
-			if (diff < top) {
-				top -= diff;
+			if (diff < Top) {
+				Top -= diff;
 			} else {
-				top = 0;
+				Top = 0;
 			}
 		} else {
 			const uint count_line = view->getConfig().drawableLines(view->height()) - 1;
 			const quint64 max_top = document->length() / HexConfig::Num - count_line;
-			if (top < numeric_limits<quint64>::max() - diff && top + diff <= max_top) {
-				top += diff;
+			if (Top < numeric_limits<quint64>::max() - diff && Top + diff <= max_top) {
+				Top += diff;
 			} else {
-				top = max_top;
+				Top = max_top;
 			}
 		}
 	}
@@ -76,14 +77,19 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 		PositionAnchor = pos;
 	}
 	Position = pos;
-	if (Top == top) {
-	   if ((Position != oldPos || hasSelection)) {
-			const int line_old_pos = (oldPos / HexConfig::Num) - Top;
-			const int line_anchor = (PositionAnchor / HexConfig::Num) - Top;
-			view->drawView(HexView::DRAW_RANGE, qMin(line_old_pos, line_anchor), qMax(line_old_pos, line_anchor) + 1);
-	   }
+
+	if (Top == oldTop) {
+		int line_pos, line_anchor;
+		if (Position != oldPos) {
+			view->drawView(HexView::DRAW_LINE, oldPos / HexConfig::Num - oldTop);
+		}
+		if (oldSelection) {
+			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor), oldTop);
+		}
+		if (hasSelection()) {
+			redrawSelection(qMin(Position, PositionAnchor), qMax(Position, PositionAnchor), Top);
+		}
 	} else {
-		Top = top;
 		view->drawView();
 	}
 
@@ -112,6 +118,20 @@ void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 	movePosition(okPos, sel, hold_vpos);
 }
 
+void Cursor::redrawSelection(quint64 begin, quint64 end, quint64 top)
+{
+	qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, top);
+	int beginLine, endLine;
+	begin /= HexConfig::Num;
+	end   /= HexConfig::Num;
+
+	Q_ASSERT(end > top);
+
+	beginLine = qMax(begin, top) - top;
+	endLine   = end - top;
+
+	view->drawView(HexView::DRAW_RANGE, beginLine, endLine + 1);
+}
 
 
 }	// namespace
