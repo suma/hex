@@ -35,11 +35,13 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	const quint64 oldPosAnchor = PositionAnchor;
 	const bool oldSelection = hasSelection();
 
+	// Compute virtual position of caret
 	int vpos_line = 0;
 	if (hold_vpos) {
 		vpos_line = Top - Position / HexConfig::Num;
 	}
 
+	//-- Update Cursor::Top with Position
 	const bool goDown = Position < pos;
 	if (goDown) {
 		const uint count_line = view->getConfig().drawableLines(view->height()) - 1;
@@ -53,6 +55,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 		Top = qMin(pos / HexConfig::Num, Top);
 	}
 
+	// Hold virtual position of caret
 	if (hold_vpos) {
 		const int vpos_line_now = Top - pos / HexConfig::Num;
 		const uint diff = qAbs(vpos_line - vpos_line_now);
@@ -76,6 +79,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	Position = pos;
 	PositionAnchor = sel ? PositionAnchor : Position;
 
+	// Redraw view
 	if (Top == oldTop) {
 		if (!sel && oldSelection) {
 			// Clear selection
@@ -86,6 +90,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			quint64 end   = qMax(qMax(Position, PositionAnchor), oldPos);
 			redrawSelection(begin, end);
 		}
+		// Clear old caret
 		view->drawView(HexView::DRAW_LINE, oldPos / HexConfig::Num - Top);
 	} else {
 		view->drawView();
