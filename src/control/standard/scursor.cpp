@@ -86,8 +86,8 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
 		} else if (Position != oldPos) {
 			// Draw/Redraw selection
-			quint64 begin = qMin(qMin(Position, PositionAnchor), oldPos);
-			quint64 end   = qMax(qMax(Position, PositionAnchor), oldPos);
+			const quint64 begin = qMin(qMin(Position, PositionAnchor), oldPos);
+			const quint64 end   = qMax(qMax(Position, PositionAnchor), oldPos);
 			redrawSelection(begin, end);
 		}
 		// Clear old caret
@@ -102,7 +102,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 
 void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 {
-	quint64 diff = static_cast<quint64>(qAbs(pos));
+	const quint64 diff = static_cast<quint64>(qAbs(pos));
 	quint64 okPos = 0;
 	if (pos < 0) {
 		if (Position < diff) {
@@ -124,12 +124,11 @@ void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 void Cursor::redrawSelection(quint64 begin, quint64 end)
 {
 	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
-	int beginLine, endLine;
 	begin /= HexConfig::Num;
 	end   /= HexConfig::Num;
 
-	beginLine = qMax(begin, Top) - Top;
-	endLine   = qMax(end, Top) - Top;
+	const int beginLine = qMax(begin, Top) - Top;
+	const int endLine   = qMax(end, Top) - Top;
 
 	//qDebug("redrawSelection %d, %d, Top:%llu", beginLine, endLine, Top);
 	view->drawView(HexView::DRAW_RANGE, beginLine, endLine + 1);
