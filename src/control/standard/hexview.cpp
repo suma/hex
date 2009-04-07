@@ -445,11 +445,13 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	// FIXME: move down automatically
-	if (height() < ev->pos().y()) {
-		return;
+	if (ev->button() == Qt::LeftButton) {
+		// FIXME: move down automatically
+		if (height() < ev->pos().y()) {
+			return;
+		}
+		cursor->movePosition(posAt(ev->pos()), true, false);
 	}
-	cursor->movePosition(posAt(ev->pos()), true, false);
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *)
@@ -543,10 +545,10 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		cursor->moveRelativePosition(16, keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
-		cursor->moveRelativePosition(-16 * 15, keepAnchor, false);
+		cursor->moveRelativePosition(-16 * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
-		cursor->moveRelativePosition(16 * 15, keepAnchor, false);
+		cursor->moveRelativePosition(16 * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
 		qDebug("key backspace");
@@ -558,6 +560,29 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		qDebug("key delete");
 		break;
 	default:
+		{
+			QString text = ev->text();
+			for (int i = 0; i < text.length(); i++) {
+				QChar c = text.at(i);
+				int nibble = -1;
+				if (c.unicode() >= 'a' && c.unicode() <= 'f') {
+					nibble = c.unicode() - 'a' + 10;
+				} else if (c.unicode() >= '0' && c.unicode() <= '9') {
+					nibble = c.unicode() - '0';
+				}
+				if (nibble < 0) {
+					continue;
+				}
+				if (cursor->HighNibble) {
+					//changeData(m_cursorPosition, (nibble << 4) + (m_data[m_cursorPosition] & 0x0f), true);
+					cursor->HighNibble = false;
+				} else {
+					//changeData(m_cursorPosition, nibble + (m_data[m_cursorPosition] & 0xf0));
+					cursor->HighNibble = true;
+					cursor->moveRelativePosition(1, false, false);
+				}
+			}
+		}
 		return;
 	}
 
