@@ -25,7 +25,7 @@ Cursor::Cursor(Document *Doc, HexView *View)
 {
 }
 
-void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
+void Cursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 {
 	Q_ASSERT(pos <= document->length());
 	// FIXME: replace drawView/drawCaret callings by doc udpate event
@@ -37,7 +37,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 
 	// Compute virtual position of caret
 	int vwOldPosLine = 0;
-	if (hold_vpos) {
+	if (holdViewPos) {
 		vwOldPosLine = Top - Position / HexConfig::Num;
 	}
 
@@ -57,7 +57,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	}
 
 	// Hold virtual position of caret
-	if (hold_vpos) {
+	if (holdViewPos) {
 		const int vwNewPosLine = Top - pos / HexConfig::Num;
 		const uint diff = qAbs(vwOldPosLine - vwNewPosLine);
 		if (vwOldPosLine < vwNewPosLine) {
@@ -103,7 +103,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 }
 
 
-void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
+void Cursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 {
 	const quint64 diff = static_cast<quint64>(qAbs(pos));
 	quint64 okPos = 0;
@@ -121,7 +121,7 @@ void Cursor::moveRelativePosition(qint64 pos, bool sel, bool hold_vpos)
 		}
 	}
 	//qDebug("pos:%lld, diff:%llu, okPos: %llu", pos, diff, okPos);
-	movePosition(okPos, sel, hold_vpos);
+	movePosition(okPos, sel, holdViewPos);
 }
 
 void Cursor::redrawSelection(quint64 begin, quint64 end)
