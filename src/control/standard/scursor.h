@@ -21,11 +21,6 @@ namespace Standard {
 		CARET_UNDERBAR,
 	};
 
-	enum MoveMode {
-		MoveAnchor,
-		KeepAnchor,
-	};
-
 	class Cursor
 	{
 	public:

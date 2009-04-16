@@ -61,6 +61,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 		const uint diff = qAbs(vpos_line - vpos_line_now);
 		if (vpos_line < vpos_line_now) {
 			if (diff < Top) {
+				// Fix hold vpos(when move to end line)
 				Top -= diff;
 			} else {
 				Top = 0;
