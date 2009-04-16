@@ -28,7 +28,7 @@ Cursor::Cursor(Document *Doc, HexView *View)
 void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 {
 	Q_ASSERT(pos <= document->length());
-	// FIXME: replace drawView/drawCaret callings to udpate event
+	// FIXME: replace drawView/drawCaret callings by doc udpate event
 	
 	const quint64 oldTop = Top;
 	const quint64 oldPos = Position;
@@ -78,6 +78,9 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 
 	Position = pos;
 	PositionAnchor = sel ? PositionAnchor : Position;
+
+	// Reset Nibble
+	//HighNibble = true;
 
 	// Redraw view
 	if (Top == oldTop) {

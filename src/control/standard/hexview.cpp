@@ -258,7 +258,7 @@ COUNTUP:// Count up
 		if (--itr_color->Length <= 0) {
 			// Move next color
 			++itr_color;
-			// Make color update
+			// Change color
 			reset_color = true;
 		}
 
@@ -527,27 +527,35 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
 	case Qt::Key_Home:
+		cursor->HighNibble = true;
 		cursor->movePosition(0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
+		cursor->HighNibble = true;
 		cursor->movePosition(document->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
+		cursor->HighNibble = true;
 		cursor->moveRelativePosition(-1, keepAnchor, false);
 		break;
 	case Qt::Key_Right:
+		cursor->HighNibble = true;
 		cursor->moveRelativePosition(1, keepAnchor, false);
 		break;
 	case Qt::Key_Up:
+		cursor->HighNibble = true;
 		cursor->moveRelativePosition(-16, keepAnchor, false);
 		break;
 	case Qt::Key_Down:
+		cursor->HighNibble = true;
 		cursor->moveRelativePosition(16, keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
+		cursor->HighNibble = true;
 		cursor->moveRelativePosition(-16 * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
+		cursor->HighNibble = true;
 		cursor->moveRelativePosition(16 * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
@@ -561,6 +569,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	default:
 		{
+			// copy from QtCreator
 			QString text = ev->text();
 			for (int i = 0; i < text.length(); i++) {
 				QChar c = text.at(i);
@@ -576,6 +585,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 				if (cursor->HighNibble) {
 					//changeData(m_cursorPosition, (nibble << 4) + (m_data[m_cursorPosition] & 0x0f), true);
 					cursor->HighNibble = false;
+					cursor->moveRelativePosition(0, false, false);
 				} else {
 					//changeData(m_cursorPosition, nibble + (m_data[m_cursorPosition] & 0xf0));
 					cursor->HighNibble = true;
