@@ -36,9 +36,9 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	const bool oldSelection = hasSelection();
 
 	// Compute virtual position of caret
-	int vwPosLine = 0;
+	int vwOldPosLine = 0;
 	if (hold_vpos) {
-		vwPosLine = Top - Position / HexConfig::Num;
+		vwOldPosLine = Top - Position / HexConfig::Num;
 	}
 
 	const uint vwCountLine = view->getConfig().drawableLines(view->height()) - 1;
@@ -46,11 +46,11 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	//-- Update Cursor::Top with Position
 	const bool goDown = Position < pos;
 	if (goDown) {
-		const quint64 vwNewPosLine = pos / HexConfig::Num;
+		const quint64 posLine = pos / HexConfig::Num;
 
-		// if Top + vwCountLine < vwNewPosLine then Pos is invisible
-		if (vwCountLine <= vwNewPosLine && Top <= vwNewPosLine - vwCountLine) {
-			Top = vwNewPosLine - vwCountLine + 1;
+		// if Top + vwCountLine < posLine then Pos is invisible
+		if (vwCountLine <= posLine && Top <= posLine - vwCountLine) {
+			Top = posLine - vwCountLine + 1;
 		}
 	} else {
 		Top = qMin(pos / HexConfig::Num, Top);
@@ -59,21 +59,19 @@ void Cursor::movePosition(quint64 pos, bool sel, bool hold_vpos)
 	// Hold virtual position of caret
 	if (hold_vpos) {
 		const int vwNewPosLine = Top - pos / HexConfig::Num;
-		const uint diff = qAbs(vwPosLine - vwNewPosLine);
-		const quint64 max_top = document->length() / HexConfig::Num - vwCountLine;
-		if (vwPosLine < vwNewPosLine) {
+		const uint diff = qAbs(vwOldPosLine - vwNewPosLine);
+		if (vwOldPosLine < vwNewPosLine) {
 			if (diff < Top) {
-				// Fix hold vpos(when move to end line)
 				Top -= diff;
-				//Top = qMin(Top, max_top);
 			} else {
 				Top = 0;
 			}
 		} else {
-			if (Top < numeric_limits<quint64>::max() - diff && Top + diff <= max_top) {
+			const quint64 maxTop = document->length() / HexConfig::Num - vwCountLine + 1;
+			if (Top < numeric_limits<quint64>::max() - diff && Top + diff <= maxTop) {
 				Top += diff;
 			} else {
-				Top = max_top;
+				Top = maxTop;
 			}
 		}
 	}
