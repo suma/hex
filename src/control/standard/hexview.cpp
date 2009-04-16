@@ -346,6 +346,8 @@ void HexView::drawCaretShape(CaretDrawInfo info)
 	case CARET_UNDERBAR:
 		drawCaretUnderbar(info);
 		break;
+	default:
+		;
 	}
 }
 
@@ -436,6 +438,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
 
+		cursor->HighNibble = true;
 		cursor->movePosition(posAt(ev->pos()), false, false);
 
 		// Start mouse capture
