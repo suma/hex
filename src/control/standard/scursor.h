@@ -42,6 +42,7 @@ namespace Standard {
 		//bool Selected;		// Begin != End
 		//bool Selection;
 		bool HighNibble;
+		bool Insert;
 	
 		// for Caret
 		CaretShape CaretVisibleShape;
