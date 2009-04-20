@@ -100,7 +100,7 @@ namespace Standard {
 	public:
 		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
 
-		HexConfig & getConfig() { return config; }
+		HexConfig & getConfig() { return config_; }
 		void setCaretBlink(bool enable);
 
 	public:
@@ -171,7 +171,7 @@ namespace Standard {
 
 	protected:
 		// Main components
-		HexConfig config;
+		HexConfig config_;
 		Cursor *cursor_;
 	};
 
