@@ -121,8 +121,10 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 		return;
 	}
 
-	Q_ASSERT(0 <= line_start && line_start <= document->length() / HexConfig::Num + 1);
-	Q_ASSERT(0 <= end && end <= document->length() / HexConfig::Num + 1);
+	Q_ASSERT(0 <= line_start);
+	Q_ASSERT(static_cast<uint>(line_start) <= document->length() / HexConfig::Num + 1);
+	Q_ASSERT(0 <= end);
+	Q_ASSERT(static_cast<uint>(end) <= document->length() / HexConfig::Num + 1);
 
 	// Get draw range
 	int y_top = config_.top();
@@ -295,7 +297,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 
 	// Redraw line
 	const quint64 line = cursor_->Position / HexConfig::Num;
-	if (cursor_->Top <= line && line - cursor_->Top < (unsigned int)config_.drawableLines(height())) {
+	if (cursor_->Top <= line && line - cursor_->Top < static_cast<unsigned int>(config_.drawableLines(height()))) {
 		drawView(DRAW_LINE, line - cursor_->Top);
 	}
 
