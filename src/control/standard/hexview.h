@@ -172,7 +172,7 @@ namespace Standard {
 	protected:
 		// Main components
 		HexConfig config;
-		Cursor *cursor;
+		Cursor *cursor_;
 	};
 
 }
