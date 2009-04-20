@@ -587,12 +587,14 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 					continue;
 				}
 				if (cursor->HighNibble) {
+					// TODO: insert/rewrite document
 					//changeData(m_cursorPosition, (nibble << 4) + (m_data[m_cursorPosition] & 0x0f), true);
 					cursor->HighNibble = false;
 					// Clear and redraw caret
 					drawView(DRAW_LINE, cursor->Position / HexConfig::Num);
 					drawCaret();
 				} else {
+					// TODO: insert/rewrite document
 					//changeData(m_cursorPosition, nibble + (m_data[m_cursorPosition] & 0xf0));
 					cursor->HighNibble = true;
 					cursor->moveRelativePosition(1, false, false);

@@ -37,12 +37,12 @@ void Document::get(quint64 pos, uchar *buf, uint len)
 	Q_ASSERT(x != 0);
 	quint64 diff = pos - document->documents.position(x);
 	if (diff) {
-		quint64 size = document->documents.size(x) - diff;
+		quint64 fragmentSize = document->documents.size(x) - diff;
 		DocumentData *X = document->documents.fragment(x);
-		if (size < len) {
-			copy(X->type, X->bufferPosition + diff, size, buf);
-			len -= size;
-			buf += size;
+		if (fragmentSize < len) {
+			copy(X->type, X->bufferPosition + diff, fragmentSize, buf);
+			len -= fragmentSize;
+			buf += fragmentSize;
 			x = document->documents.next(x);
 		} else {
 			copy(X->type, X->bufferPosition + diff, len, buf);
@@ -52,12 +52,12 @@ void Document::get(quint64 pos, uchar *buf, uint len)
 
 	Q_ASSERT(x != 0);
 	while (0 < len) {
-		quint64 size = document->documents.size(x);
+		quint64 fragmentSize = document->documents.size(x);
 		DocumentData *X = document->documents.fragment(x);
-		if (size < len) {
-			copy(X->type, X->bufferPosition, size, buf);
-			len -= size;
-			buf += size;
+		if (fragmentSize < len) {
+			copy(X->type, X->bufferPosition, fragmentSize, buf);
+			len -= fragmentSize;
+			buf += fragmentSize;
 			x = document->documents.next(x);
 		} else {
 			copy(X->type, X->bufferPosition, len, buf);
@@ -87,7 +87,7 @@ void Document::insert(quint64 pos, const uchar *buf, uint len)
 	Q_ASSERT(len != 0);
 	Q_ASSERT(pos <= length());
 
-	quint64 bufPos = buffer.size();
+	const quint64 bufPos = buffer.size();
 	buffer.insert(buffer.end(), buf, buf + len);
 	document->insert_data(pos, bufPos, len, DOCTYPE_BUFFER);
 }
