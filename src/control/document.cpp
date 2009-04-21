@@ -53,8 +53,8 @@ void Document::get(quint64 pos, uchar *buf, uint len)
 	Q_ASSERT(x != 0);
 	while (0 < len) {
 		const quint64 fragmentSize = impl_->documents_.size(x);
-		DocumentData *X = impl_->documents_.fragment(x);
 		const uint cpSize = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
+		const DocumentData *X = impl_->documents_.fragment(x);
 		copy(X->type, X->bufferPosition, cpSize, buf);
 		len -= cpSize;
 		buf += cpSize;
