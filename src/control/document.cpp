@@ -35,9 +35,9 @@ void Document::get(quint64 pos, uchar *buf, uint len)
 	uint x = impl_->documents_.findNode(pos);
 
 	Q_ASSERT(x != 0);
-	quint64 diff = pos - impl_->documents_.position(x);
+	const quint64 diff = pos - impl_->documents_.position(x);
 	if (diff) {
-		quint64 fragmentSize = impl_->documents_.size(x) - diff;
+		const quint64 fragmentSize = impl_->documents_.size(x) - diff;
 		DocumentData *X = impl_->documents_.fragment(x);
 		if (fragmentSize < len) {
 			copy(X->type, X->bufferPosition + diff, fragmentSize, buf);
@@ -52,9 +52,9 @@ void Document::get(quint64 pos, uchar *buf, uint len)
 
 	Q_ASSERT(x != 0);
 	while (0 < len) {
-		quint64 fragmentSize = impl_->documents_.size(x);
+		const quint64 fragmentSize = impl_->documents_.size(x);
 		DocumentData *X = impl_->documents_.fragment(x);
-		uint cpSize = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
+		const uint cpSize = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
 		copy(X->type, X->bufferPosition, cpSize, buf);
 		len -= cpSize;
 		buf += cpSize;
