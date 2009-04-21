@@ -54,15 +54,11 @@ void Document::get(quint64 pos, uchar *buf, uint len)
 	while (0 < len) {
 		quint64 fragmentSize = impl_->documents_.size(x);
 		DocumentData *X = impl_->documents_.fragment(x);
-		if (fragmentSize < len) {
-			copy(X->type, X->bufferPosition, fragmentSize, buf);
-			len -= fragmentSize;
-			buf += fragmentSize;
-			x = impl_->documents_.next(x);
-		} else {
-			copy(X->type, X->bufferPosition, len, buf);
-			return;
-		}
+		uint cpSize = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
+		copy(X->type, X->bufferPosition, cpSize, buf);
+		len -= cpSize;
+		buf += cpSize;
+		x = impl_->documents_.next(x);
 	}
 }
 

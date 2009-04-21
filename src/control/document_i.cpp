@@ -33,7 +33,7 @@
 ** contact the sales department at qt-sales@nokia.com.
 **
 ****************************************************************************/
-/* copied by src/gui/text/qtextdocument_p.cpp */
+/* original by src/gui/text/qtextdocument_p.cpp */
 
 #include "document_i.h"
 

@@ -9,5 +9,5 @@ INCLUDEPATH += .
 
 # Input
 HEADERS += ../control/document.h ../control/document_i.h ../control/qfragmentmap_p.h
-SOURCES += main.cpp ../control/document.cpp  ../control/document_i.cpp
+SOURCES += test.cpp ../control/document.cpp  ../control/document_i.cpp
 
