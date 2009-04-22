@@ -8,7 +8,7 @@ using namespace std;
 
 View::View(QWidget *parent, Document *doc, Highlight *hi)
 	: QWidget(parent)
-	, document(doc)
+	, document_(doc)
 	, high_(hi)
 {
 }

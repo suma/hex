@@ -111,7 +111,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	painter.begin(&pix_);
 	painter.setFont(config_.Font);
 
-	if (!document->length()) {
+	if (!document_->length()) {
 		// TODO: draw Empty Background only
 		QBrush brush(config_.Colors[Color::Background]);
 		painter.fillRect(0, 0, width(), height(), brush);
@@ -122,9 +122,9 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	}
 
 	Q_ASSERT(0 <= line_start);
-	Q_ASSERT(static_cast<uint>(line_start) <= document->length() / HexConfig::Num + 1);
+	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / HexConfig::Num + 1);
 	Q_ASSERT(0 <= end);
-	Q_ASSERT(static_cast<uint>(end) <= document->length() / HexConfig::Num + 1);
+	Q_ASSERT(static_cast<uint>(end) <= document_->length() / HexConfig::Num + 1);
 
 	// Get draw range
 	int y_top = config_.top();
@@ -157,7 +157,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 
 	// Get top position of view
 	const quint64 top = (cursor_->Top + line_start) * HexConfig::Num;
-	const uint size = qMin(document->length() - top, (quint64)HexConfig::Num * count_draw_line);
+	const uint size = qMin(document_->length() - top, (quint64)HexConfig::Num * count_draw_line);
 	if (size == 0) {
 		return;
 	}
@@ -174,7 +174,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	if (buff_.capacity() < size) {
 		buff_.resize(size);
 	}
-	document->get(top, &buff_[0], size);
+	document_->get(top, &buff_[0], size);
 
 	// Get selectead area
 	bool selected = false;
@@ -317,7 +317,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	const int y = config_.top() + config_.byteHeight() * (pos / HexConfig::Num - cursor_->Top);
 
 	// Draw shape
-	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document->length()));
+	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
 
 	// Finish paint and update screen buffer
 	painter.end();
@@ -329,7 +329,7 @@ void HexView::drawCaretShape(CaretDrawInfo info)
 	if (info.caret_middle) {
 		// Copy from document
 		uchar data;
-		document->get(info.pos, &data, 1);
+		document_->get(info.pos, &data, 1);
 
 		info.hex.resize(2);
 		byteToHex(data, info.hex);
@@ -479,7 +479,7 @@ quint64 HexView::posAt(const QPoint &pos)
 		x = y = 0;
 	}
 
-	return qMin((cursor_->Top + y) * HexConfig::Num + x, document->length());
+	return qMin((cursor_->Top + y) * HexConfig::Num + x, document_->length());
 }
 
 // Enable caret blink
@@ -537,7 +537,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_End:
 		cursor_->HighNibble = true;
-		cursor_->movePosition(document->length(), keepAnchor, false);
+		cursor_->movePosition(document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
 		cursor_->HighNibble = true;
