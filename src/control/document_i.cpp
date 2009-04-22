@@ -66,6 +66,7 @@ uint DocumentImpl::insert_data(ulint pos, ulint bufPos, uint len, quint8 type)
 
 uint DocumentImpl::remove_data(ulint pos, ulint len)
 {
+	//qDebug("remove_data pos:%llu len:%llu", pos, len);
     split(pos);
     split(pos+len);
 	uint x = documents_.findNode(pos);
@@ -75,10 +76,17 @@ uint DocumentImpl::remove_data(ulint pos, ulint len)
 	while (0 < len) {
 		ulint size = documents_.size(x);
 		if (size < len) {
+			//qDebug("pos:%llu x:%u size:%llu len:%llu", pos, x, size, len);
 			len -= size;
 			length_ -= size;
 			x = documents_.erase_single(x);
-			x = documents_.next(x);
+			//qDebug("erased x:%u", x);
+			if (!x) {
+				x = documents_.findNode(pos);
+			} else {
+				x = documents_.next(x);
+			}
+			//qDebug("next  x:%u", x);
 		} else {
 			length_ -= len;
 			documents_.setSize(x, size - len);
