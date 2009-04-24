@@ -523,11 +523,6 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 
 
 	// TODO: support keyboard remap
-	if (ev->modifiers() == Qt::NoModifier) {
-		//qDebug("keypress:[%s]", ev->text().toStdString().c_str());
-	} else {
-		//qDebug("keypress:[%s] with modifier", ev->text().toStdString().c_str());
-	}
 
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
@@ -604,10 +599,6 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 			}
 		}
 		return;
-	}
-
-	if (ev->modifiers() != Qt::NoModifier) {
-	} else {
 	}
 }
 
