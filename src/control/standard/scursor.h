@@ -68,6 +68,10 @@ namespace Standard {
 
 		bool hasSelection();
 		void setSelection(bool);
+
+		void reverseHighNibble();
+		void reverseInsert();
+
 		void setHexCaretVisible(bool t);
 		void turnHexCaretVisible();
 		void setTextCaretVisible(bool t);
@@ -91,6 +95,11 @@ namespace Standard {
 	inline bool Cursor::hasSelection()
 	{
 		return Position != PositionAnchor;
+	}
+
+	inline void Cursor::reverseInsert()
+	{
+		Insert = !Insert;
 	}
 
 	inline void Cursor::setHexCaretVisible(bool t)

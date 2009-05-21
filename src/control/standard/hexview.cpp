@@ -563,7 +563,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Insert:
 		qDebug("key insert");
-		cursor_->Insert = !cursor_->Insert;
+		cursor_->reverseInsert();
 		break;
 	case Qt::Key_Delete:
 		qDebug("key delete");
