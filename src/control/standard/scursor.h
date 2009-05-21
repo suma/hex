@@ -69,7 +69,6 @@ namespace Standard {
 		bool hasSelection();
 		void setSelection(bool);
 
-		void reverseHighNibble();
 		void reverseInsert();
 
 		void setHexCaretVisible(bool t);
