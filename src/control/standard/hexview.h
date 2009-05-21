@@ -146,6 +146,7 @@ namespace Standard {
 	public:
 		// TODO change signal
 		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
+		void drawViewAfter(quint64 pos);
 
 	protected:
 		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
@@ -171,6 +172,7 @@ namespace Standard {
 
 		void changeData(quint64 pos, uchar character, bool highNibble = false);
 		void insertData(quint64 pos, uchar character);
+		void removeData(quint64 pos, quint64 len);
 
 	protected:
 		// Main components

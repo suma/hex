@@ -197,6 +197,11 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	update(0, y_top, draw_width, draw_height);
 }
 
+inline void HexView::drawViewAfter(quint64 pos)
+{
+	drawView(DRAW_AFTER, pos / HexConfig::Num - cursor_-> Top);
+}
+
 inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
 {
 	if (!cursor_->hasSelection()) {
@@ -559,14 +564,34 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		cursor_->moveRelativePosition(16 * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
-		qDebug("key backspace");
+		if (cursor_->hasSelection()) {
+			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
+			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
+			removeData(pos, len);
+			cursor_->moveRelativePosition(0, false, false);
+			cursor_->HighNibble = true;
+		} else if (0 < cursor_->Position) {
+			removeData(cursor_->Position - 1, 1);
+			cursor_->moveRelativePosition(-1, false, false);
+			cursor_->HighNibble = true;
+		}
 		break;
 	case Qt::Key_Insert:
 		qDebug("key insert");
 		cursor_->reverseInsert();
 		break;
 	case Qt::Key_Delete:
-		qDebug("key delete");
+		if (cursor_->hasSelection()) {
+			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
+			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
+			removeData(pos, len);
+			cursor_->moveRelativePosition(0, false, false);
+			cursor_->HighNibble = true;
+		} else if (cursor_->Position < document_->length()) {
+			removeData(cursor_->Position, 1);
+			cursor_->moveRelativePosition(0, false, false);
+			cursor_->HighNibble = true;
+		}
 		break;
 	default:
 		{
@@ -595,10 +620,10 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 						document_->remove(pos, qMax(cursor_->Position, cursor_->PositionAnchor) - pos);
 						cursor_->Position = pos;
 						cursor_->resetAnchor();
+						// TODO: remove and refresh collectly
+						cursor_->moveRelativePosition(0, false, false);
 					}
 
-					cursor_->HighNibble = true;
-					cursor_->moveRelativePosition(0, false, false);
 					insertData(pos, nibble << 4);
 					cursor_->HighNibble = false;
 				} else if (cursor_->Position < document_->length()) {
@@ -636,9 +661,18 @@ void HexView::insertData(quint64 pos, uchar character)
 {
 	document_->insert(pos, &character, 1);
 	// TODO: implement Redraw Event
-	drawView(DRAW_AFTER, pos / HexConfig::Num - cursor_-> Top);
+	drawViewAfter(pos);
 	drawCaret();
 }
+
+void HexView::removeData(quint64 pos, quint64 len)
+{
+	document_->remove(pos, len);
+	// TODO: implement Redraw Event
+	drawViewAfter(pos);
+}
+
+
 
 
 }	// namespace
