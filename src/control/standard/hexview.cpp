@@ -592,12 +592,13 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 					if (cursor_->hasSelection()) {
 						// TODO: Support Undo
 						// Off redrawing temporary for redrawing on insertion
-						document_->remove(pos, qMax(pos, cursor_->PositionAnchor) - pos);
+						document_->remove(pos, qMax(cursor_->Position, cursor_->PositionAnchor) - pos);
 						cursor_->Position = pos;
 						cursor_->resetAnchor();
 					}
 
 					cursor_->HighNibble = true;
+					cursor_->moveRelativePosition(0, false, false);
 					insertData(pos, nibble << 4);
 					cursor_->HighNibble = false;
 				} else if (cursor_->Position < document_->length()) {
