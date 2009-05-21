@@ -64,6 +64,8 @@ namespace Standard {
 		void setSelectEndOld(quint64);
 		*/
 
+		void resetAnchor();
+
 		bool hasSelection();
 		void setSelection(bool);
 		void setHexCaretVisible(bool t);
@@ -80,6 +82,11 @@ namespace Standard {
 		void redrawSelection(quint64, quint64);
 
 	};
+
+	inline void Cursor::resetAnchor()
+	{
+		PositionAnchor = Position;
+	}
 
 	inline bool Cursor::hasSelection()
 	{
