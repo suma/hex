@@ -169,6 +169,9 @@ namespace Standard {
 		void drawCaretBlock(const CaretDrawInfo &);
 		void drawCaretUnderbar(const CaretDrawInfo &);
 
+		void changeData(quint64 pos, uchar character, bool highNibble = false);
+		void insertData(quint64 pos, uchar character);
+
 	protected:
 		// Main components
 		HexConfig config_;

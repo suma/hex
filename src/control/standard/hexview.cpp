@@ -583,23 +583,50 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 				if (nibble < 0) {
 					continue;
 				}
-				if (cursor_->HighNibble) {
-					// TODO: insert/rewrite document
-					//changeData(m_cursorPosition, (nibble << 4) + (m_data[m_cursorPosition] & 0x0f), true);
-					cursor_->HighNibble = false;
-					// Clear and redraw caret
-					drawView(DRAW_LINE, cursor_->Position / HexConfig::Num - cursor_->Top);
-					drawCaret();
-				} else {
-					// TODO: insert/rewrite document
-					//changeData(m_cursorPosition, nibble + (m_data[m_cursorPosition] & 0xf0));
+				//if (cursor_->Insert) {
+				if (false) {
+					// Inserte mode
+					quint64 pos = cursor_->Position + (cursor_->HighNibble ? 0 : 1);
 					cursor_->HighNibble = true;
-					cursor_->moveRelativePosition(1, false, false);
+					insertData(pos, nibble);
+				} else if (cursor_->Position < document_->length()) {
+					// Ovewrite mode
+					uchar currentCharacter;
+					document_->get(cursor_->Position, &currentCharacter, 1);
+					if (cursor_->HighNibble) {
+						changeData(cursor_->Position, (nibble << 4) + (currentCharacter & 0x0f), true);
+						cursor_->HighNibble = false;
+						// TODO: fix Clear and redraw caret, implment Event
+						drawView(DRAW_LINE, cursor_->Position / HexConfig::Num - cursor_->Top);
+						drawCaret();
+					} else {
+						changeData(cursor_->Position, nibble + (currentCharacter & 0xf0));
+						cursor_->moveRelativePosition(1, false, false);
+					}
+				} else {
+					break;
 				}
 			}
 		}
 		return;
 	}
 }
+
+void HexView::changeData(quint64 pos, uchar character, bool highNibble)
+{
+	document_->remove(pos, 1);
+	document_->insert(pos, &character, 1);
+	cursor_->HighNibble = !cursor_->HighNibble;
+	// TODO: implement Redraw Event
+}
+
+void HexView::insertData(quint64 pos, uchar character)
+{
+	document_->insert(pos, &character, 1);
+	// TODO: implement Redraw Event
+	drawView(DRAW_AFTER, cursor_->Position / HexConfig::Num);
+	drawCaret();
+}
+
 
 }	// namespace
