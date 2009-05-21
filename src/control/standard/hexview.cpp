@@ -573,7 +573,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 			// copy from QtCreator
 			QString text = ev->text();
 			for (int i = 0; i < text.length(); i++) {
-				QChar c = text.at(i);
+				QChar c = text.at(i).toLower();
 				int nibble = -1;
 				if (c.unicode() >= 'a' && c.unicode() <= 'f') {
 					nibble = c.unicode() - 'a' + 10;
