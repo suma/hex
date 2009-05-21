@@ -456,7 +456,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
-		// FIXME: move down automatically
+		// FIXME: move up/down automatically
 		if (height() < ev->pos().y()) {
 			return;
 		}
