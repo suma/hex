@@ -12,7 +12,7 @@ Document::Document()
 	: impl_(new DocumentImpl())
 	, file_(NULL)
 {
-	buffer_.reserve(1024 * 256);
+	buffer_.resize(1024 * 256);
 }
 
 Document::~Document()
