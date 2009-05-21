@@ -312,7 +312,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	painter.begin(&pix_);
 	painter.setFont(config_.Font);
 
-	// Get caret coordinates 
+	// Get caret coordinates
 	const int x = pos % HexConfig::Num;
 	const int y = config_.top() + config_.byteHeight() * (pos / HexConfig::Num - cursor_->Top);
 
