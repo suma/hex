@@ -583,10 +583,10 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 				if (nibble < 0) {
 					continue;
 				}
-				if (cursor_->Insert) {
+				if (cursor_->Insert && cursor_->HighNibble) {
 				//if (false) {
 					// Inserte mode
-					quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor) + (cursor_->HighNibble ? 0 : 1);
+					quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
 
 					// Replace data if selected
 					if (cursor_->hasSelection()) {
@@ -598,7 +598,8 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 					}
 
 					cursor_->HighNibble = true;
-					insertData(pos, nibble);
+					insertData(pos, nibble << 4);
+					cursor_->HighNibble = false;
 				} else if (cursor_->Position < document_->length()) {
 					// Ovewrite mode
 					uchar currentCharacter;
@@ -634,7 +635,7 @@ void HexView::insertData(quint64 pos, uchar character)
 {
 	document_->insert(pos, &character, 1);
 	// TODO: implement Redraw Event
-	drawView(DRAW_AFTER, pos / HexConfig::Num);
+	drawView(DRAW_AFTER, pos / HexConfig::Num - cursor_-> Top);
 	drawCaret();
 }
 
