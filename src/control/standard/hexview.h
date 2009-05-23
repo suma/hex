@@ -147,13 +147,15 @@ namespace Standard {
 		void keyPressEvent(QKeyEvent *);
 
 
-	public slots:
+	public:
 		// TODO change signal
 		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
 
 	public:
 		void drawViewAfter(quint64 pos);
 
+	signals:
+		void viewDrawed(DrawMode mode, int, int);
 
 	protected:
 		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)

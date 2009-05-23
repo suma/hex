@@ -196,7 +196,8 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	painter.end();
 	update(0, y_top, draw_width, draw_height);
 
-	//emit viewDrawed(mode, line_start, end);
+	//qDebug("HexView: emit viewDrawed(mode, line_start, end);");
+	emit viewDrawed(mode, line_start, end);
 }
 
 inline void HexView::drawViewAfter(quint64 pos)

@@ -84,7 +84,7 @@
     <value type="QString" >CONFIG+=debug_and_release</value>
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/local/Trolltech/Qt-4.5.0/bin/qmake</value>
-   <value key="abstractProcess.enabled" type="bool" >false</value>
+   <value key="abstractProcess.enabled" type="bool" >true</value>
    <value key="abstractProcess.workingDirectory" type="QString" >/Users/suma/dev/hex/src/build</value>
   </valuemap>
  </data>

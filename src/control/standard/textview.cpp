@@ -197,11 +197,6 @@ void TextView::drawView(DrawMode mode, int line_start, int end)
 	update(0, y_top, draw_width, draw_height);
 }
 
-//void TextView::viewDrawed(DrawMode mode, int line_start, int end)
-//{
-//	drawView(mode, line_start, end);
-//}
-
 inline void TextView::drawViewAfter(quint64 pos)
 {
 	drawView(DRAW_AFTER, pos / TextConfig::Num - cursor_-> Top);

@@ -45,8 +45,9 @@ Editor::Editor()
 	tview_->move(hview_->getConfig().width(),0);
 	tview_->resize(200, 270);
 
-	//connect(hview_, SIGNAL(drawView(DrawMode, int ,int)),
-	//	tview_, SLOT(viewDrawed(DrawMode, int, int)));
+	//connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)), tview_, SLOT(drawView(DrawMode, int ,int)));
+	connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)),
+		tview_, SLOT(drawView(DrawMode, int, int)));
 
 
 
