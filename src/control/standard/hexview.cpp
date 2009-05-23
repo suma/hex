@@ -568,7 +568,8 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
 			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
 			removeData(pos, len);
-			cursor_->moveRelativePosition(0, false, false);
+			cursor_->moveRelativePosition(pos, false, false);
+			// TODO: drawView [pos. pos+len]
 			cursor_->HighNibble = true;
 		} else if (0 < cursor_->Position) {
 			removeData(cursor_->Position - 1, 1);
@@ -586,6 +587,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
 			removeData(pos, len);
 			cursor_->moveRelativePosition(0, false, false);
+			// TODO: drawView [pos. pos+len]
 			cursor_->HighNibble = true;
 		} else if (cursor_->Position < document_->length()) {
 			removeData(cursor_->Position, 1);
@@ -608,8 +610,8 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 				if (nibble < 0) {
 					continue;
 				}
-				if (cursor_->Insert && cursor_->HighNibble) {
-				//if (false) {
+				//if (cursor_->Insert && cursor_->HighNibble) {
+				if (false) {
 					// Inserte mode
 					quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
 
@@ -621,11 +623,12 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 						cursor_->Position = pos;
 						cursor_->resetAnchor();
 						// TODO: remove and refresh collectly
-						cursor_->moveRelativePosition(0, false, false);
+						//cursor_->moveRelativePosition(0, false, false);
 					}
 
 					insertData(pos, nibble << 4);
 					cursor_->HighNibble = false;
+					drawCaret();
 				} else if (cursor_->Position < document_->length()) {
 					// Ovewrite mode
 					uchar currentCharacter;
@@ -633,12 +636,10 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 					if (cursor_->HighNibble) {
 						changeData(cursor_->Position, (nibble << 4) + (currentCharacter & 0x0f), true);
 						cursor_->HighNibble = false;
-						// TODO: fix Clear and redraw caret, implment Event
-						drawView(DRAW_LINE, cursor_->Position / HexConfig::Num - cursor_->Top);
 						drawCaret();
 					} else {
-						changeData(cursor_->Position, nibble + (currentCharacter & 0xf0));
 						cursor_->moveRelativePosition(1, false, false);
+						changeData(cursor_->Position - 1, nibble + (currentCharacter & 0xf0));
 					}
 				} else {
 					break;
@@ -655,6 +656,7 @@ void HexView::changeData(quint64 pos, uchar character, bool highNibble)
 	document_->insert(pos, &character, 1);
 	cursor_->HighNibble = !highNibble;
 	// TODO: implement Redraw Event
+	drawView(DRAW_LINE, pos / HexConfig::Num - cursor_->Top);
 }
 
 void HexView::insertData(quint64 pos, uchar character)
@@ -669,7 +671,7 @@ void HexView::removeData(quint64 pos, quint64 len)
 {
 	document_->remove(pos, len);
 	// TODO: implement Redraw Event
-	drawViewAfter(pos);
+	//drawViewAfter(pos);
 }
 
 
