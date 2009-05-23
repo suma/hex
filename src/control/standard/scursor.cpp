@@ -95,7 +95,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 			redrawSelection(begin, end);
 		}
 		// Clear old caret
-		view->drawView(HexView::DRAW_LINE, oldPos / HexConfig::Num - Top);
+		view->drawView(DRAW_LINE, oldPos / HexConfig::Num - Top);
 	} else {
 		view->drawView();
 	}
@@ -135,7 +135,7 @@ void Cursor::redrawSelection(quint64 begin, quint64 end)
 	const int endLine   = qMax(end, Top) - Top;
 
 	//qDebug("redrawSelection %d, %d, Top:%llu", beginLine, endLine, Top);
-	view->drawView(HexView::DRAW_RANGE, beginLine, endLine + 1);
+	view->drawView(DRAW_RANGE, beginLine, endLine + 1);
 }
 
 

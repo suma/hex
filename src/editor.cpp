@@ -29,15 +29,30 @@ Editor::Editor()
 	//cur_ = new Standard::Cursor(doc_);
 	hview_ = new Standard::HexView(this, doc_, high_);
 	hview_->setCaretBlink(true);
+
+	tview_ = new Standard::TextView(this, doc_, high_, &(hview_->getCursor()));
+	tview_->setCaretBlink(true);
+
 	aview_ = new Standard::AddressView(this, doc_, NULL);
-	resize(600,400);
+	resize(900,400);
 	aview_->move(0,0);
 	aview_->resize(0, 270);
+
 	hview_->move(0,0);
-	hview_->resize(width(), 270);
-	hview_->resize(width(), 270);
+	hview_->resize(hview_->getConfig().width(), 270);
+	qDebug("%d ", hview_->getConfig().width());
+
+	tview_->move(hview_->getConfig().width(),0);
+	tview_->resize(200, 270);
+
+	//connect(hview_, SIGNAL(drawView(DrawMode, int ,int)),
+	//	tview_, SLOT(viewDrawed(DrawMode, int, int)));
+
+
+
 	aview_->show();
 	hview_->show();
+	tview_->show();
 
 
 
@@ -67,6 +82,7 @@ Editor::Editor()
 
 void Editor::resizeEvent(QResizeEvent*)
 {
-	hview_->resize(width(), height());
+	hview_->resize(hview_->width(), height());
+	tview_->resize(tview_->width(), height());
 }
 

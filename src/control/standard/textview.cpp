@@ -2,7 +2,7 @@
 #include <QtGui>
 #include <algorithm>
 #include <vector>
-#include "hexview.h"
+#include "textview.h"
 #include "scursor.h"
 #include "../document.h"
 #include "../highlight.h"
@@ -13,9 +13,9 @@ namespace Standard {
 
 ////////////////////////////////////////
 // Config
-HexConfig::HexConfig()
+TextConfig::TextConfig()
 	: Margin(2, 2, 3, 3)
-	, ByteMargin(3, 0, 2, 0)
+	, ByteMargin(0, 0, 0, 0)
 	, Font("Monaco", 17)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
@@ -35,7 +35,7 @@ HexConfig::HexConfig()
 	update();
 }
 
-void HexConfig::update()
+void TextConfig::update()
 {
 	// TODO: set ByteMargin value(left=charWidth/2, right=charWidth/2)
 
@@ -47,7 +47,7 @@ void HexConfig::update()
 
 	// Pos of end
 	for (int i = 0; i < Num; i++) {
-		x_end[i] = x_begin[i] + charWidth(2) + ByteMargin.right();
+		x_end[i] = x_begin[i] + charWidth(1) + ByteMargin.right();
 	}
 
 	// Area
@@ -58,13 +58,13 @@ void HexConfig::update()
 	x_area[Num] = x_area[Num-1] + byteWidth();
 }
 
-int HexConfig::drawableLines(int height) const
+int TextConfig::drawableLines(int height) const
 {
 	const int y = top() + byteMargin().top();
 	return (height - y + byteHeight()) / byteHeight();
 }
 
-int HexConfig::XToPos(int x) const
+int TextConfig::XToPos(int x) const
 {
 	if (x < Margin.left()) {
 		return -1;
@@ -73,7 +73,7 @@ int HexConfig::XToPos(int x) const
 	return (int)distance(x_area, lower_bound(x_area, x_area + Num + 1, x)) - 1;
 }
 
-int HexConfig::YToLine(int y) const
+int TextConfig::YToLine(int y) const
 {
 	if (y < top()) {
 		return -1;
@@ -84,15 +84,15 @@ int HexConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
+TextView::TextView(QWidget *parent, Document *doc, Highlight *hi, Cursor *cursor)
 	: ::View(parent, doc, hi)
-	, cursor_(new Cursor(doc, this))
+	, cursor_(cursor)
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
 }
 
-void HexView::resizeEvent(QResizeEvent *rs)
+void TextView::resizeEvent(QResizeEvent *rs)
 {
 	QSize size(qMin(rs->size().width(), config_.maxWidth()), rs->size().height());
 	QResizeEvent resize(size, rs->oldSize());
@@ -101,7 +101,7 @@ void HexView::resizeEvent(QResizeEvent *rs)
 	drawView();
 }
 
-void HexView::drawView(DrawMode mode, int line_start, int end)
+void TextView::drawView(DrawMode mode, int line_start, int end)
 {
 	//qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
 	//qDebug(" pos:%llu, anchor:%llu", cursor_->Position, cursor_->PositionAnchor);
@@ -122,9 +122,9 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	}
 
 	Q_ASSERT(0 <= line_start);
-	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / HexConfig::Num + 1);
+	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / TextConfig::Num + 1);
 	Q_ASSERT(0 <= end);
-	Q_ASSERT(static_cast<uint>(end) <= document_->length() / HexConfig::Num + 1);
+	Q_ASSERT(static_cast<uint>(end) <= document_->length() / TextConfig::Num + 1);
 
 	// Get draw range
 	int y_top = config_.top();
@@ -156,8 +156,8 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	}
 
 	// Get top position of view
-	const quint64 top = (cursor_->Top + line_start) * HexConfig::Num;
-	const uint size = qMin(document_->length() - top, (quint64)HexConfig::Num * count_draw_line);
+	const quint64 top = (cursor_->Top + line_start) * TextConfig::Num;
+	const uint size = qMin(document_->length() - top, (quint64)TextConfig::Num * count_draw_line);
 	if (size == 0) {
 		return;
 	}
@@ -195,16 +195,19 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	const int draw_height = count_draw_line * config_.byteHeight();
 	painter.end();
 	update(0, y_top, draw_width, draw_height);
-
-	//emit viewDrawed(mode, line_start, end);
 }
 
-inline void HexView::drawViewAfter(quint64 pos)
+//void TextView::viewDrawed(DrawMode mode, int line_start, int end)
+//{
+//	drawView(mode, line_start, end);
+//}
+
+inline void TextView::drawViewAfter(quint64 pos)
 {
-	drawView(DRAW_AFTER, pos / HexConfig::Num - cursor_-> Top);
+	drawView(DRAW_AFTER, pos / TextConfig::Num - cursor_-> Top);
 }
 
-inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
+inline void TextView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
 {
 	if (!cursor_->hasSelection()) {
 		return;
@@ -213,21 +216,21 @@ inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel
 	sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
 	sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
 
-	if (top <= sel_end && sel_begin <= qMax(top + (HexConfig::Num * count_draw_line), top + size)) {
+	if (top <= sel_end && sel_begin <= qMax(top + (TextConfig::Num * count_draw_line), top + size)) {
 		selected = true;
 	} else {
 		selected = false;
 	}
 }
 
-inline bool HexView::isSelected(quint64 pos)
+inline bool TextView::isSelected(quint64 pos)
 {
 	const quint64 sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
 	const quint64 sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
 	return sel_begin <= pos && pos <  sel_end;
 }
 
-void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
+void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
 {
 	int index_data = 0, x = 0;
 	bool reset_color = true;
@@ -260,7 +263,7 @@ void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin,
 
 COUNTUP:// Count up
 		index_data++;
-		x = (x + 1) % HexConfig::Num;
+		x = (x + 1) % TextConfig::Num;
 
 		// Iterate color
 		Q_ASSERT(0 <= itr_color->Length);
@@ -278,24 +281,24 @@ COUNTUP:// Count up
 	}
 
 	// Draw empty area(after end line)
-	if (0 < x && x < x_end && x < HexConfig::Num) {
+	if (0 < x && x < x_end && x < TextConfig::Num) {
 		//qDebug("empty: %d", x);
 		QBrush brush(config_.Colors[Color::Background]);
 		painter.fillRect(config_.x(x), y, width(), config_.byteHeight(), brush);
 	}
 }
 
-inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int y)
+inline void TextView::drawText(QPainter &painter, const QString &hex, int x, int y)
 {
 	painter.drawText(x, y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
 }
 
-void HexView::drawCaret(bool visible)
+void TextView::drawCaret(bool visible)
 {
 	drawCaret(visible, cursor_->Position);
 }
 
-void HexView::drawCaret(bool visible, quint64 pos)
+void TextView::drawCaret(bool visible, quint64 pos)
 {
 	// Check out of range
 	if (!(config_.top() + config_.byteHeight() < height())) {
@@ -303,7 +306,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Redraw line
-	const quint64 line = cursor_->Position / HexConfig::Num;
+	const quint64 line = cursor_->Position / TextConfig::Num;
 	if (cursor_->Top <= line && line - cursor_->Top < static_cast<unsigned int>(config_.drawableLines(height()))) {
 		drawView(DRAW_LINE, line - cursor_->Top);
 	}
@@ -320,8 +323,8 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	painter.setFont(config_.Font);
 
 	// Get caret coordinates
-	const int x = pos % HexConfig::Num;
-	const int y = config_.top() + config_.byteHeight() * (pos / HexConfig::Num - cursor_->Top);
+	const int x = pos % TextConfig::Num;
+	const int y = config_.top() + config_.byteHeight() * (pos / TextConfig::Num - cursor_->Top);
 
 	// Draw shape
 	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
@@ -331,7 +334,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	update(config_.x(x), y, config_.byteWidth(), config_.charHeight());
 }
 
-void HexView::drawCaretShape(CaretDrawInfo info)
+void TextView::drawCaretShape(CaretDrawInfo info)
 {
 	if (info.caret_middle) {
 		// Copy from document
@@ -360,7 +363,7 @@ void HexView::drawCaretShape(CaretDrawInfo info)
 	}
 }
 
-void HexView::drawCaretLine(const CaretDrawInfo &info)
+void TextView::drawCaretLine(const CaretDrawInfo &info)
 {
 	int x;
 	if (cursor_->HighNibble || !info.caret_middle) {
@@ -372,7 +375,7 @@ void HexView::drawCaretLine(const CaretDrawInfo &info)
 	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
 }
 
-void HexView::drawCaretBlock(const CaretDrawInfo &info)
+void TextView::drawCaretBlock(const CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
 		if (cursor_->HighNibble || cursor_->hasSelection()) {
@@ -398,7 +401,7 @@ void HexView::drawCaretBlock(const CaretDrawInfo &info)
 	}
 }
 
-void HexView::drawCaretFrame(const CaretDrawInfo &info)
+void TextView::drawCaretFrame(const CaretDrawInfo &info)
 {
 	int width, x;
 	if (cursor_->HighNibble || !info.caret_middle) {
@@ -412,7 +415,7 @@ void HexView::drawCaretFrame(const CaretDrawInfo &info)
 	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
 }
 
-void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
+void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
 {
 	int width, x;
 	if (cursor_->HighNibble || !info.caret_middle) {
@@ -427,7 +430,7 @@ void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
 }
 
-void HexView::byteToHex(uchar c, QString &h)
+void TextView::byteToHex(uchar c, QString &h)
 {
 	const uchar H = (c >> 4) & 0xF;
 	if (H <= 9) {
@@ -443,7 +446,7 @@ void HexView::byteToHex(uchar c, QString &h)
 	}
 }
 
-void HexView::mousePressEvent(QMouseEvent *ev)
+void TextView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
 
@@ -455,7 +458,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 	}
 }
 
-void HexView::mouseMoveEvent(QMouseEvent *ev)
+void TextView::mouseMoveEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
 		// FIXME: move up/down automatically
@@ -466,7 +469,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	}
 }
 
-void HexView::mouseReleaseEvent(QMouseEvent *)
+void TextView::mouseReleaseEvent(QMouseEvent *)
 {
 	//qDebug("mouse release");
 
@@ -474,7 +477,7 @@ void HexView::mouseReleaseEvent(QMouseEvent *)
 	releaseMouse();
 }
 
-quint64 HexView::posAt(const QPoint &pos)
+quint64 TextView::posAt(const QPoint &pos)
 {
 	int x = config_.XToPos(pos.x());
 	int y = config_.YToLine(pos.y());
@@ -486,11 +489,11 @@ quint64 HexView::posAt(const QPoint &pos)
 		x = y = 0;
 	}
 
-	return qMin((cursor_->Top + y) * HexConfig::Num + x, document_->length());
+	return qMin((cursor_->Top + y) * TextConfig::Num + x, document_->length());
 }
 
 // Enable caret blink
-void HexView::setCaretBlink(bool enable)
+void TextView::setCaretBlink(bool enable)
 {
 	if (!config_.EnableCaret || !config_.CaretBlinkTime) {
 		return;
@@ -507,7 +510,7 @@ void HexView::setCaretBlink(bool enable)
 	}
 }
 
-void HexView::timerEvent(QTimerEvent *ev)
+void TextView::timerEvent(QTimerEvent *ev)
 {
 	if (cursor_->CaretTimerId == ev->timerId()) {
 		// Caret blink
@@ -516,7 +519,7 @@ void HexView::timerEvent(QTimerEvent *ev)
 	}
 }
 
-void HexView::keyPressEvent(QKeyEvent *ev)
+void TextView::keyPressEvent(QKeyEvent *ev)
 {
 	if (ev == QKeySequence::SelectAll) {
 		//ev->accept();
@@ -602,66 +605,22 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 			// copy from QtCreator
 			QString text = ev->text();
 			for (int i = 0; i < text.length(); i++) {
-				QChar c = text.at(i).toLower();
-				int nibble = -1;
-				if (c.unicode() >= 'a' && c.unicode() <= 'f') {
-					nibble = c.unicode() - 'a' + 10;
-				} else if (c.unicode() >= '0' && c.unicode() <= '9') {
-					nibble = c.unicode() - '0';
-				}
-				if (nibble < 0) {
-					continue;
-				}
-				//if (cursor_->Insert && cursor_->HighNibble) {
-				if (false) {
-					// Inserte mode
-					quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
-
-					// Replace data if selected
-					if (cursor_->hasSelection()) {
-						// TODO: Support Undo
-						// Off redrawing temporary for redrawing on insertion
-						document_->remove(pos, qMax(cursor_->Position, cursor_->PositionAnchor) - pos);
-						cursor_->Position = pos;
-						cursor_->resetAnchor();
-						// TODO: remove and refresh collectly
-						//cursor_->moveRelativePosition(0, false, false);
-					}
-
-					insertData(pos, nibble << 4);
-					cursor_->HighNibble = false;
-					drawCaret();
-				} else if (cursor_->Position < document_->length()) {
-					// Ovewrite mode
-					uchar currentCharacter;
-					document_->get(cursor_->Position, &currentCharacter, 1);
-					if (cursor_->HighNibble) {
-						changeData(cursor_->Position, (nibble << 4) + (currentCharacter & 0x0f), true);
-						cursor_->HighNibble = false;
-						drawCaret();
-					} else {
-						cursor_->moveRelativePosition(1, false, false);
-						changeData(cursor_->Position - 1, nibble + (currentCharacter & 0xf0));
-					}
-				} else {
-					break;
-				}
 			}
 		}
 		return;
 	}
 }
 
-void HexView::changeData(quint64 pos, uchar character, bool highNibble)
+void TextView::changeData(quint64 pos, uchar character, bool highNibble)
 {
 	document_->remove(pos, 1);
 	document_->insert(pos, &character, 1);
 	cursor_->HighNibble = !highNibble;
 	// TODO: implement Redraw Event
-	drawView(DRAW_LINE, pos / HexConfig::Num - cursor_->Top);
+	drawView(DRAW_LINE, pos / TextConfig::Num - cursor_->Top);
 }
 
-void HexView::insertData(quint64 pos, uchar character)
+void TextView::insertData(quint64 pos, uchar character)
 {
 	document_->insert(pos, &character, 1);
 	// TODO: implement Redraw Event
@@ -669,7 +628,7 @@ void HexView::insertData(quint64 pos, uchar character)
 	drawCaret();
 }
 
-void HexView::removeData(quint64 pos, quint64 len)
+void TextView::removeData(quint64 pos, quint64 len)
 {
 	document_->remove(pos, len);
 	// TODO: implement Redraw Event

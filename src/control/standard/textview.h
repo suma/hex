@@ -1,21 +1,16 @@
-#ifndef STDHEXVIEW_H_INC
-#define STDHEXVIEW_H_INC
+#ifndef STDTEXTVIEW_H_INC
+#define STDTEXTVIEW_H_INC
 
 #include <QFont>
 #include <QFontMetrics>
 #include "../view.h"
 #include "../highlight.h"
 #include "scursor.h"
+#include "hexview.h"
 
 namespace Standard {
-	enum DrawMode {
-		DRAW_ALL = 0,
-		DRAW_LINE,
-		DRAW_AFTER,
-		DRAW_RANGE,	// [begin, end)
-	};
 
-	class HexConfig
+	class TextConfig
 	{
 	public:
 		enum {
@@ -36,7 +31,7 @@ namespace Standard {
 		int x_area[Num];
 	
 	public:
-		HexConfig();
+		TextConfig();
 
 		inline void updateFont()
 		{
@@ -52,7 +47,7 @@ namespace Standard {
 		}
 		inline int byteWidth() const
 		{
-			return ByteMargin.left() + charWidth(2) + ByteMargin.right();
+			return ByteMargin.left() + charWidth(1) + ByteMargin.right();
 		}
 		inline int byteHeight() const
 		{
@@ -93,25 +88,20 @@ namespace Standard {
 		{
 			return byteHeight();
 		}
-		inline int width()
-		{
-			return byteWidth() * Num + Margin.left() + Margin.right();
-		}
 		int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void update();
 	};
 
-	class HexView : public ::View
+	class TextView : public ::View
 	{
 		Q_OBJECT
 
 	public:
-		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
+		TextView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL, Cursor *cursor = NULL);
 
-		HexConfig & getConfig() { return config_; }
-		Cursor & getCursor() { return *cursor_; }
+		TextConfig & getConfig() { return config_; }
 		void setCaretBlink(bool enable);
 
 
@@ -147,16 +137,16 @@ namespace Standard {
 		void keyPressEvent(QKeyEvent *);
 
 
-	public slots:
+	public:
 		// TODO change signal
 		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
-
-	public:
 		void drawViewAfter(quint64 pos);
 
+	//signals:
+	//	void viewDrawed(DrawMode mode = DRAW_ALL, int, int);
 
 	protected:
-		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
+		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = TextConfig::Num);	// x: [)
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
 
@@ -183,7 +173,7 @@ namespace Standard {
 
 	protected:
 		// Main components
-		HexConfig config_;
+		TextConfig config_;
 		Cursor *cursor_;
 	};
 

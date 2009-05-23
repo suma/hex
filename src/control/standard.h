@@ -3,6 +3,7 @@
 
 #include "standard/scursor.h"
 #include "standard/hexview.h"
+#include "standard/textview.h"
 #include "standard/addressview.h"
 
 #endif

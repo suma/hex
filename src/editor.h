@@ -8,6 +8,7 @@ class Document;
 
 namespace Standard {
 	class HexView;
+	class TextView;
 	class AddressView;
 	class Cursor;
 }
@@ -30,6 +31,7 @@ protected:
 	Document *doc_;
 	Highlight *high_;
 	Standard::HexView *hview_;
+	Standard::TextView *tview_;
 	Standard::AddressView *aview_;
 	//Standard::Cursor *cur_;
 
