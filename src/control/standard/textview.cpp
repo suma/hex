@@ -570,6 +570,7 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 			removeData(pos, len);
 			cursor_->moveRelativePosition(pos, false, false);
 			// TODO: drawView [pos. pos+len]
+			drawView();
 			cursor_->HighNibble = true;
 		} else if (0 < cursor_->Position) {
 			removeData(cursor_->Position - 1, 1);
@@ -588,6 +589,7 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 			removeData(pos, len);
 			cursor_->moveRelativePosition(0, false, false);
 			// TODO: drawView [pos. pos+len]
+			drawView();
 			cursor_->HighNibble = true;
 		} else if (cursor_->Position < document_->length()) {
 			removeData(cursor_->Position, 1);
@@ -612,15 +614,17 @@ void TextView::changeData(quint64 pos, uchar character, bool highNibble)
 	document_->insert(pos, &character, 1);
 	cursor_->HighNibble = !highNibble;
 	// TODO: implement Redraw Event
-	drawView(DRAW_LINE, pos / TextConfig::Num - cursor_->Top);
+	//drawView(DRAW_LINE, pos / TextConfig::Num - cursor_->Top);
+	drawView();
 }
 
 void TextView::insertData(quint64 pos, uchar character)
 {
 	document_->insert(pos, &character, 1);
 	// TODO: implement Redraw Event
-	drawViewAfter(pos);
-	drawCaret();
+	//drawViewAfter(pos);
+	//drawCaret();
+	drawView();
 }
 
 void TextView::removeData(quint64 pos, quint64 len)
@@ -628,6 +632,7 @@ void TextView::removeData(quint64 pos, quint64 len)
 	document_->remove(pos, len);
 	// TODO: implement Redraw Event
 	//drawViewAfter(pos);
+	drawView();
 }
 
 
