@@ -2,7 +2,7 @@
 #include <QtGlobal>
 #include <algorithm>
 #include <limits>
-#include "scursor.h"
+#include "hexcursor.h"
 #include "../document.h"
 #include "hexview.h"
 
@@ -10,23 +10,23 @@ using namespace std;
 
 namespace Standard {
 
-Cursor::Cursor(Document *Doc, HexView *View)
-	: document(Doc)
-	, view(View)
-	, Top(0)
-	, Position(0)
-	, PositionAnchor(0)
-	, HighNibble(true)
-	, Insert(true)
-	, CaretVisibleShape(CARET_BLOCK)
-	, CaretInvisibleShape(CARET_FRAME)
-	, CaretTimerId(0)
-	, HexCaretVisible(true)
-	, TextCaretVisible(true)
-{
-}
+	HexCursor::HexCursor(Document *Doc, HexView *View)
+		: document(Doc)
+		, view(View)
+		, Top(0)
+		, Position(0)
+		, PositionAnchor(0)
+		, HighNibble(true)
+		, Insert(true)
+		, CaretVisibleShape(CARET_BLOCK)
+		, CaretInvisibleShape(CARET_FRAME)
+		, CaretTimerId(0)
+		, HexCaretVisible(true)
+		, TextCaretVisible(true)
+	{
+	}
 
-void Cursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
+	void HexCursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 {
 	Q_ASSERT(pos <= document->length());
 	// FIXME: replace drawView/drawCaret callings by doc udpate event
@@ -104,7 +104,7 @@ void Cursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 }
 
 
-void Cursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
+void HexCursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 {
 	const quint64 diff = static_cast<quint64>(qAbs(pos));
 	quint64 okPos = 0;
@@ -125,7 +125,7 @@ void Cursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 	movePosition(okPos, sel, holdViewPos);
 }
 
-void Cursor::redrawSelection(quint64 begin, quint64 end)
+void HexCursor::redrawSelection(quint64 begin, quint64 end)
 {
 	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
 	begin /= HexConfig::Num;

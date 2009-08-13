@@ -5,7 +5,7 @@
 #include <QFontMetrics>
 #include "../view.h"
 #include "../highlight.h"
-#include "scursor.h"
+#include "textcursor.h"
 #include "hexview.h"
 
 namespace Standard {
@@ -99,7 +99,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		TextView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL, Cursor *cursor = NULL);
+		TextView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
 
 		TextConfig & getConfig() { return config_; }
 		void setCaretBlink(bool enable);
@@ -154,8 +154,8 @@ namespace Standard {
 		bool isSelected(quint64 pos);
 	protected:
 
-		void byteToHex(uchar c, QString &h);
 		quint64 posAt(const QPoint &pos);
+		void getLetter(int index, QString &str);
 
 	public:
 		void drawCaret(bool visible = true);
@@ -174,7 +174,7 @@ namespace Standard {
 	protected:
 		// Main components
 		TextConfig config_;
-		Cursor *cursor_;
+		TextCursor *cursor_;
 	};
 
 }

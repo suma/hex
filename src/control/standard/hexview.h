@@ -5,7 +5,7 @@
 #include <QFontMetrics>
 #include "../view.h"
 #include "../highlight.h"
-#include "scursor.h"
+#include "hexcursor.h"
 
 namespace Standard {
 	enum DrawMode {
@@ -111,7 +111,7 @@ namespace Standard {
 		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
 
 		HexConfig & getConfig() { return config_; }
-		Cursor & getCursor() { return *cursor_; }
+		HexCursor & getCursor() { return *cursor_; }
 		void setCaretBlink(bool enable);
 
 
@@ -186,7 +186,7 @@ namespace Standard {
 	protected:
 		// Main components
 		HexConfig config_;
-		Cursor *cursor_;
+		HexCursor *cursor_;
 	};
 
 }

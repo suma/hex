@@ -1,7 +1,8 @@
-#ifndef STDCURSOR_H_INC
-#define STDCURSOR_H_INC
+
+#pragma once
 
 #include <QtGlobal>
+#include "cursorutil.h"
 
 class Document;
 
@@ -9,22 +10,10 @@ namespace Standard {
 
 	class HexView;
 
-	struct HPos {
-		quint64 X, Y;
-	};
-
-	enum CaretShape {
-		CARET_NONE,
-		CARET_LINE,
-		CARET_BLOCK,
-		CARET_FRAME,
-		CARET_UNDERBAR,
-	};
-
-	class Cursor
+	class HexCursor
 	{
 	public:
-		Cursor(Document *, HexView *);
+		HexCursor(Document *, HexView *);
 		void refreshSelected();
 		bool selMoved();
 
@@ -86,42 +75,39 @@ namespace Standard {
 
 	};
 
-	inline void Cursor::resetAnchor()
+	inline void HexCursor::resetAnchor()
 	{
 		PositionAnchor = Position;
 	}
 
-	inline bool Cursor::hasSelection()
+	inline bool HexCursor::hasSelection()
 	{
 		return Position != PositionAnchor;
 	}
 
-	inline void Cursor::reverseInsert()
+	inline void HexCursor::reverseInsert()
 	{
 		Insert = !Insert;
 	}
 
-	inline void Cursor::setHexCaretVisible(bool t)
+	inline void HexCursor::setHexCaretVisible(bool t)
 	{
 		HexCaretVisible = t;
 	}
 
-	inline void Cursor::turnHexCaretVisible()
+	inline void HexCursor::turnHexCaretVisible()
 	{
 		HexCaretVisible = !HexCaretVisible;
 	}
 
-	inline void Cursor::setTextCaretVisible(bool t)
+	inline void HexCursor::setTextCaretVisible(bool t)
 	{
 		TextCaretVisible = t;
 	}
 
-	inline void Cursor::turnTextCaretVisible()
+	inline void HexCursor::turnTextCaretVisible()
 	{
 		TextCaretVisible = !TextCaretVisible;
 	}
 }
 
-
-
-#endif

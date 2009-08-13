@@ -30,7 +30,7 @@ Editor::Editor()
 	hview_ = new Standard::HexView(this, doc_, high_);
 	hview_->setCaretBlink(true);
 
-	tview_ = new Standard::TextView(this, doc_, high_, &(hview_->getCursor()));
+	tview_ = new Standard::TextView(this, doc_, high_);
 	tview_->setCaretBlink(true);
 
 	aview_ = new Standard::AddressView(this, doc_, NULL);

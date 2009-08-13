@@ -25,7 +25,9 @@ HEADERS += editor.h \
     control/standard/addressview.h \
     control/standard/hexview.h \
 	control/standard/textview.h \
-	control/standard/scursor.h
+	control/standard/hexcursor.h \
+	control/standard/textcursor.h \
+	control/standard/cursorutil.h
 SOURCES += editor.cpp \
     main.cpp \
     control/control.cpp \
@@ -38,7 +40,8 @@ SOURCES += editor.cpp \
     control/standard/addressview.cpp \
     control/standard/hexview.cpp \
 	control/standard/textview.cpp \
-	control/standard/scursor.cpp \
-    build/qtc-gdbmacros/gdbmacros.cpp
+	control/standard/hexcursor.cpp \
+	control/standard/textcursor.cpp \
+	build/qtc-gdbmacros/gdbmacros.cpp
 CONFIG += x86_64
 OTHER_FILES += 

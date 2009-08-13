@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include "textview.h"
-#include "scursor.h"
+#include "textcursor.h"
 #include "../document.h"
 #include "../highlight.h"
 
@@ -84,9 +84,9 @@ int TextConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-TextView::TextView(QWidget *parent, Document *doc, Highlight *hi, Cursor *cursor)
+TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
-	, cursor_(cursor)
+	, cursor_(new TextCursor(doc, this))
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -230,8 +230,8 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin
 	int index_data = 0, x = 0;
 	bool reset_color = true;
 	QBrush brush;
-	QString hex;
-	hex.resize(2);
+	QString str;
+	str.resize(4);
 
 	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
 		// Setup/Update color settings
@@ -244,20 +244,19 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin
 			reset_color = false;
 		}
 
-		// Skip
-		if (x < x_begin || x_end <= x) {
-			goto COUNTUP;
-		}
-
 		// Draw background
 		painter.fillRect(config_.x(x), y, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
-		byteToHex(buff_[index_data], hex);
-		drawText(painter, hex, config_.x(x) + config_.ByteMargin.left(), y + config_.ByteMargin.top());
+		//byteToHex(buff_[index_data], hex);
+		//int len = getLetterLength(buff[index]);
 
-COUNTUP:// Count up
-		index_data++;
+		int len = 2;
+		//getLetter(str);
+		//drawText(painter, str, config_.x(x) + config_.ByteMargin.left(), y + config_.ByteMargin.top());
+
+		//index_data++;
+		index_data += len;
 		x = (x + 1) % TextConfig::Num;
 
 		// Iterate color
@@ -337,7 +336,7 @@ void TextView::drawCaretShape(CaretDrawInfo info)
 		document_->get(info.pos, &data, 1);
 
 		info.hex.resize(2);
-		byteToHex(data, info.hex);
+		//byteToHex(data, info.hex);
 	}
 
 	switch (info.shape) {
@@ -425,8 +424,10 @@ void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
 }
 
-void TextView::byteToHex(uchar c, QString &h)
+void TextView::getLetter(int index, QString &h)
 {
+	//int len = getLetterLength(buff[index]);
+	/*
 	const uchar H = (c >> 4) & 0xF;
 	if (H <= 9) {
 		h[0] = QChar('0' + H);
@@ -439,6 +440,7 @@ void TextView::byteToHex(uchar c, QString &h)
 	} else {
 		h[1] = QChar('A' + L - 10);
 	}
+	*/
 }
 
 void TextView::mousePressEvent(QMouseEvent *ev)
