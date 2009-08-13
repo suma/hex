@@ -1,0 +1,8 @@
+文字のチェックには以下の関数を使うと便利かも？
+QString::fromAscii
+QString::fromLatin1
+QString::fromLocal8Bit
+QString::fromUtf8
+QString::fromUcs4
+QString::fromUtf16
+QString::fromWCharArray
