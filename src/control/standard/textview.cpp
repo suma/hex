@@ -360,7 +360,7 @@ void TextView::drawCaretShape(CaretDrawInfo info)
 void TextView::drawCaretLine(const CaretDrawInfo &info)
 {
 	int x;
-	if (cursor_->HighNibble || !info.caret_middle) {
+	if (!info.caret_middle) {
 		x = config_.x(info.x);
 	} else {
 		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
@@ -372,7 +372,7 @@ void TextView::drawCaretLine(const CaretDrawInfo &info)
 void TextView::drawCaretBlock(const CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
-		if (cursor_->HighNibble || cursor_->hasSelection()) {
+		if (cursor_->hasSelection()) {
 			// Draw block byte
 			QBrush brush(config_.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
@@ -398,7 +398,7 @@ void TextView::drawCaretBlock(const CaretDrawInfo &info)
 void TextView::drawCaretFrame(const CaretDrawInfo &info)
 {
 	int width, x;
-	if (cursor_->HighNibble || !info.caret_middle) {
+	if (!info.caret_middle) {
 		width = config_.byteWidth() - 1;
 		x = config_.x(info.x);
 	} else {
@@ -412,7 +412,7 @@ void TextView::drawCaretFrame(const CaretDrawInfo &info)
 void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
 {
 	int width, x;
-	if (cursor_->HighNibble || !info.caret_middle) {
+	if (!info.caret_middle) {
 		width = config_.byteWidth() - 1;
 		x = config_.x(info.x);
 	} else {
@@ -447,7 +447,6 @@ void TextView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
 
-		cursor_->HighNibble = true;
 		cursor_->movePosition(posAt(ev->pos()), false, false);
 
 		// Start mouse capture
@@ -511,8 +510,8 @@ void TextView::timerEvent(QTimerEvent *ev)
 {
 	if (cursor_->CaretTimerId == ev->timerId()) {
 		// Caret blink
-		drawCaret(cursor_->HexCaretVisible);
-		cursor_->turnHexCaretVisible();
+		drawCaret(cursor_->CaretVisible);
+		cursor_->turnCaretVisible();
 	}
 }
 
@@ -534,35 +533,27 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
 	case Qt::Key_Home:
-		cursor_->HighNibble = true;
 		cursor_->movePosition(0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
-		cursor_->HighNibble = true;
 		cursor_->movePosition(document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
-		cursor_->HighNibble = true;
 		cursor_->moveRelativePosition(-1, keepAnchor, false);
 		break;
 	case Qt::Key_Right:
-		cursor_->HighNibble = true;
 		cursor_->moveRelativePosition(1, keepAnchor, false);
 		break;
 	case Qt::Key_Up:
-		cursor_->HighNibble = true;
 		cursor_->moveRelativePosition(-16, keepAnchor, false);
 		break;
 	case Qt::Key_Down:
-		cursor_->HighNibble = true;
 		cursor_->moveRelativePosition(16, keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
-		cursor_->HighNibble = true;
 		cursor_->moveRelativePosition(-16 * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
-		cursor_->HighNibble = true;
 		cursor_->moveRelativePosition(16 * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
@@ -573,11 +564,9 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 			cursor_->moveRelativePosition(pos, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
-			cursor_->HighNibble = true;
 		} else if (0 < cursor_->Position) {
 			removeData(cursor_->Position - 1, 1);
 			cursor_->moveRelativePosition(-1, false, false);
-			cursor_->HighNibble = true;
 		}
 		break;
 	case Qt::Key_Insert:
@@ -592,11 +581,9 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 			cursor_->moveRelativePosition(0, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
-			cursor_->HighNibble = true;
 		} else if (cursor_->Position < document_->length()) {
 			removeData(cursor_->Position, 1);
 			cursor_->moveRelativePosition(0, false, false);
-			cursor_->HighNibble = true;
 		}
 		break;
 	default:
@@ -614,7 +601,6 @@ void TextView::changeData(quint64 pos, uchar character, bool highNibble)
 {
 	document_->remove(pos, 1);
 	document_->insert(pos, &character, 1);
-	cursor_->HighNibble = !highNibble;
 	// TODO: implement Redraw Event
 	//drawView(DRAW_LINE, pos / TextConfig::Num - cursor_->Top);
 	drawView();
