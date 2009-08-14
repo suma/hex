@@ -21,7 +21,7 @@ namespace Standard {
 		, CaretVisibleShape(CARET_BLOCK)
 		, CaretInvisibleShape(CARET_FRAME)
 		, CaretTimerId(0)
-		, HexCaretVisible(true)
+		, CaretVisible(true)
 	{
 	}
 

@@ -512,8 +512,8 @@ void HexView::timerEvent(QTimerEvent *ev)
 {
 	if (cursor_->CaretTimerId == ev->timerId()) {
 		// Caret blink
-		drawCaret(cursor_->HexCaretVisible);
-		cursor_->turnHexCaretVisible();
+		drawCaret(cursor_->CaretVisible);
+		cursor_->turnCaretVisible();
 	}
 }
 

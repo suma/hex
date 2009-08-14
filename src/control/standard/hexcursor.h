@@ -37,7 +37,7 @@ namespace Standard {
 		CaretShape CaretVisibleShape;
 		CaretShape CaretInvisibleShape;
 		int CaretTimerId;
-		bool HexCaretVisible;
+		bool CaretVisible;
 
 		//QColor StrCaretColor;
 	
@@ -59,8 +59,8 @@ namespace Standard {
 
 		void reverseInsert();
 
-		void setHexCaretVisible(bool t);
-		void turnHexCaretVisible();
+		void setCaretVisible(bool t);
+		void turnCaretVisible();
 	
 	public:
 
@@ -87,14 +87,14 @@ namespace Standard {
 		Insert = !Insert;
 	}
 
-	inline void HexCursor::setHexCaretVisible(bool t)
+	inline void HexCursor::setCaretVisible(bool t)
 	{
-		HexCaretVisible = t;
+		CaretVisible = t;
 	}
 
-	inline void HexCursor::turnHexCaretVisible()
+	inline void HexCursor::turnCaretVisible()
 	{
-		HexCaretVisible = !HexCaretVisible;
+		CaretVisible = !CaretVisible;
 	}
 
 }

@@ -30,30 +30,32 @@ Editor::Editor()
 	hview_ = new Standard::HexView(this, doc_, high_);
 	hview_->setCaretBlink(true);
 
-	tview_ = new Standard::TextView(this, doc_, high_);
-	tview_->setCaretBlink(true);
-
+	
+	/*
 	aview_ = new Standard::AddressView(this, doc_, NULL);
-	resize(900,400);
 	aview_->move(0,0);
 	aview_->resize(0, 270);
+	*/
 
+	resize(900,400);
 	hview_->move(0,0);
 	hview_->resize(hview_->getConfig().width(), 270);
 	qDebug("%d ", hview_->getConfig().width());
+	hview_->show();
 
+	tview_ = new Standard::TextView(this, doc_, high_);
+	tview_->setCaretBlink(true);
 	tview_->move(hview_->getConfig().width(),0);
 	tview_->resize(200, 270);
-
-	//connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)), tview_, SLOT(drawView(DrawMode, int ,int)));
-	connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)),
-		tview_, SLOT(drawView(DrawMode, int, int)));
-
-
-
-	aview_->show();
-	hview_->show();
 	tview_->show();
+
+	////connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)), tview_, SLOT(drawView(DrawMode, int ,int)));
+	//connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)),
+	//	tview_, SLOT(drawView(DrawMode, int, int)));
+
+
+
+	//aview_->show();
 
 
 
@@ -83,7 +85,11 @@ Editor::Editor()
 
 void Editor::resizeEvent(QResizeEvent*)
 {
-	hview_->resize(hview_->width(), height());
-	tview_->resize(tview_->width(), height());
+	if (hview_) {
+		hview_->resize(hview_->width(), height());
+	}
+	if (tview_) {
+		tview_->resize(tview_->width(), height());
+	}
 }
 

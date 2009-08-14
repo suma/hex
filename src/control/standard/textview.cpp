@@ -360,7 +360,8 @@ void TextView::drawCaretShape(CaretDrawInfo info)
 void TextView::drawCaretLine(const CaretDrawInfo &info)
 {
 	int x;
-	if (!info.caret_middle) {
+	//if (!info.caret_middle) {
+	if (true) {
 		x = config_.x(info.x);
 	} else {
 		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
@@ -372,7 +373,8 @@ void TextView::drawCaretLine(const CaretDrawInfo &info)
 void TextView::drawCaretBlock(const CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
-		if (cursor_->hasSelection()) {
+		//if (cursor_->hasSelection()) {
+		if (true) {
 			// Draw block byte
 			QBrush brush(config_.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
@@ -398,7 +400,8 @@ void TextView::drawCaretBlock(const CaretDrawInfo &info)
 void TextView::drawCaretFrame(const CaretDrawInfo &info)
 {
 	int width, x;
-	if (!info.caret_middle) {
+	//if (!info.caret_middle) {
+	if (true) {
 		width = config_.byteWidth() - 1;
 		x = config_.x(info.x);
 	} else {
