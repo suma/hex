@@ -1,11 +1,11 @@
 
 #include <QtGui>
 #include "addressview.h"
-#include "scursor.h"
+#include "hexcursor.h"
 
 namespace Standard {
 
-AddressView::AddressView(QWidget *parent, Document *doc, Cursor *cur)
+AddressView::AddressView(QWidget *parent, Document *doc, HexCursor *cur)
 	: ::View(parent, doc)
 	, cursor(cur)
 {

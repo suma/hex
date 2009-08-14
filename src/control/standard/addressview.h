@@ -6,20 +6,20 @@
 
 namespace Standard {
 
-	class Cursor;
+	class HexCursor;
 
 	class AddressView : public ::View
 	{
 		Q_OBJECT
 
 	public:
-		AddressView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL);
+		AddressView(QWidget *parent = NULL, Document *doc = NULL, HexCursor *cur = NULL);
 
 	protected:
 		void drawView();
 
 	protected:
-		Cursor *cursor;
+		HexCursor *cursor;
 	
 	};
 

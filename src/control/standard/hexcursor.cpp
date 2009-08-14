@@ -22,7 +22,6 @@ namespace Standard {
 		, CaretInvisibleShape(CARET_FRAME)
 		, CaretTimerId(0)
 		, HexCaretVisible(true)
-		, TextCaretVisible(true)
 	{
 	}
 
