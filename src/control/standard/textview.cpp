@@ -380,7 +380,7 @@ void TextView::drawCaretBlock(const CaretDrawInfo &info)
 			info.painter.setBackground(brush);
 			info.painter.setPen(config_.Colors[Color::CaretText]);
 			info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-			info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, info.hex);
+			//info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, info.hex);
 		} else {
 			// Draw block lowwer nibble
 			QBrush brush(config_.Colors[Color::CaretBackground]);
@@ -388,7 +388,7 @@ void TextView::drawCaretBlock(const CaretDrawInfo &info)
 			info.painter.setPen(config_.Colors[Color::CaretText]);
 			info.painter.fillRect(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y, config_.charWidth() + config_.ByteMargin.right(), config_.byteHeight(), brush);
 			QString low(info.hex[1]);
-			info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignLeft, low);
+			//info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignLeft, low);
 		}
 	} else {
 		// Draw block without data
