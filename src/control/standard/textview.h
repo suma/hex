@@ -139,14 +139,11 @@ namespace Standard {
 
 	public slots:
 		// TODO change signal
-		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
-
-	public:
-		void drawViewAfter(quint64 pos);
+		void drawView();
 
 
 	protected:
-		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = TextConfig::Num);	// x: [)
+		void drawLines(QPainter &painter, DCIList &dcolors, int y);
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
 
@@ -155,7 +152,6 @@ namespace Standard {
 	protected:
 
 		quint64 posAt(const QPoint &pos);
-		void getLetter(int index, QString &str);
 
 	public:
 		void drawCaret(bool visible = true);
@@ -167,7 +163,7 @@ namespace Standard {
 		void drawCaretBlock(const CaretDrawInfo &);
 		void drawCaretUnderbar(const CaretDrawInfo &);
 
-		void changeData(quint64 pos, uchar character, bool highNibble = false);
+		void changeData(quint64 pos, uchar character);
 		void insertData(quint64 pos, uchar character);
 		void removeData(quint64 pos, quint64 len);
 

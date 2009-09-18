@@ -101,25 +101,14 @@ void TextView::resizeEvent(QResizeEvent *rs)
 	drawView();
 }
 
-void TextView::drawView(DrawMode mode, int line_start, int end)
+void TextView::drawView()
 {
-	//qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
-	//qDebug(" pos:%llu, anchor:%llu", cursor_->Position, cursor_->PositionAnchor);
-
 	// FIXME: refactoring refresh event
 	QPainter painter;
 	painter.begin(&pix_);
 	painter.setFont(config_.Font);
 
-	if (!document_->length()) {
-		// TODO: draw Empty Background only
-		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(0, 0, width(), height(), brush);
-		painter.end();
-		// Update screen buffer
-		update(0, 0, width(), height());
-		return;
-	}
+	// TODO: draw Empty Background only
 
 	Q_ASSERT(0 <= line_start);
 	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / TextConfig::Num + 1);
@@ -129,52 +118,21 @@ void TextView::drawView(DrawMode mode, int line_start, int end)
 	// Get draw range
 	int y_top = config_.top();
 	int y = config_.top() + config_.byteMargin().top();
-	int count_draw_line, max_y;
+	int count_draw_line;
 
-	// Get minumum drawing area
-	switch (mode) {
-	case DRAW_ALL:
 		count_draw_line = config_.drawableLines(height());
-		break;
-	case DRAW_LINE:
-		y_top += config_.byteHeight() * line_start;
-		y     += config_.byteHeight() * line_start;
-		count_draw_line = 1;
-		break;
-	case DRAW_AFTER:
-		y_top += config_.byteHeight() * line_start;
-		y     += config_.byteHeight() * line_start;
-		max_y = qMax(y + config_.byteHeight(), height());
-		count_draw_line = config_.drawableLines(max_y - y);
-		break;
-	case DRAW_RANGE:
-		y_top += config_.byteHeight() * line_start;
-		y     += config_.byteHeight() * line_start;
-		max_y = qMin(y + config_.byteHeight() * end, height());
-		count_draw_line = config_.drawableLines(max_y - y);
-		break;
-	}
 
 	// Get top position of view
-	const quint64 top = (cursor_->Top + line_start) * TextConfig::Num;
+	const quint64 top = cursor_->Top * TextConfig::Num;
 	const uint size = qMin(document_->length() - top, (quint64)TextConfig::Num * count_draw_line);
 	if (size == 0) {
 		return;
 	}
 
 	// Draw empty area(after end line)
-	if (mode == DRAW_ALL || mode == DRAW_AFTER) {
-		//qDebug("draw empty area DRAW_ALL or DRAW_AFTER");
-		QBrush brush(config_.Colors[Color::Background]);
-		const int y_start = y_top + qMax(0, count_draw_line - 1) * config_.byteHeight();
-		painter.fillRect(0, y_start, width(), height(), brush);
-	}
-
-	// Copy from document
-	if (buff_.capacity() < size) {
-		buff_.resize(size);
-	}
-	document_->get(top, &buff_[0], size);
+	QBrush brush(config_.Colors[Color::Background]);
+	const int y_start = y_top + qMax(0, count_draw_line - 1) * config_.byteHeight();
+	painter.fillRect(0, y_start, width(), height(), brush);
 
 	// Get selectead area
 	bool selected = false;
@@ -186,20 +144,13 @@ void TextView::drawView(DrawMode mode, int line_start, int end)
 	getDrawColors(di, dcolors_);
 
 	// Draw lines
-	//qDebug("x:%d", (width() - config_.Margin.left()) / config_.byteWidth());
-	const int x_count_max = (width() - config_.Margin.left()) / config_.byteWidth() + 1;
-	drawLines(painter, dcolors_, y_top, 0, x_count_max);
+	drawLines(painter, dcolors_, y_top);
 
 	// Update screen buffer
 	const int draw_width  = qMin(width(), config_.maxWidth());
 	const int draw_height = count_draw_line * config_.byteHeight();
 	painter.end();
 	update(0, y_top, draw_width, draw_height);
-}
-
-inline void TextView::drawViewAfter(quint64 pos)
-{
-	drawView(DRAW_AFTER, pos / TextConfig::Num - cursor_-> Top);
 }
 
 inline void TextView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
@@ -225,7 +176,7 @@ inline bool TextView::isSelected(quint64 pos)
 	return sel_begin <= pos && pos <  sel_end;
 }
 
-void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
+void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 {
 	int index_data = 0, x = 0;
 	bool reset_color = true;
@@ -248,12 +199,8 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin
 		painter.fillRect(config_.x(x), y, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
-		//byteToHex(buff_[index_data], hex);
-		//int len = getLetterLength(buff[index]);
-
 		int len = 2;
-		//getLetter(str);
-		//drawText(painter, str, config_.x(x) + config_.ByteMargin.left(), y + config_.ByteMargin.top());
+
 
 		//index_data++;
 		index_data += len;
@@ -275,7 +222,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin
 	}
 
 	// Draw empty area(after end line)
-	if (0 < x && x < x_end && x < TextConfig::Num) {
+	if (0 < x && x < TextConfig::Num) {
 		//qDebug("empty: %d", x);
 		QBrush brush(config_.Colors[Color::Background]);
 		painter.fillRect(config_.x(x), y, width(), config_.byteHeight(), brush);
@@ -302,7 +249,7 @@ void TextView::drawCaret(bool visible, quint64 pos)
 	// Redraw line
 	const quint64 line = cursor_->Position / TextConfig::Num;
 	if (cursor_->Top <= line && line - cursor_->Top < static_cast<unsigned int>(config_.drawableLines(height()))) {
-		drawView(DRAW_LINE, line - cursor_->Top);
+		drawView();
 	}
 
 	// Shape
@@ -425,25 +372,6 @@ void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
 
 	QBrush brush(config_.Colors[Color::CaretBackground]);
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
-}
-
-void TextView::getLetter(int index, QString &h)
-{
-	//int len = getLetterLength(buff[index]);
-	/*
-	const uchar H = (c >> 4) & 0xF;
-	if (H <= 9) {
-		h[0] = QChar('0' + H);
-	} else {
-		h[0] = QChar('A' + H - 10);
-	}
-	const uchar L = c & 0xF;
-	if (L <= 9) {
-		h[1] = QChar('0' + L);
-	} else {
-		h[1] = QChar('A' + L - 10);
-	}
-	*/
 }
 
 void TextView::mousePressEvent(QMouseEvent *ev)
@@ -600,12 +528,11 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 	}
 }
 
-void TextView::changeData(quint64 pos, uchar character, bool highNibble)
+void TextView::changeData(quint64 pos, uchar character)
 {
 	document_->remove(pos, 1);
 	document_->insert(pos, &character, 1);
 	// TODO: implement Redraw Event
-	//drawView(DRAW_LINE, pos / TextConfig::Num - cursor_->Top);
 	drawView();
 }
 
@@ -613,7 +540,6 @@ void TextView::insertData(quint64 pos, uchar character)
 {
 	document_->insert(pos, &character, 1);
 	// TODO: implement Redraw Event
-	//drawViewAfter(pos);
 	//drawCaret();
 	drawView();
 }
@@ -622,7 +548,6 @@ void TextView::removeData(quint64 pos, quint64 len)
 {
 	document_->remove(pos, len);
 	// TODO: implement Redraw Event
-	//drawViewAfter(pos);
 	drawView();
 }
 
