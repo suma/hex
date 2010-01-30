@@ -174,9 +174,10 @@ inline bool TextView::isSelected(quint64 pos) const
 
 void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 {
-	TextConfig::XIterator xitr = config_.createXIterator();
-	uint current_pos = 0, next_pos = 0;
-	int mb_len = 0;
+	TextConfig::XIterator xitr = config_.createXIterator();	// X位置
+	uint current_pos = 0;	// 現在描画している位置(Document)
+	uint next_pos = 0;		// 次の描画可能な文字までの位置
+	int char_length = 0;	// 描画可能な文字のバイト数
 	bool reset_color = true;
 	QBrush brush;
 	QString str;
@@ -203,10 +204,10 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			// 次に描画する位置を取得
 			next_pos = decode_helper_.GetStartPosition(current_pos);
 			// TODO: 描画可能な文字数を取得する
-			mb_len = 0;
-			if (current_pos == next_pos && mb_len != 0) {
+			char_length = 0;
+			if (current_pos == next_pos && char_length != 0) {
 				// 描画可能
-				next_pos += mb_len;
+				next_pos += char_length;
 				decode_helper_.AppendPosition(current_pos);
 			} else {
 				// 印字不能
@@ -217,9 +218,9 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 		}
 
 		// TODO:：1バイト目と2バイト目で描画する色が変わる場合！
-		if (mb_len == 0) {
+		if (char_length == 0) {
 			// 印字不能な文字なので、next_posまで飛ばす
-			mb_len = 1;
+			char_length = 1;
 			current_pos += 1;
 			drawText(painter, QString("."), xitr.getTextX(), y + config_.ByteMargin.top(), 1);
 		} else {
