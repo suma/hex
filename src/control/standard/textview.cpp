@@ -175,8 +175,8 @@ inline bool TextView::isSelected(quint64 pos) const
 void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 {
 	int x = 0;
-	uint check_counter = 0;
-	uint current_pos = 0;
+	uint current_pos = 0, next_pos = 0;
+	int mb_len = 0;
 	bool reset_color = true;
 	QBrush brush;
 	QString str;
@@ -199,25 +199,35 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 		painter.fillRect(config_.x(x), y, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
-		if (check_counter == 0) {
-			uint next_pos = decode_helper_.GetStartPosition(current_pos);
-			if (current_pos == next_pos) {
-				// まだ文字の開始位置がつかめていない or 現在位置から始めてOK
+		if (current_pos == next_pos) {
+			// 次に描画する位置を取得
+			next_pos = decode_helper_.GetStartPosition(current_pos);
+			mb_len = 0;
+			if (current_pos == next_pos && mb_len != 0) {
+				// 描画可能
+				next_pos += mb_len;
+				decode_helper_.AppendPosition(next_pos);
 			} else {
-				// 印字不能な文字なので、next_posまで飛ばす
+				// 印字不能
+				next_pos += 1;
+				// next_pos += get_next_char(current_pos);
 			}
 		}
 
-		uint len = 2;
+		// TODO:：1バイト目と2バイト目で描画する色が変わる場合！
+		if (mb_len == 0) {
+			// 印字不能な文字なので、next_posまで飛ばす
+			mb_len = 1;
+			current_pos += 1;
+			// DrawBlindChar
+		} else {
+			// マルチバイト文字描画
+			current_pos += 1;
+			// DrawMBChar
+		}
 
-		check_counter -= len;
-		current_pos += len;
 
-		//x = (x + 1) % TextConfig::Num;
-		const int old_x = x;
-		//x = (x + pos) % TextConfig::Num;
 		x = (x + 1) % TextConfig::Num;
-		//if (x < old_x) {
 		if (x == 0) {
 			// 改行したので、描画座標を次の行にする
 			// TDOO: 行の加算はイテレータクラスにした方がよいかもしれない？
