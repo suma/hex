@@ -227,6 +227,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			// 文字描画
 			// TODO: 文字数に対して、バイト数が多すぎても綺麗に整形して描画したい
 			// TODO: 選択表示など、色が変わっても表示したい
+			// 面倒: 改行, 色分けのitr_color の大きさ
 			current_pos += 1;
 			// FIXME: DrawMBChar
 		}
