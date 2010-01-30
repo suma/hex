@@ -202,6 +202,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 		if (current_pos == next_pos) {
 			// 次に描画する位置を取得
 			next_pos = decode_helper_.GetStartPosition(current_pos);
+			// TODO: 描画可能な文字数を取得する
 			mb_len = 0;
 			if (current_pos == next_pos && mb_len != 0) {
 				// 描画可能
@@ -210,6 +211,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			} else {
 				// 印字不能
 				next_pos += 1;
+				// TODO: 描画不可能な文字数を next_posに加算する
 				// FIXME: next_pos += get_next_char(current_pos);
 			}
 		}
@@ -219,10 +221,11 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			// 印字不能な文字なので、next_posまで飛ばす
 			mb_len = 1;
 			current_pos += 1;
-			// FIXME: DrawBlindChar
 			drawText(painter, QString("."), xitr.getTextX(), y + config_.ByteMargin.top(), 1);
 		} else {
 			// マルチバイト文字描画
+			// TODO: 文字数に対して、バイト数が多すぎても綺麗に整形して描画したい
+			// TODO: 選択表示など、色が変わっても表示したい
 			current_pos += 1;
 			// FIXME: DrawMBChar
 		}
