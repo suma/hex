@@ -206,11 +206,11 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			if (current_pos == next_pos && mb_len != 0) {
 				// 描画可能
 				next_pos += mb_len;
-				decode_helper_.AppendPosition(next_pos);
+				decode_helper_.AppendPosition(current_pos);
 			} else {
 				// 印字不能
 				next_pos += 1;
-				// next_pos += get_next_char(current_pos);
+				// FIXME: next_pos += get_next_char(current_pos);
 			}
 		}
 
@@ -219,11 +219,12 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			// 印字不能な文字なので、next_posまで飛ばす
 			mb_len = 1;
 			current_pos += 1;
-			// DrawBlindChar
+			// FIXME: DrawBlindChar
+			drawText(painter, QString("."), config_.x(x) + config_.ByteMargin.left(), y + config_.ByteMargin.top(), 1);
 		} else {
 			// マルチバイト文字描画
 			current_pos += 1;
-			// DrawMBChar
+			// FIXME: DrawMBChar
 		}
 
 
@@ -252,9 +253,9 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 	}
 }
 
-inline void TextView::drawText(QPainter &painter, const QString &hex, int x, int y)
+inline void TextView::drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth)
 {
-	painter.drawText(x, y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
+	painter.drawText(x, y, config_.charWidth(charwidth), config_.charHeight(), Qt::AlignCenter, hex);
 }
 
 void TextView::drawCaret(bool visible)

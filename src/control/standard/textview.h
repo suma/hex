@@ -144,7 +144,7 @@ namespace Standard {
 
 	protected:
 		void drawLines(QPainter &painter, DCIList &dcolors, int y);
-		void drawText(QPainter &painter, const QString &hex, int x, int y);
+		void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
 
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
