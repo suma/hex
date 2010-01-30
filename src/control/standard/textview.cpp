@@ -221,7 +221,6 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 		// TODO:：1バイト目と2バイト目で描画する色が変わる場合！
 		if (char_length == 0) {
 			// 印字不能な文字なので、next_posまで飛ばす
-			char_length = 1;
 			current_pos += 1;
 			drawText(painter, QString("."), xitr.getTextX(), y + config_.ByteMargin.top(), 1);
 		} else {
