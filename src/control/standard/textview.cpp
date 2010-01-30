@@ -177,7 +177,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 	TextConfig::XIterator xitr = config_.createXIterator();	// X位置
 	uint current_pos = 0;	// 現在描画している位置(Document)
 	uint next_pos = 0;		// 次の描画可能な文字までの位置
-	int char_length = 0;	// 描画可能な文字のバイト数
+	int char_length = 0;	// 印字可能な文字のバイト数
 	bool reset_color = true;
 	QBrush brush;
 	QString str;
@@ -201,18 +201,19 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 
 		// Draw text
 		if (current_pos == next_pos) {
-			// 次に描画する位置を取得
+			// 次に印字できる文字の位置を取得
 			next_pos = decode_helper_.GetStartPosition(current_pos);
-			// TODO: 描画可能な文字数を取得する
+			// TODO: 印字可能な文字数を取得する
+			// 基本的に、1文字ごと描画するのがルールで！(なぜなら、1文字=2バイトであるとも限らない）
 			char_length = 0;
 			if (current_pos == next_pos && char_length != 0) {
-				// 描画可能
+				// 印字可能
 				next_pos += char_length;
 				decode_helper_.AppendPosition(current_pos);
 			} else {
 				// 印字不能
 				next_pos += 1;
-				// TODO: 描画不可能な文字数を next_posに加算する
+				// TODO: 印字不能な文字数を next_posに加算する
 				// FIXME: next_pos += get_next_char(current_pos);
 			}
 		}
@@ -224,7 +225,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			current_pos += 1;
 			drawText(painter, QString("."), xitr.getTextX(), y + config_.ByteMargin.top(), 1);
 		} else {
-			// マルチバイト文字描画
+			// 文字描画
 			// TODO: 文字数に対して、バイト数が多すぎても綺麗に整形して描画したい
 			// TODO: 選択表示など、色が変わっても表示したい
 			current_pos += 1;
