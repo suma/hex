@@ -174,7 +174,7 @@ inline bool TextView::isSelected(quint64 pos) const
 
 void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 {
-	int x = 0;
+	TextConfig::XIterator xitr = config_.createXIterator();
 	uint current_pos = 0, next_pos = 0;
 	int mb_len = 0;
 	bool reset_color = true;
@@ -196,7 +196,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 		}
 
 		// Draw background
-		painter.fillRect(config_.x(x), y, config_.byteWidth(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.getScreenX(), y, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
 		if (current_pos == next_pos) {
@@ -220,7 +220,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			mb_len = 1;
 			current_pos += 1;
 			// FIXME: DrawBlindChar
-			drawText(painter, QString("."), config_.x(x) + config_.ByteMargin.left(), y + config_.ByteMargin.top(), 1);
+			drawText(painter, QString("."), xitr.getTextX(), y + config_.ByteMargin.top(), 1);
 		} else {
 			// マルチバイト文字描画
 			current_pos += 1;
@@ -228,8 +228,8 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 		}
 
 
-		x = (x + 1) % TextConfig::Num;
-		if (x == 0) {
+		++xitr;
+		if (*xitr == 0) {
 			// 改行したので、描画座標を次の行にする
 			// TDOO: 行の加算はイテレータクラスにした方がよいかもしれない？
 			y += config_.byteHeight();
@@ -246,10 +246,10 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 	}
 
 	// Draw empty area(after end line)
-	if (0 < x && x < TextConfig::Num) {
+	if (0 < *xitr && *xitr < TextConfig::Num) {
 		//qDebug("empty: %d", x);
 		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(config_.x(x), y, width(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.getScreenX(), y, width(), config_.byteHeight(), brush);
 	}
 }
 
