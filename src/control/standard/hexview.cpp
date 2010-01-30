@@ -230,8 +230,10 @@ inline bool HexView::isSelected(quint64 pos) const
 
 void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
 {
-	int index_data = 0, x = 0;
+	int index_data = 0;
 	bool reset_color = true;
+	HexConfig::XIterator xitr = config_.createXIterator();
+	HexConfig::YIterator yitr = config_.createYIterator(y);
 	QBrush brush;
 	QString hex;
 	hex.resize(2);
@@ -248,20 +250,22 @@ void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin,
 		}
 
 		// Skip
-		if (x < x_begin || x_end <= x) {
+		if (*xitr < x_begin || x_end <= *xitr) {
 			goto COUNTUP;
 		}
 
 		// Draw background
-		painter.fillRect(config_.x(x), y, config_.byteWidth(), config_.byteHeight(), brush);
+		//painter.fillRect(xitr.getScreenX(), y, config_.byteWidth(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
 		byteToHex(buff_[index_data], hex);
-		drawText(painter, hex, config_.x(x) + config_.ByteMargin.left(), y + config_.ByteMargin.top());
+		//drawText(painter, hex, xitr.getTextX(), y + config_.ByteMargin.top());
+		drawText(painter, hex, xitr.getTextX(), yitr.getScreenY());
+
 
 COUNTUP:// Count up
 		index_data++;
-		x = (x + 1) % HexConfig::Num;
 
 		// Iterate color
 		Q_ASSERT(0 <= itr_color->Length);
@@ -273,16 +277,18 @@ COUNTUP:// Count up
 		}
 
 		// Move next line
-		if (x == 0) {
-			y += config_.byteHeight();
+		++xitr;
+		if (*xitr == 0) {
+			++yitr;
 		}
 	}
 
 	// Draw empty area(after end line)
-	if (0 < x && x < x_end && x < HexConfig::Num) {
+	if (0 < *xitr && *xitr < x_end && *xitr < HexConfig::Num) {
 		//qDebug("empty: %d", x);
 		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(config_.x(x), y, width(), config_.byteHeight(), brush);
+		//painter.fillRect(xitr.getScreenX(), y, width(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.getScreenX(), *yitr, width(), config_.byteHeight(), brush);
 	}
 }
 

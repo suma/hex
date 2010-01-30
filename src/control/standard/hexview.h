@@ -101,6 +101,91 @@ namespace Standard {
 		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void update();
+
+		class XIterator
+		{
+		private:
+			const HexConfig &conf;
+			int pos;
+		public:
+			XIterator(const HexConfig &conf, int pos)
+				: conf(conf)
+				, pos(pos)
+			{
+			}
+
+		public:
+			XIterator operator++()
+			{
+				pos = (pos + 1) % HexConfig::Num;
+				return *this;
+			}
+
+			void operator++(int)
+			{
+				pos = (pos + 1) % HexConfig::Num;
+			}
+
+			int operator*() const
+			{
+				return pos;
+			}
+
+			int getScreenX() const
+			{
+				return conf.x(pos);
+			}
+
+			int getTextX() const
+			{
+				return conf.x(pos) + conf.ByteMargin.left();
+			}
+		};
+
+		class YIterator
+		{
+		private:
+			const HexConfig &conf;
+			int pos;
+		public:
+			YIterator(const HexConfig &conf, int pos)
+				: conf(conf)
+				, pos(pos)
+			{
+			}
+
+		public:
+			YIterator operator++()
+			{
+				pos += conf.byteHeight();
+				return *this;
+			}
+
+			void operator++(int)
+			{
+				pos += conf.byteHeight();
+			}
+
+			int operator*() const
+			{
+				return pos;
+			}
+
+			int getScreenY() const
+			{
+				return pos + conf.ByteMargin.top();
+			}
+		};
+
+		XIterator createXIterator() const
+		{
+			return XIterator(*this, 0);
+		}
+
+		YIterator createYIterator(int pos) const
+		{
+			return YIterator(*this, pos);
+		}
 	};
 
 	class HexView : public ::View
