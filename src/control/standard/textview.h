@@ -6,6 +6,7 @@
 #include "../view.h"
 #include "../highlight.h"
 #include "textcursor.h"
+#include "textdecodehelper.h"
 #include "hexview.h"
 
 namespace Standard {
@@ -108,24 +109,24 @@ namespace Standard {
 	protected:
 		class CaretDrawInfo
 		{
-			public:
-				QPainter &painter;
-				CaretShape shape;
-				QString hex;
-				quint64 pos;
-				bool caret_middle;
-				int x;
-				int y;
-			public:
-				CaretDrawInfo(QPainter &p, CaretShape shape, quint64 pos, int x, int y, bool caret_middle)
-					: painter(p)
-				{
-					this->pos = pos;
-					this->shape = shape;
-					this->x = x;
-					this->y = y;
-					this->caret_middle = caret_middle;
-				}
+		public:
+			QPainter &painter;
+			CaretShape shape;
+			QString hex;
+			quint64 pos;
+			bool caret_middle;
+			int x;
+			int y;
+		public:
+			CaretDrawInfo(QPainter &p, CaretShape shape, quint64 pos, int x, int y, bool caret_middle)
+				: painter(p)
+			{
+				this->pos = pos;
+				this->shape = shape;
+				this->x = x;
+				this->y = y;
+				this->caret_middle = caret_middle;
+			}
 		};
 
 	protected:
@@ -141,17 +142,16 @@ namespace Standard {
 		// TODO change signal
 		void drawView();
 
-
 	protected:
 		void drawLines(QPainter &painter, DCIList &dcolors, int y);
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
-		bool isSelected(quint64 pos);
+		bool isSelected(quint64 pos) const;
 	protected:
 
-		quint64 posAt(const QPoint &pos);
+		quint64 posAt(const QPoint &pos) const;
 
 	public:
 		void drawCaret(bool visible = true);
@@ -171,6 +171,7 @@ namespace Standard {
 		// Main components
 		TextConfig config_;
 		TextCursor *cursor_;
+		TextDecodeHelper decode_helper_;
 	};
 
 }

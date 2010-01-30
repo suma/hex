@@ -87,6 +87,7 @@ int TextConfig::YToLine(int y) const
 TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor_(new TextCursor(doc, this))
+	, decode_helper_(QString("Shift-JIS"), cursor_->Top)
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -110,17 +111,12 @@ void TextView::drawView()
 
 	// TODO: draw Empty Background only
 
-	Q_ASSERT(0 <= line_start);
-	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / TextConfig::Num + 1);
-	Q_ASSERT(0 <= end);
-	Q_ASSERT(static_cast<uint>(end) <= document_->length() / TextConfig::Num + 1);
+	//Q_ASSERT(static_cast<uint>(end) <= document_->length() / TextConfig::Num + 1);
 
 	// Get draw range
 	int y_top = config_.top();
 	int y = config_.top() + config_.byteMargin().top();
-	int count_draw_line;
-
-		count_draw_line = config_.drawableLines(height());
+	int count_draw_line = config_.drawableLines(height());
 
 	// Get top position of view
 	const quint64 top = cursor_->Top * TextConfig::Num;
@@ -169,7 +165,7 @@ inline void TextView::isSelected(bool &selected, quint64 &sel_begin, quint64 &se
 	}
 }
 
-inline bool TextView::isSelected(quint64 pos)
+inline bool TextView::isSelected(quint64 pos) const
 {
 	const quint64 sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
 	const quint64 sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
@@ -178,11 +174,15 @@ inline bool TextView::isSelected(quint64 pos)
 
 void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 {
-	int index_data = 0, x = 0;
+	int x = 0;
+	uint check_counter = 0;
+	uint current_pos = 0;
 	bool reset_color = true;
 	QBrush brush;
 	QString str;
 	str.resize(4);
+
+	decode_helper_.CheckTop(cursor_->Top);
 
 	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
 		// Setup/Update color settings
@@ -199,12 +199,30 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 		painter.fillRect(config_.x(x), y, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
-		int len = 2;
+		if (check_counter == 0) {
+			uint next_pos = decode_helper_.GetStartPosition(current_pos);
+			if (current_pos == next_pos) {
+				// まだ文字の開始位置がつかめていない or 現在位置から始めてOK
+			} else {
+				// 印字不能な文字なので、next_posまで飛ばす
+			}
+		}
 
+		uint len = 2;
 
-		//index_data++;
-		index_data += len;
+		check_counter -= len;
+		current_pos += len;
+
+		//x = (x + 1) % TextConfig::Num;
+		const int old_x = x;
+		//x = (x + pos) % TextConfig::Num;
 		x = (x + 1) % TextConfig::Num;
+		//if (x < old_x) {
+		if (x == 0) {
+			// 改行したので、描画座標を次の行にする
+			// TDOO: 行の加算はイテレータクラスにした方がよいかもしれない？
+			y += config_.byteHeight();
+		}
 
 		// Iterate color
 		Q_ASSERT(0 <= itr_color->Length);
@@ -213,11 +231,6 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			++itr_color;
 			// Change color
 			reset_color = true;
-		}
-
-		// Move next line
-		if (x == 0) {
-			y += config_.byteHeight();
 		}
 	}
 
@@ -404,7 +417,7 @@ void TextView::mouseReleaseEvent(QMouseEvent *)
 	releaseMouse();
 }
 
-quint64 TextView::posAt(const QPoint &pos)
+quint64 TextView::posAt(const QPoint &pos) const
 {
 	int x = config_.XToPos(pos.x());
 	int y = config_.YToLine(pos.y());

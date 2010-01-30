@@ -152,7 +152,7 @@ namespace Standard {
 		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
 
 	public:
-		void drawViewAfter(quint64 pos);
+		//void drawViewAfter(quint64 pos);
 
 	signals:
 		void viewDrawed(DrawMode mode, int, int);
@@ -163,11 +163,11 @@ namespace Standard {
 
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
-		bool isSelected(quint64 pos);
+		bool isSelected(quint64 pos) const;
 	protected:
 
-		void byteToHex(uchar c, QString &h);
-		quint64 posAt(const QPoint &pos);
+		static void byteToHex(uchar c, QString &h);
+		quint64 posAt(const QPoint &pos) const;
 
 	public:
 		void drawCaret(bool visible = true);

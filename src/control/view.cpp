@@ -32,7 +32,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci)
 {
 	Q_ASSERT(di.size != 0);
 	quint64 top = di.top;
-	const int sb = di.sb, se = di.se;
+	const quint64 sb = di.sb, se = di.se;
 	const uint size = di.size;
 
 	bool high = false;
@@ -50,7 +50,7 @@ void View::getDrawColors(const DrawInfo &di, DCIList &ci)
 		if (high) {
 			// case: Highlight off
 			// Scanning highlighted colors
-			int i = 0;
+			uint i = 0;
 			for (HCIList::iterator itr = hcolors_.begin(), end = hcolors_.end(); i < size; ) {
 				if (itr == end || i < itr->Index) {
 					int left = itr->Index - size;
