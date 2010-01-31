@@ -239,6 +239,18 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			// TODO: 文字数に対して、バイト数が多すぎても綺麗に整形して描画したい
 			// TODO: 選択表示など、色が変わっても表示したい
 			// 面倒: 改行, 色分けのitr_color の大きさ
+
+			if (buff_.capacity() < size) {
+				buff_.resize(size);
+			}
+
+			uchar *b = &buff_[0];
+			QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
+			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
+			document->get(index, b, size);
+			QString s = codec->toUnicode((char*)b, 4, &state);
+			drawText(painter, s, xitr.getTextX(), y, s.size());
+
 			++current_pos;
 			// FIXME: DrawMBChar
 		}
