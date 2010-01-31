@@ -472,14 +472,12 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
-	if (ev->button() == Qt::LeftButton) {
-		//qDebug("mouse move");
-		// FIXME: move up/down automatically
-		if (height() < ev->pos().y()) {
-			return;
-		}
-		cursor_->movePosition(posAt(ev->pos()), true, false);
+	//qDebug("mouse move");
+	// FIXME: move up/down automatically
+	if (height() < ev->pos().y()) {
+		return;
 	}
+	cursor_->movePosition(posAt(ev->pos()), true, false);
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *)

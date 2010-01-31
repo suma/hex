@@ -422,21 +422,19 @@ void TextView::mousePressEvent(QMouseEvent *ev)
 		cursor_->movePosition(posAt(ev->pos()), false, false);
 
 		// Start mouse capture
-		grabMouse();
+		//grabMouse();
 	}
 }
 
 void TextView::mouseMoveEvent(QMouseEvent *ev)
 {
 	//qDebug("mouse move :%d", ev->button());
-	if (ev->button() == Qt::LeftButton) {
-		//qDebug("mosue move");
-		// FIXME: move up/down automatically
-		if (height() < ev->pos().y()) {
-			return;
-		}
-		cursor_->movePosition(posAt(ev->pos()), true, false);
+	//qDebug("mosue move");
+	// FIXME: move up/down automatically
+	if (height() < ev->pos().y()) {
+		return;
 	}
+	cursor_->movePosition(posAt(ev->pos()), true, false);
 }
 
 void TextView::mouseReleaseEvent(QMouseEvent *)
@@ -444,7 +442,7 @@ void TextView::mouseReleaseEvent(QMouseEvent *)
 	//qDebug("mouse release");
 
 	// End mouse capture
-	releaseMouse();
+	//releaseMouse();
 }
 
 quint64 TextView::posAt(const QPoint &pos) const
