@@ -6,6 +6,7 @@
 #include "textcursor.h"
 #include "../document.h"
 #include "../highlight.h"
+#include "textdecodehelper.h"
 
 using namespace std;
 
@@ -87,10 +88,20 @@ int TextConfig::YToLine(int y) const
 TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor_(new TextCursor(doc, this))
-	, decode_helper_(QString("Shift-JIS"), cursor_->Top)
+	, decode_helper_(new TextDecodeHelper(doc, QString("Shift-JIS"), cursor_->Top))
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
+
+	// for Qt4.6?
+	//setEnabled(true);
+	//setMouseTracking(true);
+}
+
+TextView::~TextView()
+{
+	delete decode_helper_;
+	delete cursor_;
 }
 
 void TextView::resizeEvent(QResizeEvent *rs)
@@ -183,7 +194,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 	QString str;
 	str.resize(4);
 
-	decode_helper_.CheckTop(cursor_->Top);
+	decode_helper_->CheckTop(cursor_->Top);
 
 	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
 		// Setup/Update color settings
@@ -202,19 +213,19 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 		// Draw text
 		if (current_pos == next_pos) {
 			// 次に印字できる文字の位置を取得
-			next_pos = decode_helper_.GetStartPosition(current_pos);
+			next_pos = decode_helper_->GetStartPosition(current_pos);
 			// TODO: 印字可能な文字数を取得する
 			// 基本的に、1文字ごと描画するのがルールで！(なぜなら、1文字=2バイトであるとも限らない）
-			char_length = 0;
+			char_length = decode_helper_->GetPrintableCharLength(next_pos);
 			if (current_pos == next_pos && char_length != 0) {
 				// 印字可能
 				next_pos += char_length;
-				decode_helper_.AppendPosition(current_pos);
+				decode_helper_->AppendPosition(current_pos);
 			} else {
 				// 印字不能
-				next_pos += 1;
+				++next_pos;
 				// TODO: 印字不能な文字数を next_posに加算する
-				// FIXME: next_pos += get_next_char(current_pos);
+				next_pos = decode_helper_->GetNextPrintableCharBytes(current_pos);
 			}
 		}
 
@@ -228,7 +239,7 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			// TODO: 文字数に対して、バイト数が多すぎても綺麗に整形して描画したい
 			// TODO: 選択表示など、色が変わっても表示したい
 			// 面倒: 改行, 色分けのitr_color の大きさ
-			current_pos += 1;
+			++current_pos;
 			// FIXME: DrawMBChar
 		}
 
@@ -406,6 +417,7 @@ void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
 void TextView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
+		qDebug("mosue press");
 
 		cursor_->movePosition(posAt(ev->pos()), false, false);
 
@@ -416,7 +428,9 @@ void TextView::mousePressEvent(QMouseEvent *ev)
 
 void TextView::mouseMoveEvent(QMouseEvent *ev)
 {
+	//qDebug("mouse move :%d", ev->button());
 	if (ev->button() == Qt::LeftButton) {
+		//qDebug("mosue move");
 		// FIXME: move up/down automatically
 		if (height() < ev->pos().y()) {
 			return;

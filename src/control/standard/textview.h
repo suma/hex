@@ -6,10 +6,10 @@
 #include "../view.h"
 #include "../highlight.h"
 #include "textcursor.h"
-#include "textdecodehelper.h"
 #include "hexview.h"
 
 namespace Standard {
+	class TextDecodeHelper;
 
 	class TextConfig
 	{
@@ -186,6 +186,7 @@ namespace Standard {
 
 	public:
 		TextView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
+		virtual ~TextView();
 
 		TextConfig & getConfig() { return config_; }
 		void setCaretBlink(bool enable);
@@ -256,7 +257,7 @@ namespace Standard {
 		// Main components
 		TextConfig config_;
 		TextCursor *cursor_;
-		TextDecodeHelper decode_helper_;
+		TextDecodeHelper *decode_helper_;
 	};
 
 }

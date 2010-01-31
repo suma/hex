@@ -194,6 +194,7 @@ namespace Standard {
 
 	public:
 		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
+		virtual ~HexView();
 
 		HexConfig & getConfig() { return config_; }
 		HexCursor & getCursor() { return *cursor_; }

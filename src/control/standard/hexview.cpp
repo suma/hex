@@ -90,6 +90,13 @@ HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
+
+	//setMouseTracking(true);
+}
+
+HexView::~HexView()
+{
+	delete cursor_;
 }
 
 void HexView::resizeEvent(QResizeEvent *rs)
@@ -453,6 +460,7 @@ void HexView::byteToHex(uchar c, QString &h)
 void HexView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
+		//qDebug("mouse press");
 
 		cursor_->HighNibble = true;
 		cursor_->movePosition(posAt(ev->pos()), false, false);
@@ -465,6 +473,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 void HexView::mouseMoveEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
+		//qDebug("mouse move");
 		// FIXME: move up/down automatically
 		if (height() < ev->pos().y()) {
 			return;

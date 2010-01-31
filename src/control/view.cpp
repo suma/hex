@@ -13,6 +13,10 @@ View::View(QWidget *parent, Document *doc, Highlight *hi)
 {
 }
 
+View::~View()
+{
+}
+
 void View::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);

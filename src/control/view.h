@@ -63,6 +63,7 @@ protected:
 
 public:
 	View(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
+	virtual ~View();
 
 protected:
 	void paintEvent(QPaintEvent*);
