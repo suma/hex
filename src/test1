@@ -1,0 +1,1 @@
+make -j3 -f t_Makefile && ./test1.app/Contents/MacOS/test1 
