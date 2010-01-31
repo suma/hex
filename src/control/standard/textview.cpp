@@ -150,6 +150,12 @@ void TextView::drawView()
 	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
 	getDrawColors(di, dcolors_);
 
+	// Copy from document
+	if (buff_.capacity() < size) {
+		buff_.resize(size);
+	}
+	document_->get(top, &buff_[0], size);
+
 	// Draw lines
 	drawLines(painter, dcolors_, y_top);
 
@@ -240,16 +246,16 @@ void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
 			// TODO: 選択表示など、色が変わっても表示したい
 			// 面倒: 改行, 色分けのitr_color の大きさ
 
-			if (buff_.capacity() < size) {
-				buff_.resize(size);
-			}
-
-			uchar *b = &buff_[0];
+#if 1
+			//テスト
+			if (current_pos %2 == 0) {
+			uchar *b = &buff_[current_pos];
 			QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
-			document->get(index, b, size);
 			QString s = codec->toUnicode((char*)b, 4, &state);
-			drawText(painter, s, xitr.getTextX(), y, s.size());
+			drawText(painter, s, xitr.getTextX(), y, qMin(2,s.size()));
+			}
+#endif
 
 			++current_pos;
 			// FIXME: DrawMBChar
