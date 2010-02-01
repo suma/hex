@@ -36,12 +36,15 @@ int main(int argc, char *argv[])
 }
 */
 
+#include "rectest.h"
+
 class DocTest : public QObject
 {
 	Q_OBJECT
 private slots:
 
 	void test1();
+	void rec1();
 
 };
 
@@ -69,6 +72,14 @@ void DocTest::test1()
 	DO( doc.get(2, buf, 2) );
 }
 
+void DocTest::rec1()
+{
+	srand(127);
+	Test t("aa");
+	for ( int i = 0; i < TEST_MAX+1; i++ ) {
+		t.TestUnit();
+	}
+}
 
 
 QTEST_MAIN(DocTest)

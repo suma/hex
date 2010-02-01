@@ -12,7 +12,8 @@ INCLUDEPATH += . ../control
 HEADERS += \
 	document.h \
 	document_i.h \
-	qfragmentmap_p.h
+	qfragmentmap_p.h \
+	rectest.h
 
 SOURCES += \
 	doctest.cpp \

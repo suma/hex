@@ -4,10 +4,16 @@
 
 TEMPLATE = app
 TARGET = test1
-DEPENDPATH += .
-INCLUDEPATH += .
+DEPENDPATH += . ../control
+INCLUDEPATH += . ../control
 
 # Input
-HEADERS += ../control/document.h ../control/document_i.h ../control/qfragmentmap_p.h
-SOURCES += test.cpp ../control/document.cpp  ../control/document_i.cpp
+HEADERS += \
+	document.h \
+	document_i.h \
+	qfragmentmap_p.h
+
+SOURCES += test.cpp \
+	document_i.cpp \
+	document.cpp \
 
