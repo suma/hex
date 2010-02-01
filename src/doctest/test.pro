@@ -5,8 +5,8 @@
 QT += testlib
 TEMPLATE = app
 TARGET = test
-DEPENDPATH += . ../
-INCLUDEPATH += . ../
+DEPENDPATH += . ../control
+INCLUDEPATH += . ../control
 
 # Input
 HEADERS += \
