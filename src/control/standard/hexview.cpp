@@ -222,13 +222,13 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 
 	// Draw loop
 	for (uint index = 0; index < size; ++index) {
-		// Set color
-		ColorType color = getColorType(selection, docpos++);
-		QBrush brush = QBrush(config_.Colors[color.Background]);
-		painter.setBackground(brush);
-		painter.setPen(config_.Colors[color.Text]);
-
 		if (x_begin <= *xitr && *xitr < x_end) {
+			// Set color
+			ColorType color = getColorType(selection, docpos++);
+			QBrush brush = QBrush(config_.Colors[color.Background]);
+			painter.setBackground(brush);
+			painter.setPen(config_.Colors[color.Text]);
+
 			// Draw background
 			painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
 
