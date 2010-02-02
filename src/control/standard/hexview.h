@@ -29,7 +29,7 @@ namespace Standard {
 		bool EnableCaret;
 		int CaretBlinkTime;
 
-	protected:
+	private:
 		QFontMetrics FontMetrics;
 		int x_begin[Num];	// pos of value
 		int x_end[Num];		// pos of end
@@ -194,17 +194,16 @@ namespace Standard {
 
 	public:
 		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
-		virtual ~HexView();
+		~HexView();
 
 		HexConfig & getConfig() { return config_; }
 		HexCursor & getCursor() { return *cursor_; }
 		void setCaretBlink(bool enable);
 
 
-	protected:
-		class CaretDrawInfo
+	private:
+		struct CaretDrawInfo
 		{
-			public:
 				QPainter &painter;
 				CaretShape shape;
 				QString hex;
@@ -212,7 +211,7 @@ namespace Standard {
 				bool caret_middle;
 				int x;
 				int y;
-			public:
+
 				CaretDrawInfo(QPainter &p, CaretShape shape, quint64 pos, int x, int y, bool caret_middle)
 					: painter(p)
 				{
@@ -224,14 +223,13 @@ namespace Standard {
 				}
 		};
 
-	protected:
+	private:
 		void resizeEvent(QResizeEvent *);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
 		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
-
 
 	public:
 		// TODO change signal
@@ -243,14 +241,14 @@ namespace Standard {
 	signals:
 		void viewDrawed(DrawMode mode, int, int);
 
-	protected:
+	private:
 		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		bool isSelected(quint64 pos) const;
-	protected:
+	private:
 
 		static void byteToHex(uchar c, QString &h);
 		quint64 posAt(const QPoint &pos) const;
@@ -258,7 +256,7 @@ namespace Standard {
 	public:
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
-	protected:
+	private:
 		void drawCaretShape(CaretDrawInfo info);
 		void drawCaretLine(const CaretDrawInfo &);
 		void drawCaretFrame(const CaretDrawInfo &);
@@ -269,7 +267,7 @@ namespace Standard {
 		void insertData(quint64 pos, uchar character);
 		void removeData(quint64 pos, quint64 len);
 
-	protected:
+	private:
 		// Main components
 		HexConfig config_;
 		HexCursor *cursor_;

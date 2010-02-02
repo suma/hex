@@ -65,8 +65,10 @@ public:
 	View(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
 	virtual ~View();
 
-protected:
+private:
 	void paintEvent(QPaintEvent*);
+
+protected:
 	void resizeEvent(QResizeEvent*);
 	void getDrawColors(const DrawInfo &di, DCIList &ci);
 

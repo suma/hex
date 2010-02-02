@@ -25,7 +25,7 @@ namespace Standard {
 		bool EnableCaret;
 		int CaretBlinkTime;
 
-	protected:
+	private:
 		QFontMetrics FontMetrics;
 		int x_begin[Num];	// pos of value
 		int x_end[Num];		// pos of end
@@ -186,16 +186,15 @@ namespace Standard {
 
 	public:
 		TextView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
-		virtual ~TextView();
+		~TextView();
 
 		TextConfig & getConfig() { return config_; }
 		void setCaretBlink(bool enable);
 
 
-	protected:
-		class CaretDrawInfo
+	private:
+		struct CaretDrawInfo
 		{
-		public:
 			QPainter &painter;
 			CaretShape shape;
 			QString hex;
@@ -203,7 +202,7 @@ namespace Standard {
 			bool caret_middle;
 			int x;
 			int y;
-		public:
+
 			CaretDrawInfo(QPainter &p, CaretShape shape, quint64 pos, int x, int y, bool caret_middle)
 				: painter(p)
 			{
@@ -215,7 +214,7 @@ namespace Standard {
 			}
 		};
 
-	protected:
+	private:
 		void resizeEvent(QResizeEvent *);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
@@ -228,21 +227,21 @@ namespace Standard {
 		// TODO change signal
 		void drawView();
 
-	protected:
+	private:
 		void drawLines(QPainter &painter, DCIList &dcolors, int y);
 		void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
 
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		bool isSelected(quint64 pos) const;
-	protected:
+	private:
 
 		quint64 posAt(const QPoint &pos) const;
 
 	public:
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
-	protected:
+	private:
 		void drawCaretShape(CaretDrawInfo info);
 		void drawCaretLine(const CaretDrawInfo &);
 		void drawCaretFrame(const CaretDrawInfo &);
@@ -253,7 +252,7 @@ namespace Standard {
 		void insertData(quint64 pos, uchar character);
 		void removeData(quint64 pos, quint64 len);
 
-	protected:
+	private:
 		// Main components
 		TextConfig config_;
 		TextCursor *cursor_;
