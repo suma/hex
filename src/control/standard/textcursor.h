@@ -60,6 +60,8 @@ namespace Standard {
 
 		void setCaretVisible(bool t);
 		void turnCaretVisible();
+
+		CursorSelection getSelection() const;
 	
 	public:
 
@@ -94,6 +96,14 @@ namespace Standard {
 	inline void TextCursor::turnCaretVisible()
 	{
 		CaretVisible = !CaretVisible;
+	}
+
+	inline CursorSelection TextCursor::getSelection() const
+	{
+		CursorSelection c;
+		c.begin = qMin(Position, PositionAnchor);
+		c.end = qMax(Position, PositionAnchor);
+		return c;
 	}
 }
 

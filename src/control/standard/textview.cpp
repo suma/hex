@@ -141,15 +141,6 @@ void TextView::drawView()
 	const int y_start = y_top + qMax(0, count_draw_line - 1) * config_.byteHeight();
 	painter.fillRect(0, y_start, width(), height(), brush);
 
-	// Get selectead area
-	bool selected = false;
-	quint64 sel_begin = 0, sel_end = 0;
-	isSelected(selected, sel_begin, sel_end, top, count_draw_line, size);
-
-	// TODO: Adding cache class for color highligh data
-	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
-	getDrawColors(di, dcolors_);
-
 	// Copy from document
 	if (buff_.capacity() < size) {
 		buff_.resize(size);
@@ -157,7 +148,7 @@ void TextView::drawView()
 	document_->get(top, &buff_[0], size);
 
 	// Draw lines
-	drawLines(painter, dcolors_, y_top);
+	drawLines(painter, top, y_top, size);
 
 	// Update screen buffer
 	const int draw_width  = qMin(width(), config_.maxWidth());
@@ -189,93 +180,48 @@ inline bool TextView::isSelected(quint64 pos) const
 	return sel_begin <= pos && pos <  sel_end;
 }
 
-void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y)
+ColorType TextView::getColorType(const CursorSelection &c, quint64 pos)
 {
-	TextConfig::XIterator xitr = config_.createXIterator();	// X位置
-	uint current_pos = 0;	// 現在描画している位置(Document)
-	uint next_pos = 0;		// 次の描画可能な文字までの位置
-	int char_length = 0;	// 印字可能な文字のバイト数
-	bool reset_color = true;
-	QBrush brush;
-	QString str;
-	str.resize(4);
+	if (c.begin <= pos && pos < c.end) {
+		return ColorType(Color::SelBackground, Color::SelText);
+	} else {
+		return ColorType(Color::Background, Color::Text);
+	}
+}
 
-	decode_helper_->CheckTop(cursor_->Top);
+void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
+{
+	TextConfig::XIterator xitr = config_.createXIterator();
+	TextConfig::YIterator yitr = config_.createYIterator(y);
+	CursorSelection selection = cursor_->getSelection();
 
-	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
-		// Setup/Update color settings
-		if (reset_color) {
-			// Create brush for background
-			brush = QBrush(config_.Colors[itr_color->BackgroundColor]);
-			// Set color
-			painter.setBackground(brush);
-			painter.setPen(config_.Colors[itr_color->TextColor]);
-			reset_color = false;
-		}
+	// Draw loop
+	for (uint index = 0; index < size; ++index) {
+		// Set color
+		ColorType color = getColorType(selection, docpos++);
+		QBrush brush = QBrush(config_.Colors[color.Background]);
+		painter.setBackground(brush);
+		painter.setPen(config_.Colors[color.Text]);
 
 		// Draw background
 		painter.fillRect(xitr.getScreenX(), y, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
-		if (current_pos == next_pos) {
-			// 次に印字できる文字の位置を取得
-			next_pos = decode_helper_->GetStartPosition(current_pos);
-			// TODO: 印字可能な文字数を取得する
-			// 基本的に、1文字ごと描画するのがルールで！(なぜなら、1文字=2バイトであるとも限らない）
-			char_length = decode_helper_->GetPrintableCharLength(next_pos);
-			if (current_pos == next_pos && char_length != 0) {
-				// 印字可能
-				next_pos += char_length;
-				decode_helper_->AppendPosition(current_pos);
-			} else {
-				// 印字不能
-				++next_pos;
-				// TODO: 印字不能な文字数を next_posに加算する
-				next_pos = decode_helper_->GetNextPrintableCharBytes(current_pos);
-			}
-		}
-
-		// TODO:：1バイト目と2バイト目で描画する色が変わる場合！
-		if (char_length == 0) {
-			// 印字不能な文字なので、next_posまで飛ばす
-			current_pos += 1;
-			drawText(painter, QString("."), xitr.getTextX(), y + config_.ByteMargin.top(), 1);
-		} else {
-			// 文字描画
-			// TODO: 文字数に対して、バイト数が多すぎても綺麗に整形して描画したい
-			// TODO: 選択表示など、色が変わっても表示したい
-			// 面倒: 改行, 色分けのitr_color の大きさ
-
-#if 1
-			//テスト
-			if (current_pos %2 == 0) {
-			uchar *b = &buff_[current_pos];
+		// FIXME: multibyte support
+		if (index %2 == 0) {
+			uchar *b = &buff_[index];
 			QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
 			QString s = codec->toUnicode((char*)b, 4, &state);
 			drawText(painter, s, xitr.getTextX(), y, qMin(2,s.size()));
-			}
-#endif
-
-			++current_pos;
-			// FIXME: DrawMBChar
 		}
 
-
+		// Move next line
 		++xitr;
 		if (*xitr == 0) {
 			// 改行したので、描画座標を次の行にする
 			// TDOO: 行の加算はイテレータクラスにした方がよいかもしれない？
 			y += config_.byteHeight();
-		}
-
-		// Iterate color
-		Q_ASSERT(0 <= itr_color->Length);
-		if (--itr_color->Length <= 0) {
-			// Move next color
-			++itr_color;
-			// Change color
-			reset_color = true;
 		}
 	}
 

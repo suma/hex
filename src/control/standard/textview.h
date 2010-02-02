@@ -228,9 +228,10 @@ namespace Standard {
 		void drawView();
 
 	private:
-		void drawLines(QPainter &painter, DCIList &dcolors, int y);
-		void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
 
+		ColorType getColorType(const CursorSelection &, quint64 pos);
+		void drawLines(QPainter &painter, quint64 top, int y, uint size);
+		void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
 
 		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
 		bool isSelected(quint64 pos) const;
