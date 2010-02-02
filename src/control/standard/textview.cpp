@@ -27,7 +27,7 @@ TextConfig::TextConfig()
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
 	Colors[Color::SelText] = QColor(0,0,0);
-	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0);
+	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
 	Colors[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
 
 	// Font

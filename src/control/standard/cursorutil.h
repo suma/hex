@@ -15,4 +15,8 @@ namespace Standard {
 		CARET_UNDERBAR,
 	};
 
+	struct CursorSelection {
+		quint64 begin;
+		quint64 end;
+	};
 }

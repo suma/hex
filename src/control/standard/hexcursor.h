@@ -61,6 +61,8 @@ namespace Standard {
 
 		void setCaretVisible(bool t);
 		void turnCaretVisible();
+
+		CursorSelection getSelection() const;
 	
 	public:
 
@@ -95,6 +97,14 @@ namespace Standard {
 	inline void HexCursor::turnCaretVisible()
 	{
 		CaretVisible = !CaretVisible;
+	}
+
+	inline CursorSelection HexCursor::getSelection() const
+	{
+		CursorSelection c;
+		c.begin = qMin(Position, PositionAnchor);
+		c.end = qMax(Position, PositionAnchor);
+		return c;
 	}
 
 }

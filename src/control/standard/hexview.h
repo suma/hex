@@ -242,7 +242,10 @@ namespace Standard {
 		void viewDrawed(DrawMode mode, int, int);
 
 	private:
-		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
+
+		ColorType getColorType(const CursorSelection &, quint64 pos);
+		void drawLines(QPainter &painter, quint64 top, int y, int x_begin, int x_end, uint size);
+
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
 

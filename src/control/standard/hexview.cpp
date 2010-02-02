@@ -26,7 +26,7 @@ HexConfig::HexConfig()
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
 	Colors[Color::SelText] = QColor(0,0,0);
-	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0);
+	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
 	Colors[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
 
 	// Font
@@ -184,18 +184,8 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	document_->get(top, &buff_[0], size);
 
 	// Get selectead area
-	bool selected = false;
-	quint64 sel_begin = 0, sel_end = 0;
-	isSelected(selected, sel_begin, sel_end, top, count_draw_line, size);
-
-	// TODO: Adding cache class for color highligh data
-	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
-	getDrawColors(di, dcolors_);
-
-	// Draw lines
-	//qDebug("x:%d", (width() - config_.Margin.left()) / config_.byteWidth());
 	const int x_count_max = (width() - config_.Margin.left()) / config_.byteWidth() + 1;
-	drawLines(painter, dcolors_, y_top, 0, x_count_max);
+	drawLines(painter, top, y_top, 0, x_count_max, size);
 
 	// Update screen buffer
 	const int draw_width  = qMin(width(), config_.maxWidth());
@@ -235,52 +225,40 @@ inline bool HexView::isSelected(quint64 pos) const
 	return sel_begin <= pos && pos <  sel_end;
 }
 
-void HexView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
+
+ColorType HexView::getColorType(const CursorSelection &c, quint64 pos)
 {
-	int index_data = 0;
-	bool reset_color = true;
+	if (c.begin <= pos && pos < c.end) {
+		return ColorType(Color::SelBackground, Color::SelText);
+	} else {
+		return ColorType(Color::Background, Color::Text);
+	}
+}
+
+void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, int x_end, uint size)
+{
 	HexConfig::XIterator xitr = config_.createXIterator();
 	HexConfig::YIterator yitr = config_.createYIterator(y);
-	QBrush brush;
 	QString hex;
 	hex.resize(2);
 
-	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
-		// Setup/Update color settings
-		if (reset_color) {
-			// Create brush for background
-			brush = QBrush(config_.Colors[itr_color->BackgroundColor]);
-			// Set color
-			painter.setBackground(brush);
-			painter.setPen(config_.Colors[itr_color->TextColor]);
-			reset_color = false;
-		}
+	CursorSelection selection = cursor_->getSelection();
 
-		// Skip
-		if (*xitr < x_begin || x_end <= *xitr) {
-			goto COUNTUP;
-		}
+	// Draw loop
+	for (uint index = 0; index < size; ++index) {
+		// Set color
+		ColorType color = getColorType(selection, docpos++);
+		QBrush brush = QBrush(config_.Colors[color.Background]);
+		painter.setBackground(brush);
+		painter.setPen(config_.Colors[color.Text]);
 
-		// Draw background
-		//painter.fillRect(xitr.getScreenX(), y, config_.byteWidth(), config_.byteHeight(), brush);
-		painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
+		if (x_begin <= *xitr && *xitr < x_end) {
+			// Draw background
+			painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
 
-		// Draw text
-		byteToHex(buff_[index_data], hex);
-		//drawText(painter, hex, xitr.getTextX(), y + config_.ByteMargin.top());
-		drawText(painter, hex, xitr.getTextX(), yitr.getScreenY());
-
-
-COUNTUP:// Count up
-		index_data++;
-
-		// Iterate color
-		Q_ASSERT(0 <= itr_color->Length);
-		if (--itr_color->Length <= 0) {
-			// Move next color
-			++itr_color;
-			// Change color
-			reset_color = true;
+			// Draw text
+			byteToHex(buff_[index], hex);
+			drawText(painter, hex, xitr.getTextX(), yitr.getScreenY());
 		}
 
 		// Move next line
@@ -292,9 +270,7 @@ COUNTUP:// Count up
 
 	// Draw empty area(after end line)
 	if (0 < *xitr && *xitr < x_end && *xitr < HexConfig::Num) {
-		//qDebug("empty: %d", x);
 		QBrush brush(config_.Colors[Color::Background]);
-		//painter.fillRect(xitr.getScreenX(), y, width(), config_.byteHeight(), brush);
 		painter.fillRect(xitr.getScreenX(), *yitr, width(), config_.byteHeight(), brush);
 	}
 }
