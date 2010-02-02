@@ -233,8 +233,6 @@ namespace Standard {
 		void drawLines(QPainter &painter, quint64 top, int y, uint size);
 		void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
 
-		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
-		bool isSelected(quint64 pos) const;
 	private:
 
 		quint64 posAt(const QPoint &pos) const;

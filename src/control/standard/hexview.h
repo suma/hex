@@ -248,9 +248,6 @@ namespace Standard {
 
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
-
-		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
-		bool isSelected(quint64 pos) const;
 	private:
 
 		static void byteToHex(uchar c, QString &h);

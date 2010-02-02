@@ -157,29 +157,6 @@ void TextView::drawView()
 	update(0, y_top, draw_width, draw_height);
 }
 
-inline void TextView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
-{
-	if (!cursor_->hasSelection()) {
-		return;
-	}
-
-	sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
-	sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
-
-	if (top <= sel_end && sel_begin <= qMax(top + (TextConfig::Num * count_draw_line), top + size)) {
-		selected = true;
-	} else {
-		selected = false;
-	}
-}
-
-inline bool TextView::isSelected(quint64 pos) const
-{
-	const quint64 sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
-	const quint64 sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
-	return sel_begin <= pos && pos <  sel_end;
-}
-
 ColorType TextView::getColorType(const CursorSelection &c, quint64 pos)
 {
 	if (c.begin <= pos && pos < c.end) {
@@ -193,7 +170,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 {
 	TextConfig::XIterator xitr = config_.createXIterator();
 	TextConfig::YIterator yitr = config_.createYIterator(y);
-	CursorSelection selection = cursor_->getSelection();
+	const CursorSelection selection = cursor_->getSelection();
 
 	// Draw loop
 	for (uint index = 0; index < size; ++index) {

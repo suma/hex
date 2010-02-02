@@ -202,29 +202,6 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 //	drawView(DRAW_AFTER, pos / HexConfig::Num - cursor_-> Top);
 //}
 
-inline void HexView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
-{
-	if (!cursor_->hasSelection()) {
-		return;
-	}
-
-	sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
-	sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
-
-	if (top <= sel_end && sel_begin <= qMax(top + (HexConfig::Num * count_draw_line), top + size)) {
-		selected = true;
-	} else {
-		selected = false;
-	}
-}
-
-inline bool HexView::isSelected(quint64 pos) const
-{
-	const quint64 sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
-	const quint64 sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
-	return sel_begin <= pos && pos <  sel_end;
-}
-
 
 ColorType HexView::getColorType(const CursorSelection &c, quint64 pos)
 {
@@ -239,10 +216,9 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 {
 	HexConfig::XIterator xitr = config_.createXIterator();
 	HexConfig::YIterator yitr = config_.createYIterator(y);
+	const CursorSelection selection = cursor_->getSelection();
 	QString hex;
 	hex.resize(2);
-
-	CursorSelection selection = cursor_->getSelection();
 
 	// Draw loop
 	for (uint index = 0; index < size; ++index) {
