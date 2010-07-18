@@ -12,14 +12,18 @@ using namespace std;
 class Test
 {
 public:
-	const char *str;
+	const char *org_str;
 	//StringOriginal org;
 	Document *doc;
 	string test;
 
+private:
+	int count;
+
 public:
 	Test(const char *s)
-		//: str( s )
+		: org_str( s )
+		, count(0)
 		//, org( str )
 		//, piece( new PieceTable( org ) )
 	{
@@ -37,7 +41,7 @@ public:
 
 		// Insert
 		cout << "## Insert ";
-		for ( int i = 0; i < length + 2; i++ ) {
+		for ( int i = 0; i <= length; i++ ) {
 			Init();
 			string old = test;
 			string s = GenRandomString( i + 10 );
@@ -45,7 +49,7 @@ public:
 			//printf("   insert:%s(%u) old:%s(%u)\n", s.c_str(), (uint)s.size(), old.c_str(), old.length());
 			Insert( i, s );
 			bool b = Compare();
-			cout << "   doc->len: " << doc->length() << " test.len:" << test.length() << endl;
+			//cout << "   doc->len: " << doc->length() << " test.len:" << test.length() << endl;
 			if ( !b ) {
 				cout << "Failed index: " << i << endl;
 				cout << "       old : " << old << endl;
@@ -67,8 +71,8 @@ public:
 		for ( int i = 0; i < length; i++ ) {
 			for ( int k = 0; i + k < length; k++ ) {
 				Init();
-				cout << "size; "<< test.length() << endl;
-				cout << " try index:" << i << " len:" << k <<endl;
+				//cout << "size; "<< test.length() << endl;
+				//cout << " try index:" << i << " len:" << k <<endl;
 				Delete( i, k );
 				bool b = Compare();
 				if ( !b ) {
@@ -115,8 +119,8 @@ public:
 
 	void Init(bool b = false)
 	{
-		static int count = 0;
-		const char *str[] = {
+
+		static const char *str[] = {
 			"01234",
 			"<>?_}*{`~",
 			"abc",
@@ -127,7 +131,8 @@ public:
 #define TEST_MAX 6
 
 		doc = new Document();
-		test = string();
+		doc->insert(0, (const uchar*)org_str, strlen(org_str));
+		test = string(org_str);
 
 		for ( int i = 0, max = count; i < max; i++ ) {
 			Insert( 0, str[i] );
@@ -149,10 +154,7 @@ public:
 
 	void Insert(int index, string ins)
 	{
-		if ( doc->length() < index + ins.length() ) {
-			//cout << "Insert: bad values" << endl;
-			return;
-		}
+		Q_ASSERT( index <= doc->length());
 
 		doc->insert( index, (uchar*)ins.c_str(), ins.size() );
 
@@ -163,10 +165,7 @@ public:
 
 	void Delete(int index, int length)
 	{
-		if ( doc->length() < index + length ) {
-			//cout << "Delete: bad values" << endl;
-			return;
-		}
+		Q_ASSERT( index + length <= doc->length() );
 
 		doc->remove( index, (quint64)length );
 		test.erase( index, length );
@@ -174,10 +173,7 @@ public:
 
 	void Replace(int index, int length, const char *buf, int bufLength)
 	{
-		if ( doc->length() < index + length ) {
-			//cout << "Repalce: bad values" << endl;
-			return;
-		}
+		Q_ASSERT( index + length <= doc->length() );
 		
 		//doc->Replace( index, length, buf, bufLength );
 		doc->remove(index, (quint64)length);
@@ -241,8 +237,10 @@ public:
 
 	void Dump()
 	{
-		//DumpPieceString( "dump piece\n  " );
-		//DumpString( "std::string\n  " );
+		cout << "Document::length = " << doc->length() << endl;
+		cout << "String::length = " << test.length() << endl;
+		DumpPieceString( "dump piece  : " );
+		DumpString(      "std::string : " );
 		//doc->Dump();
 	}
 
