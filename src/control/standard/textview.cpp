@@ -201,10 +201,15 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 			// Draw text
 			drawText(painter, text, xitr.getTextX(), yitr.getScreenY());
+			// FIXME: 選択、描画可能文字数等を考慮したマルチバイト文字の描画
 
 			index += printableBytes;
 			xitr += printableBytes;
 			docpos += printableBytes;
+
+			// FIXME: もしここで次の行のバイト分も描画した場合、
+			// FIXME* 次の行のデータ部分をFillRectする必要有り（選択も考慮して）
+
 		} else {
 			// Draw background
 			painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);

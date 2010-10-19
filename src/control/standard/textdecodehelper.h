@@ -79,12 +79,12 @@ public:
 
 	bool isLeadByte(uchar c) const
 	{
-		return 0x81 <= c && c <= 0x9F || 0xE0 <= c && c <= 0xEF;
+		return (0x81 <= c && c <= 0x9F) || (0xE0 <= c && c <= 0xEF);
 	}
 
 	bool isTailByte(uchar c) const
 	{
-		return 0x40 <= c && c <= 0xE7 || 0x80 <= c && c <= 0xFC;
+		return (0x40 <= c && c <= 0xE7) || (0x80 <= c && c <= 0xFC);
 	}
 
 	bool isASCIISpace(uchar c) const
@@ -99,15 +99,15 @@ public:
 
 	bool isASCIISymbol(uchar c) const
 	{
-		return 0x21 <= c && c <= 0x2F ||
-			0x3A <= c && c <= 0x40 ||
-			0x5B <= c && c <= 0x60 ||
-			0x7B <= c && c <= 0x7E;
+		return (0x21 <= c && c <= 0x2F) ||
+			(0x3A <= c && c <= 0x40) ||
+			(0x5B <= c && c <= 0x60) ||
+			(0x7B <= c && c <= 0x7E);
 	}
 
 	bool isASCIIAlphabet(uchar c) const
 	{
-		return 0x41 <= c && 0x5A || 0x61 <= c && c <= 0x7A;
+		return (0x41 <= c && c <= 0x5A) || (0x61 <= c && c <= 0x7A);
 	}
 
 	bool isASCII(uchar c) const
@@ -128,10 +128,8 @@ public:
 
 
 		// ここからチェック
-		if (isLeadByte(data[0])) {
-			if (len >= 2 && isTailByte(data[1])) {
-				return 2;
-			}
+		if (len >= 2 && isLeadByte(data[0]) && isTailByte(data[1])) {
+			return 2;
 		}
 		if (isASCII(data[0])) {
 			return 1;
