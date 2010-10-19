@@ -239,7 +239,9 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 
 		// Move next line
 		++xitr;
-		if (*xitr == 0) {
+		//if (*xitr == 0) {
+		if (xitr.is_next_flag()) {
+			xitr.set_next_flag(false);
 			++yitr;
 		}
 	}

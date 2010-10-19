@@ -99,23 +99,35 @@ namespace Standard {
 		private:
 			const TextConfig &conf;
 			int pos;
+			bool next_flag_;
 		public:
 			XIterator(const TextConfig &conf, int pos)
 				: conf(conf)
 				, pos(pos)
+				, next_flag_(false)
 			{
 			}
 
 		public:
 			XIterator operator++()
 			{
-				pos = (pos + 1) % TextConfig::Num;
+				//pos = (pos + 1) % TextConfig::Num;
+				//return *this;
+				return *this += 1;
+			}
+
+			XIterator &operator+=(uint i)
+			{
+				const uint old = pos;
+				pos = (pos + i) % TextConfig::Num;
+				set_next_flag(pos < old);
 				return *this;
 			}
 
 			void operator++(int)
 			{
-				pos = (pos + 1) % TextConfig::Num;
+				//pos = (pos + 1) % TextConfig::Num;
+				*this += 1;
 			}
 
 			int operator*() const
@@ -131,6 +143,16 @@ namespace Standard {
 			int getTextX() const
 			{
 				return conf.x(pos) + conf.ByteMargin.left();
+			}
+
+			bool is_next_flag() const
+			{
+				return next_flag_;
+			}
+
+			void set_next_flag(bool t)
+			{
+				next_flag_ = t;
 			}
 		};
 

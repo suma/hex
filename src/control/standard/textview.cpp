@@ -148,6 +148,7 @@ void TextView::drawView()
 	document_->get(top, &buff_[0], size);
 
 	// Draw lines
+	decode_helper_->flush(top);
 	drawLines(painter, top, y_top, size);
 
 	// Update screen buffer
@@ -173,7 +174,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	const CursorSelection selection = cursor_->getSelection();
 
 	// Draw loop
-	for (uint index = 0; index < size; ++index) {
+	for (uint index = 0; index < size; ) {
 		// Set color
 		ColorType color = getColorType(selection, docpos++);
 		QBrush brush = QBrush(config_.Colors[color.Background]);
@@ -181,24 +182,34 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 		painter.setPen(config_.Colors[color.Text]);
 
 		// Draw background
-		painter.fillRect(xitr.getScreenX(), y, config_.byteWidth(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
 		// FIXME: multibyte support
-		if (index %2 == 0) {
+		uint printableBytes = decode_helper_->get_printable_bytes(index);
+		//qDebug("printableBytes = %u", printableBytes);
+		if (printableBytes > 0) {
 			uchar *b = &buff_[index];
-			QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
+			//QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
-			QString s = codec->toUnicode((char*)b, 4, &state);
-			drawText(painter, s, xitr.getTextX(), y, qMin(2,s.size()));
+			QString s = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
+			//qDebug("printable string = %s", s.toStdString().c_str());
+			drawText(painter, s, xitr.getTextX(), yitr.getScreenY(), qMax((uint)1, printableBytes));
+
+			index += printableBytes;
+			xitr += printableBytes;
+		} else {
+			QString s = QString(QChar('.'));
+			drawText(painter, s, xitr.getTextX(), yitr.getScreenY(), 1);
+			++index;
+			++xitr;
 		}
 
-		// Move next line
-		++xitr;
-		if (*xitr == 0) {
+
+		if (xitr.is_next_flag()) {
 			// 改行したので、描画座標を次の行にする
-			// TDOO: 行の加算はイテレータクラスにした方がよいかもしれない？
-			y += config_.byteHeight();
+			xitr.set_next_flag(false);
+			++yitr;
 		}
 	}
 
