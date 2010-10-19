@@ -132,6 +132,10 @@ void TextView::drawView()
 	// Get top position of view
 	const quint64 top = cursor_->Top * TextConfig::Num;
 	const uint size = qMin(document_->length() - top, (quint64)TextConfig::Num * count_draw_line);
+
+	qDebug("refresh event line:%llu end:%d", cursor_->Top, count_draw_line);
+	//qDebug(" pos:%llu, anchor:%llu", cursor_->Position, cursor_->PositionAnchor);
+
 	if (size == 0) {
 		return;
 	}
@@ -176,33 +180,41 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	// Draw loop
 	for (uint index = 0; index < size; ) {
 		// Set color
-		ColorType color = getColorType(selection, docpos++);
+		ColorType color = getColorType(selection, docpos);
 		QBrush brush = QBrush(config_.Colors[color.Background]);
 		painter.setBackground(brush);
 		painter.setPen(config_.Colors[color.Text]);
 
-		// Draw background
-		painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
 
 		// Draw text
 		// FIXME: multibyte support
 		uint printableBytes = decode_helper_->get_printable_bytes(index);
+
 		//qDebug("printableBytes = %u", printableBytes);
 		if (printableBytes > 0) {
 			uchar *b = &buff_[index];
-			//QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
-			QString s = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
-			//qDebug("printable string = %s", s.toStdString().c_str());
-			drawText(painter, s, xitr.getTextX(), yitr.getScreenY(), qMax((uint)1, printableBytes));
+			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
+
+			// Draw background
+			painter.fillRect(xitr.getScreenX(), *yitr, config_.charWidth(printableBytes), config_.byteHeight(), brush);
+
+			// Draw text
+			drawText(painter, text, xitr.getTextX(), yitr.getScreenY());
 
 			index += printableBytes;
 			xitr += printableBytes;
+			docpos += printableBytes;
 		} else {
-			QString s = QString(QChar('.'));
-			drawText(painter, s, xitr.getTextX(), yitr.getScreenY(), 1);
+			// Draw background
+			painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
+
+			// Draw dot
+			QString text = QString(QChar('.'));
+			drawText(painter, text, xitr.getTextX(), yitr.getScreenY(), 1);
 			++index;
 			++xitr;
+			++docpos;
 		}
 
 
@@ -224,6 +236,11 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 inline void TextView::drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth)
 {
 	painter.drawText(x, y, config_.charWidth(charwidth), config_.charHeight(), Qt::AlignCenter, hex);
+}
+
+inline void TextView::drawText(QPainter &painter, const QString &str, int x, int y)
+{
+	painter.drawText(x, y, config_.textWidth(str), config_.charHeight(), Qt::AlignCenter, str);
 }
 
 void TextView::drawCaret(bool visible)

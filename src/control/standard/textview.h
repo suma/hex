@@ -38,6 +38,10 @@ namespace Standard {
 		{
 			FontMetrics = QFontMetrics(Font);
 		}
+		inline int textWidth(const QString &string) const
+		{
+			return FontMetrics.width(string);
+		}
 		inline int charWidth(int num = 1) const
 		{
 			return FontMetrics.width(QChar('A')) * num;
@@ -88,6 +92,10 @@ namespace Standard {
 		inline int caretHeight() const
 		{
 			return byteHeight();
+		}
+		inline int width()
+		{
+			return charWidth(Num + 1) + Margin.left() + Margin.right();
 		}
 		int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
@@ -254,6 +262,7 @@ namespace Standard {
 		ColorType getColorType(const CursorSelection &, quint64 pos);
 		void drawLines(QPainter &painter, quint64 top, int y, uint size);
 		void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
+		void drawText(QPainter &painter, const QString &str, int x, int y);
 
 	private:
 
