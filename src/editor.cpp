@@ -45,7 +45,7 @@ Editor::Editor()
 
 	tview_ = new Standard::TextView(this, doc_, high_);
 	tview_->setCaretBlink(true);
-	tview_->move(hview_->getConfig().width(),0);
+	tview_->move(hview_->getConfig().width() + 20, 0);
 	tview_->resize(tview_->getConfig().width(), 270);
 	tview_->show();
 

@@ -4,6 +4,7 @@
 #include <vector>
 #include "textview.h"
 #include "textcursor.h"
+#include "../util/util.h"
 #include "../document.h"
 #include "../highlight.h"
 #include "textdecodehelper.h"
@@ -23,7 +24,7 @@ TextConfig::TextConfig()
 	, FontMetrics(Font)
 {
 	// Coloring
-	Colors[Color::Background] = QColor(0xEF,0xEF,0xEF);
+	Colors[Color::Background] = QColor(0xEF,0xDF,0xDF);
 	Colors[Color::Text] = QColor(0,0,0);
 	Colors[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
 	Colors[Color::SelText] = QColor(0,0,0);
@@ -42,21 +43,21 @@ void TextConfig::update()
 
 	// Pos
 	x_begin[0] = Margin.left() + ByteMargin.left();
-	for (int i = 1; i < Num; i++) {
+	for (int i = 1; i < ::util::countof(x_begin); i++) {
 		x_begin[i] = x_begin[i-1] + byteWidth();
 	}
 
 	// Pos of end
-	for (int i = 0; i < Num; i++) {
+	for (int i = 0; i < util::countof(x_begin); i++) {
 		x_end[i] = x_begin[i] + charWidth(1) + ByteMargin.right();
 	}
 
 	// Area
 	x_area[0] = Margin.left() + ByteMargin.left();
-	for (int i = 1; i < Num; i++) {
+	for (int i = 1; i < util::countof(x_area); i++) {
 		x_area[i] = x_area[i-1] + byteWidth();
 	}
-	x_area[Num] = x_area[Num-1] + byteWidth();
+	//x_area[Num] = x_area[Num-1] + byteWidth();
 }
 
 int TextConfig::drawableLines(int height) const
@@ -176,7 +177,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	TextConfig::XIterator xitr = config_.createXIterator();
 	TextConfig::YIterator yitr = config_.createYIterator(y);
 	const CursorSelection selection = cursor_->getSelection();
-
+	
 	// Draw loop
 	for (uint index = 0; index < size; ) {
 		// Set color
@@ -197,7 +198,8 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
 			// Draw background
-			painter.fillRect(xitr.getScreenX(), *yitr, config_.charWidth(printableBytes), config_.byteHeight(), brush);
+			painter.fillRect(xitr.getScreenX(), *yitr, config_.X(qMin(*xitr + printableBytes, (uint)TextConfig::NumV)), config_.byteHeight(), brush);
+			
 
 			// Draw text
 			drawText(painter, text, xitr.getTextX(), yitr.getScreenY());
@@ -206,9 +208,6 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			index += printableBytes;
 			xitr += printableBytes;
 			docpos += printableBytes;
-
-			// FIXME: もしここで次の行のバイト分も描画した場合、
-			// FIXME* 次の行のデータ部分をFillRectする必要有り（選択も考慮して）
 
 		} else {
 			// Draw background
@@ -226,7 +225,20 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 		if (xitr.is_next_flag()) {
 			// 改行したので、描画座標を次の行にする
 			xitr.set_next_flag(false);
+
+			// FIXME: printableBytes > 16 の時は考慮していないので、注意が必要
 			++yitr;
+
+			// 次の行で、スキップされた箇所を描画(printableBytes > 0の時
+			if (*xitr > 0) {
+				QString text = QString(QChar('_'));
+				for (TextConfig::XIterator xi = config_.createXIterator(); *xi < *xitr; ++xi) {
+					// Draw background
+					painter.fillRect(xi.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
+
+					drawText(painter, text, xi.getTextX(), yitr.getScreenY(), 1);
+				}
+			}
 		}
 	}
 

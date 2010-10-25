@@ -3,6 +3,7 @@
 
 #include <QFont>
 #include <QFontMetrics>
+#include "../util/util.h"
 #include "../view.h"
 #include "../highlight.h"
 #include "textcursor.h"
@@ -16,6 +17,7 @@ namespace Standard {
 	public:
 		enum {
 			Num = 16,
+			NumV = Num + 1,
 		};
 		QRect Margin;
 		QRect ByteMargin;
@@ -27,9 +29,10 @@ namespace Standard {
 
 	private:
 		QFontMetrics FontMetrics;
-		int x_begin[Num];	// pos of value
-		int x_end[Num];		// pos of end
-		int x_area[Num];
+		// Num + 1(for multibyte letter)
+		int x_begin[NumV];	// pos of value
+		int x_end[NumV];		// pos of end
+		int x_area[NumV];
 	
 	public:
 		TextConfig();
@@ -72,16 +75,16 @@ namespace Standard {
 		}
 		inline int maxWidth() const
 		{
-			return X(Num - 1) + Margin.right();
+			return X(util::countof(x_begin) - 1) + Margin.right();
 		}
 		inline int x(int i) const
 		{
-			Q_ASSERT(0 <= i && i < Num);
+			Q_ASSERT(0 <= i && i < util::countof(x_begin));
 			return x_begin[i];
 		}
 		inline int X(int i) const
 		{
-			Q_ASSERT(0 <= i && i < Num);
+			Q_ASSERT(0 <= i && i < util::countof(x_end));
 			return x_end[i];
 		}
 		inline int caretWidth() const
@@ -95,7 +98,7 @@ namespace Standard {
 		}
 		inline int width()
 		{
-			return charWidth(Num + 1) + Margin.left() + Margin.right();
+			return charWidth(NumV) + Margin.left() + Margin.right();
 		}
 		int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
@@ -107,6 +110,8 @@ namespace Standard {
 		private:
 			const TextConfig &conf;
 			int pos;
+
+			// 次の行を描画するか表すフラグ
 			bool next_flag_;
 		public:
 			XIterator(const TextConfig &conf, int pos)
