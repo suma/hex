@@ -189,7 +189,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 		// Draw text
 		// FIXME: multibyte support
-		uint printableBytes = decode_helper_->get_printable_bytes(index);
+		uint printableBytes = decode_helper_->getPrintableBytes(index);
 
 		//qDebug("printableBytes = %u", printableBytes);
 		if (printableBytes > 0) {

@@ -116,7 +116,7 @@ public:
 	}
 
 	// relative pos from Top
-	uint get_printable_bytes(uint pos)
+	uint getPrintableBytes(uint pos)
 	{
 		quint64 position = top_ + pos;
 		Q_ASSERT(position <= document_->length());
