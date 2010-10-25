@@ -231,6 +231,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 			// 次の行で、スキップされた箇所を描画(printableBytes > 0の時
 			if (*xitr > 0) {
+				// TODO: 選択時の処理対応とか
 				QString text = QString(QChar('_'));
 				for (TextConfig::XIterator xi = config_.createXIterator(); *xi < *xitr; ++xi) {
 					// Draw background
@@ -346,23 +347,10 @@ void TextView::drawCaretLine(const CaretDrawInfo &info)
 void TextView::drawCaretBlock(const CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
-		//if (cursor_->hasSelection()) {
-		if (true) {
-			// Draw block byte
-			QBrush brush(config_.Colors[Color::CaretBackground]);
-			info.painter.setBackground(brush);
-			info.painter.setPen(config_.Colors[Color::CaretText]);
-			info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-			//info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, info.hex);
-		} else {
-			// Draw block lowwer nibble
-			QBrush brush(config_.Colors[Color::CaretBackground]);
-			info.painter.setBackground(brush);
-			info.painter.setPen(config_.Colors[Color::CaretText]);
-			info.painter.fillRect(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y, config_.charWidth() + config_.ByteMargin.right(), config_.byteHeight(), brush);
-			QString low(info.hex[1]);
-			//info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignLeft, low);
-		}
+		QBrush brush(config_.Colors[Color::CaretBackground]);
+		info.painter.setBackground(brush);
+		info.painter.setPen(config_.Colors[Color::CaretText]);
+		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 	} else {
 		// Draw block without data
 		QBrush brush(config_.Colors[Color::CaretBackground]);
@@ -372,29 +360,17 @@ void TextView::drawCaretBlock(const CaretDrawInfo &info)
 
 void TextView::drawCaretFrame(const CaretDrawInfo &info)
 {
-	int width, x;
-	//if (!info.caret_middle) {
-	if (true) {
-		width = config_.byteWidth() - 1;
-		x = config_.x(info.x);
-	} else {
-		width = config_.charWidth() + config_.ByteMargin.right() - 1;
-		x = config_.x(info.x) + config_.charWidth() + config_.ByteMargin.left();
-	}
+	int width = config_.byteWidth() - 1;
+	int x = config_.x(info.x);
+
 	info.painter.setPen(config_.Colors[Color::CaretBackground]);
 	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
 }
 
 void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
 {
-	int width, x;
-	if (!info.caret_middle) {
-		width = config_.byteWidth() - 1;
-		x = config_.x(info.x);
-	} else {
-		width = config_.charWidth() + config_.ByteMargin.right() - 1;
-		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
-	}
+	int width = config_.byteWidth() - 1;
+	int x = config_.x(info.x);
 
 	QBrush brush(config_.Colors[Color::CaretBackground]);
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
