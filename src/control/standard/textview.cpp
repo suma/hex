@@ -17,8 +17,8 @@ namespace Standard {
 // Config
 TextConfig::TextConfig()
 	: Margin(2, 2, 3, 3)
-	, ByteMargin(0, 0, 0, 0)
 	, Font("Monaco", 17)
+	, ByteMargin(0, 0, 0, 0)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
 	, FontMetrics(Font)
@@ -42,18 +42,18 @@ void TextConfig::update()
 	// TODO: set ByteMargin value(left=charWidth/2, right=charWidth/2)
 
 	// Pos
-	x_begin[0] = Margin.left() + ByteMargin.left();
+	x_begin[0] = Margin.left();
 	for (int i = 1; i < ::util::countof(x_begin); i++) {
 		x_begin[i] = x_begin[i-1] + byteWidth();
 	}
 
 	// Pos of end
 	for (int i = 0; i < util::countof(x_begin); i++) {
-		x_end[i] = x_begin[i] + charWidth(1) + ByteMargin.right();
+		x_end[i] = x_begin[i] + charWidth(1);
 	}
 
 	// Area
-	x_area[0] = Margin.left() + ByteMargin.left();
+	x_area[0] = Margin.left();
 	for (int i = 1; i < util::countof(x_area); i++) {
 		x_area[i] = x_area[i-1] + byteWidth();
 	}
@@ -180,12 +180,6 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	
 	// Draw loop
 	for (uint index = 0; index < size; ) {
-		// Set color
-		ColorType color = getColorType(selection, docpos);
-		QBrush brush = QBrush(config_.Colors[color.Background]);
-		painter.setBackground(brush);
-		painter.setPen(config_.Colors[color.Text]);
-
 
 		// Draw text
 		// FIXME: multibyte support
@@ -193,25 +187,67 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 		//qDebug("printableBytes = %u", printableBytes);
 		if (printableBytes > 0) {
+			// Set color
+			ColorType color = getColorType(selection, docpos);
+			QBrush brush = QBrush(config_.Colors[color.Background]);
+			painter.setBackground(brush);
+			painter.setPen(config_.Colors[color.Text]);
+
+
 			uchar *b = &buff_[index];
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
 			// Draw background
-			painter.fillRect(xitr.getScreenX(), *yitr, config_.X(qMin(*xitr + printableBytes, (uint)TextConfig::NumV)), config_.byteHeight(), brush);
+			painter.fillRect(xitr.getTextX(), *yitr, config_.X(qMin(*xitr + printableBytes, (uint)TextConfig::NumV)), config_.byteHeight(), brush);
 			
 
 			// Draw text
 			drawText(painter, text, xitr.getTextX(), yitr.getScreenY());
+
+			// FIXME: 選択を考慮した描画(1バイトごとにColorTypeをチェック
+			// 文字描画用
+			/*
+			QPixmap pix(QSize(config_.textWidth(text), config_.charHeight()));
+			QPainter letterPainter(&pix);
+			letterPainter.setFont(config_.Font);
+			for (uint i = 0; i < printableBytes; i++) {
+				ColorType color = getColorType(selection, docpos);
+
+				QBrush brush = QBrush(config_.Colors[color.Background]);
+				letterPainter.setBackground(brush);
+				letterPainter.setPen(config_.Colors[color.Text]);
+				// Draw background/text
+				letterPainter.fillRect(pix.rect(), brush);
+				drawText(letterPainter, text, 0, 0);
+
+				// Copy letterPainter to painter
+				painter.drawPixmap(xitr.getTextX(), yitr.getScreenY(), pix, config_.charWidth(i), 0, config_.charWidth(), pix.height());
+
+				//++xitr;
+
+				//++index;
+				++xitr;
+				++docpos;
+			}
+*/
+				xitr += printableBytes;
+				docpos += printableBytes;
+			index += printableBytes;
+
 			// FIXME: 選択、描画可能文字数等を考慮したマルチバイト文字の描画
 
-			index += printableBytes;
-			xitr += printableBytes;
-			docpos += printableBytes;
 
 		} else {
+			// Set color
+			ColorType color = getColorType(selection, docpos);
+			QBrush brush = QBrush(config_.Colors[color.Background]);
+			painter.setBackground(brush);
+			painter.setPen(config_.Colors[color.Text]);
+
+
 			// Draw background
-			painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
+			painter.fillRect(xitr.getTextX(), *yitr, config_.X(*xitr), config_.byteHeight(), brush);
 
 			// Draw dot
 			QString text = QString(QChar('.'));
@@ -233,9 +269,16 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			if (*xitr > 0) {
 				// TODO: 選択時の処理対応とか
 				QString text = QString(QChar('_'));
+
 				for (TextConfig::XIterator xi = config_.createXIterator(); *xi < *xitr; ++xi) {
+
+					ColorType color = getColorType(selection, (uint)(docpos % TextConfig::Num) + *xitr);
+					QBrush brush = QBrush(config_.Colors[color.Background]);
+					painter.setBackground(brush);
+					painter.setPen(config_.Colors[color.Text]);
+
 					// Draw background
-					painter.fillRect(xi.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
+					painter.fillRect(xi.getTextX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
 
 					drawText(painter, text, xi.getTextX(), yitr.getScreenY(), 1);
 				}
@@ -247,7 +290,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	if (0 < *xitr && *xitr < TextConfig::Num) {
 		//qDebug("empty: %d", x);
 		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(xitr.getScreenX(), y, width(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.getTextX(), y, width(), config_.byteHeight(), brush);
 	}
 }
 
@@ -338,7 +381,7 @@ void TextView::drawCaretLine(const CaretDrawInfo &info)
 	if (true) {
 		x = config_.x(info.x);
 	} else {
-		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
+		x = config_.x(info.x) + config_.charWidth();
 	}
 	QBrush brush(config_.Colors[Color::CaretBackground]);
 	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);

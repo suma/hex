@@ -55,7 +55,7 @@ namespace Standard {
 		}
 		inline int byteWidth() const
 		{
-			return ByteMargin.left() + charWidth(1) + ByteMargin.right();
+			return charWidth(1);
 		}
 		inline int byteHeight() const
 		{
@@ -148,14 +148,9 @@ namespace Standard {
 				return pos;
 			}
 
-			int getScreenX() const
-			{
-				return conf.x(pos);
-			}
-
 			int getTextX() const
 			{
-				return conf.x(pos) + conf.ByteMargin.left();
+				return conf.x(pos);
 			}
 
 			bool is_next_flag() const

@@ -7,6 +7,12 @@
 class DocumentImpl;
 class QFile;
 
+class DocumentOriginal
+{
+public:
+	virtual quint64 length() const = 0;
+	virtual void get(quint64 pos, uchar *buf, uint len) const = 0;
+};
 
 class Document
 {
@@ -18,12 +24,12 @@ public:
 
 	quint64 length() const;
 
-	void get(quint64 pos, uchar *buf, uint len);
+	void get(quint64 pos, uchar *buf, uint len) const;
 	void insert(quint64 pos, const uchar *buf, uint len);
 	void remove(quint64 pos, quint64 len);
 
 private:
-	void copy(uint type, quint64 pos, quint64 len, uchar *buf);
+	void copy(uint type, quint64 pos, quint64 len, uchar *buf) const;
 
 
 protected:

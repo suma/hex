@@ -26,7 +26,7 @@ quint64 Document::length() const
 	return impl_->length();
 }
 
-void Document::get(quint64 pos, uchar *buf, uint len)
+void Document::get(quint64 pos, uchar *buf, uint len) const
 {
 	Q_ASSERT(pos <= length());
 	Q_ASSERT(len <= length());
@@ -62,7 +62,7 @@ void Document::get(quint64 pos, uchar *buf, uint len)
 	}
 }
 
-void Document::copy(uint type, quint64 pos, quint64 len, uchar *buf)
+void Document::copy(uint type, quint64 pos, quint64 len, uchar *buf) const
 {
 	Q_ASSERT(buf != NULL);
 	switch (type) {
