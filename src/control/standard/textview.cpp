@@ -182,58 +182,64 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	for (uint index = 0; index < size; ) {
 
 		// Draw text
-		// FIXME: multibyte support
 		uint printableBytes = decode_helper_->getPrintableBytes(index);
 
 		//qDebug("printableBytes = %u", printableBytes);
 		if (printableBytes > 0) {
-			// Set color
-			ColorType color = getColorType(selection, docpos);
-			QBrush brush = QBrush(config_.Colors[color.Background]);
-			painter.setBackground(brush);
-			painter.setPen(config_.Colors[color.Text]);
-
-
+			// get data
 			uchar *b = &buff_[index];
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
 			// Draw background
+			//ColorType color = getColorType(selection, docpos);
+			//QBrush brush = QBrush(config_.Colors[color.Background]);
+			//painter.fillRect(xitr.getTextX(), *yitr, config_.X(qMin(*xitr + printableBytes, (uint)TextConfig::NumV)), config_.byteHeight(), brush);
+			
+
+			// Draw text
+			//drawText(painter, text, xitr.getTextX(), yitr.getScreenY());
+#if 1
+			// FIXME: 選択を考慮した描画(1バイトごとにColorTypeをチェック
+			// 文字描画用
+			QPixmap pix(QSize(config_.charWidth(printableBytes), config_.byteHeight()));
+			QPainter letterPainter(&pix);
+			letterPainter.setFont(config_.Font);
+			int x = xitr.getTextX();
+			for (uint i = 0; i < printableBytes; i++) {
+				// Set color
+				ColorType color = getColorType(selection, docpos);
+				QBrush brush = QBrush(config_.Colors[color.Background]);
+				letterPainter.setBackground(brush);
+				letterPainter.setPen(config_.Colors[color.Text]);
+
+				// Draw background/text
+				letterPainter.fillRect(pix.rect(), brush);
+				drawText(letterPainter, text, 0, 0);
+
+				// Copy letterPainter to painter
+				painter.drawPixmap(x, yitr.getScreenY(), pix, config_.charWidth(i), 0, config_.charWidth(), pix.height());
+
+				++docpos;
+				x += config_.charWidth();
+			}
+
+			xitr += printableBytes;
+			index += printableBytes;
+#else
+			// Draw background
+			ColorType color = getColorType(selection, docpos);
+			QBrush brush = QBrush(config_.Colors[color.Background]);
 			painter.fillRect(xitr.getTextX(), *yitr, config_.X(qMin(*xitr + printableBytes, (uint)TextConfig::NumV)), config_.byteHeight(), brush);
 			
 
 			// Draw text
 			drawText(painter, text, xitr.getTextX(), yitr.getScreenY());
 
-			// FIXME: 選択を考慮した描画(1バイトごとにColorTypeをチェック
-			// 文字描画用
-			/*
-			QPixmap pix(QSize(config_.textWidth(text), config_.charHeight()));
-			QPainter letterPainter(&pix);
-			letterPainter.setFont(config_.Font);
-			for (uint i = 0; i < printableBytes; i++) {
-				ColorType color = getColorType(selection, docpos);
-
-				QBrush brush = QBrush(config_.Colors[color.Background]);
-				letterPainter.setBackground(brush);
-				letterPainter.setPen(config_.Colors[color.Text]);
-				// Draw background/text
-				letterPainter.fillRect(pix.rect(), brush);
-				drawText(letterPainter, text, 0, 0);
-
-				// Copy letterPainter to painter
-				painter.drawPixmap(xitr.getTextX(), yitr.getScreenY(), pix, config_.charWidth(i), 0, config_.charWidth(), pix.height());
-
-				//++xitr;
-
-				//++index;
-				++xitr;
-				++docpos;
-			}
-*/
-				xitr += printableBytes;
-				docpos += printableBytes;
 			index += printableBytes;
+			xitr += printableBytes;
+			docpos += printableBytes;
+#endif
 
 			// FIXME: 選択、描画可能文字数等を考慮したマルチバイト文字の描画
 
