@@ -17,8 +17,11 @@ public:
 class Document
 {
 public:
+	// 空で作成
 	Document();
+	// ファイルから開く
 	Document(const QString &str, bool writemode);
+	// 既存のドキュメントをコピー
 	Document(const Document &doc, bool writemode);
 	virtual ~Document();
 
@@ -34,6 +37,7 @@ private:
 
 protected:
 	DocumentImpl *impl_;
+	DocumentOriginal *original_;
 	QFile *file_;
 	std::vector<uchar> buffer_;
 

@@ -6,11 +6,27 @@
 
 enum {
 	DOCTYPE_BUFFER = 0,
+	DOCTYPE_ORIGINAL = 1,
+};
+
+class EmptyOriginal : public DocumentOriginal
+{
+public:
+	quint64 length() const
+	{
+		return 0;
+	}
+
+	void get(quint64 pos, uchar *buf, uint len) const
+	{
+		// TODO: throw Exception
+	}
 };
 
 Document::Document()
 	: impl_(new DocumentImpl())
 	, file_(NULL)
+	, original_(new EmptyOriginal())
 {
 	buffer_.resize(1024 * 256);
 }
@@ -19,6 +35,7 @@ Document::~Document()
 {
 	delete impl_;
 	delete file_;
+	delete original_;
 }
 
 quint64 Document::length() const
@@ -65,12 +82,19 @@ void Document::get(quint64 pos, uchar *buf, uint len) const
 void Document::copy(uint type, quint64 pos, quint64 len, uchar *buf) const
 {
 	Q_ASSERT(buf != NULL);
+
 	switch (type) {
 	case DOCTYPE_BUFFER:
 		Q_ASSERT(pos <= buffer_.size());
 		Q_ASSERT(len <= buffer_.size());
 		Q_ASSERT(pos <= buffer_.size() - len);
 		memcpy(buf, &buffer_[static_cast<uint>(pos)], len);
+		break;
+	case DOCTYPE_ORIGINAL:
+		Q_ASSERT(pos <= original_->length());
+		Q_ASSERT(len <= original_->length());
+		Q_ASSERT(pos <= original_->length() - len);
+		original_->get(pos, buf, len);
 		break;
 	default:
 		;
