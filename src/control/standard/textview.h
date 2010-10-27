@@ -30,9 +30,9 @@ namespace Standard {
 	private:
 		QFontMetrics FontMetrics;
 		// Num + 1(for multibyte letter)
-		int x_begin[NumV];	// pos of value
-		int x_end[NumV];		// pos of end
-		int x_area[NumV];
+		int x_begin[Num];	// pos of value
+		int x_end[Num];		// pos of end
+		int x_area[Num];
 	
 	public:
 		TextConfig();
@@ -80,12 +80,30 @@ namespace Standard {
 		inline int x(int i) const
 		{
 			Q_ASSERT(0 <= i && i < util::countof(x_begin));
-			return x_begin[i];
+			return Margin.left() + x_begin[i];
 		}
 		inline int X(int i) const
 		{
 			Q_ASSERT(0 <= i && i < util::countof(x_end));
+			return Margin.left() + x_end[i];
+		}
+		inline int x_(int i) const
+		{
+			Q_ASSERT(0 <= i && i < util::countof(x_begin));
+			return x_begin[i];
+		}
+		inline int X_(int i) const
+		{
+			Q_ASSERT(0 <= i && i < util::countof(x_end));
 			return x_end[i];
+		}
+		inline int posWidth(int begin)
+		{
+			return x_end[begin] - x_begin[begin];
+		}
+		inline int posWidth(int begin, int end)
+		{
+			return x_end[end] - x_begin[begin];
 		}
 		inline int caretWidth() const
 		{

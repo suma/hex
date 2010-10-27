@@ -12,6 +12,7 @@ Editor::Editor()
 	srand(173);
 #if 1
 	//for (int i = 0; i < 1064; i++) {
+	//for (int i = 0; i < 10 * 16; i++) { rand(); }
 	for (int i = 0; i < 157 * 200; i++) {
 		uchar c = rand() & 0xFF;
 		doc_->insert(i, &c, 1);
