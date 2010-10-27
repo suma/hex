@@ -183,7 +183,6 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	
 	// Draw loop
 	for (uint index = 0; index < size; ) {
-
 		// Draw text
 		uint printableBytes = decode_helper_->getPrintableBytes(index);
 
@@ -229,7 +228,6 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 					painter.setBackground(brush);
 					painter.setPen(config_.Colors[color.Text]);
 
-					// TODO: 選択時の処理対応とか
 					QString text = QString(QChar('_'));
 
 					// Draw background
@@ -242,8 +240,6 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 					++xitr;
 				}
 			}
-
-			//xitr += printableBytes;
 			index += printableBytes;
 		} else {
 			// Set color
@@ -262,8 +258,8 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			++xitr;
 			++docpos;
 
+			// 描画座標を次の行にする
 			if (xitr.is_next_flag()) {
-				// 改行したので、描画座標を次の行にする
 				xitr.set_next_flag(false);
 				++yitr;
 			}
