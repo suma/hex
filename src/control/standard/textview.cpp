@@ -298,7 +298,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	if (0 < *xitr && *xitr < TextConfig::Num) {
 		//qDebug("empty: %d", x);
 		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(xitr.getTextX(), y, width(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.getTextX(), yitr.getScreenY(), width(), config_.byteHeight(), brush);
 	}
 }
 
