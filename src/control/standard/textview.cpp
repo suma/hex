@@ -92,7 +92,7 @@ int TextConfig::YToLine(int y) const
 TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor_(new TextCursor(doc, this))
-	, decode_helper_(new TextDecodeHelper(doc, QString("Shift-JIS"), cursor_->Top))
+	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->Top))
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -156,7 +156,6 @@ void TextView::drawView()
 	document_->get(top, &buff_[0], size);
 
 	// Draw lines
-	decode_helper_->flush(top);
 	drawLines(painter, top, y_top, size);
 
 	// Update screen buffer

@@ -27,7 +27,8 @@ HEADERS += editor.h \
 	control/standard/textview.h \
 	control/standard/hexcursor.h \
 	control/standard/textcursor.h \
-	control/standard/cursorutil.h
+	control/standard/cursorutil.h \
+	control/standard/textdecodehelper.h
 SOURCES += editor.cpp \
     main.cpp \
     control/control.cpp \
@@ -42,6 +43,7 @@ SOURCES += editor.cpp \
 	control/standard/textview.cpp \
 	control/standard/hexcursor.cpp \
 	control/standard/textcursor.cpp \
+	control/standard/textdecodehelper.cpp \
 	build/qtc-gdbmacros/gdbmacros.cpp
 CONFIG += x86_64
 OTHER_FILES += 
