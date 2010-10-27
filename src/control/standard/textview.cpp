@@ -187,15 +187,11 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 		// Draw text
 		uint printableBytes = decode_helper_->getPrintableBytes(index);
 
-		//qDebug("printableBytes = %u", printableBytes);
-		//printableBytes = 0;
 		if (printableBytes > 0) {
 			// get data
 			uchar *b = &buff_[index];
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
-
-#if 1
 
 			int epos = qMin(*xitr + printableBytes, (uint)TextConfig::Num - 1);
 			QPixmap pix(QSize(config_.posWidth(*xitr, epos), config_.byteHeight()));
@@ -249,29 +245,12 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 			//xitr += printableBytes;
 			index += printableBytes;
-#else
-			// Draw background
-			ColorType color = getColorType(selection, docpos);
-			QBrush brush = QBrush(config_.Colors[color.Background]);
-			painter.fillRect(xitr.getTextX(), *yitr, config_.X(qMin(*xitr + printableBytes, (uint)TextConfig::Num)), config_.byteHeight(), brush);
-			
-
-			// Draw text
-			drawText(painter, text, xitr.getTextX(), yitr.getScreenY());
-
-			index += printableBytes;
-			xitr += printableBytes;
-			docpos += printableBytes;
-#endif
-
-
 		} else {
 			// Set color
 			ColorType color = getColorType(selection, docpos);
 			QBrush brush = QBrush(config_.Colors[color.Background]);
 			painter.setBackground(brush);
 			painter.setPen(config_.Colors[color.Text]);
-
 
 			// Draw background
 			painter.fillRect(xitr.getTextX(), yitr.getScreenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
@@ -288,15 +267,11 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 				xitr.set_next_flag(false);
 				++yitr;
 			}
-
 		}
-
-
 	}
 
 	// Draw empty area(after end line)
 	if (0 < *xitr && *xitr < TextConfig::Num) {
-		//qDebug("empty: %d", x);
 		QBrush brush(config_.Colors[Color::Background]);
 		painter.fillRect(xitr.getTextX(), yitr.getScreenY(), width(), config_.byteHeight(), brush);
 	}
