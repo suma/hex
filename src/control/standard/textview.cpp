@@ -183,9 +183,8 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	
 	// Draw loop
 	for (uint index = 0; index < size; ) {
-		// Draw text
+		// 印字可能な文字を描画
 		uint printableBytes = decode_helper_->getPrintableBytes(index);
-
 		if (printableBytes > 0) {
 			// get data
 			uchar *b = &buff_[index];
@@ -248,12 +247,13 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			painter.setBackground(brush);
 			painter.setPen(config_.Colors[color.Text]);
 
-			// Draw background
-			painter.fillRect(xitr.getTextX(), yitr.getScreenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
-
-			// Draw dot
+			// 印字不可なのでドットを描画
 			QString text = QString(QChar('.'));
+
+			// Draw
+			painter.fillRect(xitr.getTextX(), yitr.getScreenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
 			drawText(painter, text, xitr.getTextX(), yitr.getScreenY(), 1);
+
 			++index;
 			++xitr;
 			++docpos;
