@@ -2,7 +2,7 @@
 TEMPLATE = subdirs
 LANGUAGE = C++
 EXTRAS = control app tests
-CONFIG += x86_64 ordered precompile_header
+CONFIG += x86_64 ordered
 
 for(dir, EXTRAS) {
 	exists($$dir) {
@@ -10,9 +10,5 @@ for(dir, EXTRAS) {
 	}
 }
 
-# Use Precompiled headers (PCH)
-PRECOMPILED_HEADER = stable.h
 
-
-OTHER_FILES += 
 
