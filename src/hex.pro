@@ -11,4 +11,5 @@ for(dir, EXTRAS) {
 }
 
 
+app.depends = control
 
