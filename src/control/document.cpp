@@ -44,6 +44,7 @@ public:
 	FileOriginal(QFile *file, uint buffer_size = DEFAULT_BUFFER_SIZE)
 		: buffer_size_(buffer_size)		// 必ず16のN乗にする
 		, file_(file)
+		, ptr_(NULL)
 		, offset_(0)
 		, size_(0)
 	{
@@ -81,7 +82,7 @@ public:
 			}
 		
 			// get start position
-			uint start = static_cast<uint>(pos & buffer_size_);
+			uint start = static_cast<uint>(pos & (buffer_size_ - 1));
 			// get copy size
 			uint copy_size = qMin((quint64)buffer_size_ - start, len);
 
@@ -97,6 +98,10 @@ private:
 	void remap(quint64 pos) const
 	{
 		Q_ASSERT(pos < length());
+
+		if (ptr_ != NULL) {
+			file_->unmap(ptr_);
+		}
 
 		offset_ = pos & ~(buffer_size_ - 1);
 
