@@ -20,7 +20,7 @@ public:
 	// 空で作成
 	Document();
 	// ファイルから開く
-	Document(const QString &str, bool writemode);
+	Document(QFile *file);
 	// 既存のドキュメントをコピー
 	Document(const Document &doc, bool writemode);
 	virtual ~Document();
