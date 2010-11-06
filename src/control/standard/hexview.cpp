@@ -519,7 +519,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Up:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(-16, keepAnchor, false);
+		cursor_->moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_Down:
 		cursor_->HighNibble = true;
@@ -527,7 +527,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_PageUp:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(-16 * 15, keepAnchor, true);
+		cursor_->moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
 		cursor_->HighNibble = true;

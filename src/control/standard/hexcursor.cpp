@@ -38,7 +38,7 @@ namespace Standard {
 	// Compute virtual position of caret
 	int vwOldPosLine = 0;
 	if (holdViewPos) {
-		vwOldPosLine = Top - Position / view->getConfig().getNum();
+		vwOldPosLine = Top - Position / view->getConfig().getNum();	// FIXME
 	}
 
 	const uint vwCountLine = view->getConfig().drawableLines(view->height()) - 1;
@@ -67,7 +67,7 @@ namespace Standard {
 				Top = 0;
 			}
 		} else {
-			const quint64 maxTop = document->length() / view->getConfig().getNum()- vwCountLine + 1;
+			const quint64 maxTop = document->length() / view->getConfig().getNum() - vwCountLine + 1;
 			if (Top < numeric_limits<quint64>::max() - diff && Top + diff <= maxTop) {
 				Top += diff;
 			} else {
@@ -94,7 +94,7 @@ namespace Standard {
 			redrawSelection(begin, end);
 		}
 		// Clear old caret
-		view->drawView(DRAW_LINE, oldPos / view->getConfig().getNum()- Top);
+		view->drawView(DRAW_LINE, oldPos / view->getConfig().getNum() - Top);
 	} else {
 		view->drawView();
 	}

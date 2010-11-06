@@ -128,7 +128,7 @@ void TextView::drawView()
 
 	// TODO: draw Empty Background only
 
-	//Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.getNumV());
+	//Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.getNum() + 1);
 
 	// Get draw range
 	int y_top = config_.top();
@@ -192,7 +192,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
-			int epos = qMin(*xitr + printableBytes, config_.getNum() - 1);
+			int epos = qMin(*xitr + printableBytes, (uint)config_.getNum() - 1);
 			QPixmap pix(QSize(config_.posWidth(*xitr, epos), config_.byteHeight()));
 
 			QPainter letterPainter(&pix);
@@ -502,13 +502,13 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 		cursor_->moveRelativePosition(1, keepAnchor, false);
 		break;
 	case Qt::Key_Up:
-		cursor_->moveRelativePosition(-16, keepAnchor, false);
+		cursor_->moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_Down:
 		cursor_->moveRelativePosition(16, keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
-		cursor_->moveRelativePosition(-16 * 15, keepAnchor, true);
+		cursor_->moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
 		cursor_->moveRelativePosition(16 * 15, keepAnchor, true);
