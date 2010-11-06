@@ -9,16 +9,18 @@ class TestDocument: public QObject
 	Q_OBJECT
 private slots:
 	void initTestCase();
-	void openFile();
 	void cleanupTestCase();
-	void open();
+	void openFile();
+
+private:
+	QFile* open();
+
 private:
 	QTemporaryFile *temp_file_;
-	QFile *file_;
 	std::vector<char> data_;
 };
 
-const int SIZE = 1024 * 1024 * 16;	// 64MB
+const int SIZE = 1024 * 1024 * 2;	// 64MB
 
 void TestDocument::initTestCase()
 {
@@ -34,10 +36,10 @@ void TestDocument::initTestCase()
 
 	temp_file_->setAutoRemove(true);
 
-	open();
-	QVERIFY(file_->seek(0));
+	QFile *file = open();
+	QVERIFY(file->seek(0));
 
-	QDataStream outStream(file_);
+	QDataStream outStream(file);
 	QVERIFY(outStream.writeRawData(&data_[0], SIZE) == SIZE);
 	//QVERIFY(file_->writeData(&data_[0], SIZE) == SIZE);
 }
@@ -49,20 +51,36 @@ void TestDocument::cleanupTestCase()
 
 }
 
-void TestDocument::open()
+QFile* TestDocument::open()
 {
-	file_ = new QFile(temp_file_->fileName());
-	QVERIFY2(file_->open(QIODevice::ReadWrite), "file open failed");
+	QFile *file = new QFile(temp_file_->fileName());
+	file->open(QIODevice::ReadWrite);
+	return file;
 }
+
+
+
+
+// TEST
+
 
 void TestDocument::openFile()
 {
-	QFile *file = new QFile(QString("./tests"));
+	QFile *file = open();
 	Document *doc = new Document(file);
 
-	// copy data
-	
+	// check length
+	QVERIFY(file->size() == doc->length());
+
 	// verify data
+	const quint64 COPY_SIZE = 1000;
+	uchar buff[COPY_SIZE];
+	for (quint64 pos = 0; pos < doc->length(); pos += COPY_SIZE) {
+		uint copy_size = (uint)qMin((quint64)COPY_SIZE, doc->length() - (quint64)pos);
+		doc->get(pos, buff, copy_size);
+		QVERIFY(memcmp(buff, &data_[pos], copy_size) == 0);
+	}
+	
 
 	delete doc;
 }

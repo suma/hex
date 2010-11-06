@@ -99,7 +99,7 @@ const QTextCodec* TextDecodeHelper::getCodec() const
 uint TextDecodeHelper::getPrintableBytes(uint pos) const
 {
 	quint64 position = top_ + pos;
-	Q_ASSERT(position <= document_->length());
+	Q_ASSERT(position <= document_.length());
 
 	return decoder_->getPrintableBytes(document_, position);
 }

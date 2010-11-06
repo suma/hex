@@ -74,7 +74,9 @@ public:
 
 	void get(quint64 pos, uchar *buf, quint64 len) const
 	{
-		Q_ASSERT(pos < length() && len < length() - pos);
+		Q_ASSERT(pos <= length());
+		Q_ASSERT(len <= length());
+		Q_ASSERT(pos <= length() - len);
 
 		while (len > 0) {
 			if (!isOffsetCovered(pos)) {
@@ -119,17 +121,18 @@ private:
 
 Document::Document()
 	: impl_(new DocumentImpl())
-	, file_(NULL)
 	, original_(new EmptyOriginal())
+	, file_(NULL)
 {
 	buffer_.resize(1024 * 256);
 }
 
 Document::Document(QFile *file)
 	: impl_(new DocumentImpl())
-	, file_(NULL)
 	, original_(new FileOriginal(file))
+	, file_(file)
 {
+	impl_->insert_data(0, 0, file->size(), DOCTYPE_ORIGINAL);
 }
 
 Document::~Document()
