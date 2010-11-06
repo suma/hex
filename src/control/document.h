@@ -14,13 +14,16 @@ public:
 	virtual void get(quint64 pos, uchar *buf, quint64 len) const = 0;
 };
 
+
 class Document
 {
 public:
+
 	// 空で作成
 	Document();
 	// ファイルから開く
 	Document(QFile *file);
+	Document(QFile *file, uint buffer_size);
 	// 既存のドキュメントをコピー
 	Document(const Document &doc, bool writemode);
 	virtual ~Document();
@@ -40,6 +43,9 @@ public:
 
 	// file method
 	//  save, saveAs, ....
+	// 
+public:
+	const static int DEFAULT_BUFFER_SIZE;
 
 private:
 	void copy(uint type, quint64 pos, quint64 len, uchar *buf) const;

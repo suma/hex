@@ -41,7 +41,6 @@ void TestDocument::initTestCase()
 
 	QDataStream outStream(file);
 	QVERIFY(outStream.writeRawData(&data_[0], SIZE) == SIZE);
-	//QVERIFY(file_->writeData(&data_[0], SIZE) == SIZE);
 }
 
 void TestDocument::cleanupTestCase()
@@ -67,13 +66,19 @@ QFile* TestDocument::open()
 void TestDocument::openFile()
 {
 	QFile *file = open();
-	Document *doc = new Document(file);
+	const uint MAP_BLOCK_SIZE = 0x1000;
+	Document *doc = new Document(file, MAP_BLOCK_SIZE);
+	//Document *doc = new Document(file, Document::DEFAULT_BUFFER_SIZE);
+
 
 	// check length
 	QVERIFY(file->size() == doc->length());
 
 	// verify data
 	const quint64 COPY_SIZE = 1000;
+
+	QVERIFY( COPY_SIZE <= MAP_BLOCK_SIZE );
+
 	uchar buff[COPY_SIZE];
 	for (quint64 pos = 0; pos < doc->length(); pos += COPY_SIZE) {
 		uint copy_size = (uint)qMin((quint64)COPY_SIZE, doc->length() - (quint64)pos);

@@ -4,11 +4,12 @@
 #include "document.h"
 #include "document_i.h"
 
-
 enum {
 	DOCTYPE_BUFFER = 0,
 	DOCTYPE_ORIGINAL = 1,
 };
+
+const int Document::DEFAULT_BUFFER_SIZE = 0x100000;
 
 class EmptyOriginal : public DocumentOriginal
 {
@@ -38,10 +39,9 @@ protected:
 	mutable quint64 offset_;
 	mutable quint64 size_;
 	
-#define DEFAULT_BUFFER_SIZE 0x100000
 
 public:
-	FileOriginal(QFile *file, uint buffer_size = DEFAULT_BUFFER_SIZE)
+	FileOriginal(QFile *file, uint buffer_size)
 		: buffer_size_(buffer_size)		// 必ず16のN乗にする
 		, file_(file)
 		, ptr_(NULL)
@@ -56,7 +56,7 @@ public:
 			}
 		}
 		if (size == 0x10000000) {
-			buffer_size_ = (uint)DEFAULT_BUFFER_SIZE;
+			buffer_size_ = (uint)Document::DEFAULT_BUFFER_SIZE;
 		}
 		
 		remap(0);
@@ -119,6 +119,7 @@ private:
 	}
 };
 
+
 Document::Document()
 	: impl_(new DocumentImpl())
 	, original_(new EmptyOriginal())
@@ -129,7 +130,16 @@ Document::Document()
 
 Document::Document(QFile *file)
 	: impl_(new DocumentImpl())
-	, original_(new FileOriginal(file))
+	, original_(new FileOriginal(file, DEFAULT_BUFFER_SIZE))
+	, file_(file)
+{
+	impl_->insert_data(0, 0, file->size(), DOCTYPE_ORIGINAL);
+}
+
+
+Document::Document(QFile *file, uint buffer_size)
+	: impl_(new DocumentImpl())
+	, original_(new FileOriginal(file, buffer_size))
 	, file_(file)
 {
 	impl_->insert_data(0, 0, file->size(), DOCTYPE_ORIGINAL);
