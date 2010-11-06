@@ -14,7 +14,8 @@ namespace Standard {
 ////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
-	: Margin(2, 2, 3, 3)
+	: Num(16)
+	, Margin(2, 2, 3, 3)
 	, ByteMargin(3, 0, 2, 0)
 	, Font("Monaco", 17)
 	, EnableCaret(true)
@@ -40,22 +41,21 @@ void HexConfig::update()
 	// TODO: set ByteMargin value(left=charWidth/2, right=charWidth/2)
 
 	// Pos
-	x_begin[0] = Margin.left() + ByteMargin.left();
+	x_begin.push_back(Margin.left() + ByteMargin.left());
 	for (int i = 1; i < Num; i++) {
-		x_begin[i] = x_begin[i-1] + byteWidth();
+		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
 	// Pos of end
 	for (int i = 0; i < Num; i++) {
-		x_end[i] = x_begin[i] + charWidth(2) + ByteMargin.right();
+		x_end.push_back(x_begin[i] + charWidth(2) + ByteMargin.right());
 	}
 
 	// Area
-	x_area[0] = Margin.left() + ByteMargin.left();
-	for (int i = 1; i < Num; i++) {
-		x_area[i] = x_area[i-1] + byteWidth();
+	x_area.push_back(Margin.left() + ByteMargin.left());
+	for (int i = 1; i < getNumV(); i++) {
+		x_area.push_back(x_area.back() + byteWidth());
 	}
-	x_area[Num] = x_area[Num-1] + byteWidth();
 }
 
 int HexConfig::drawableLines(int height) const
@@ -70,7 +70,7 @@ int HexConfig::XToPos(int x) const
 		return -1;
 	}
 
-	return (int)distance(x_area, lower_bound(x_area, x_area + Num + 1, x)) - 1;
+	return (int)distance(x_area.begin(), lower_bound(x_area.begin(), x_area.end(), x)) - 1;
 }
 
 int HexConfig::YToLine(int y) const
@@ -129,9 +129,9 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	}
 
 	Q_ASSERT(0 <= line_start);
-	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / HexConfig::Num + 1);
+	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / config_.getNum() + 1);
 	Q_ASSERT(0 <= end);
-	Q_ASSERT(static_cast<uint>(end) <= document_->length() / HexConfig::Num + 1);
+	Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.getNum() + 1);
 
 	// Get draw range
 	int y_top = config_.top();
@@ -163,8 +163,8 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	}
 
 	// Get top position of view
-	const quint64 top = (cursor_->Top + line_start) * HexConfig::Num;
-	const uint size = qMin(document_->length() - top, (quint64)HexConfig::Num * count_draw_line);
+	const quint64 top = (cursor_->Top + line_start) * config_.getNum();
+	const uint size = qMin(document_->length() - top, (quint64)config_.getNum() * count_draw_line);
 	if (size == 0) {
 		return;
 	}
@@ -199,7 +199,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 
 //inline void HexView::drawViewAfter(quint64 pos)
 //{
-//	drawView(DRAW_AFTER, pos / HexConfig::Num - cursor_-> Top);
+//	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
 //}
 
 
@@ -247,7 +247,7 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 	}
 
 	// Draw empty area(after end line)
-	if (0 < *xitr && *xitr < x_end && *xitr < HexConfig::Num) {
+	if (0 < *xitr && *xitr < x_end && *xitr < config_.getNum()) {
 		QBrush brush(config_.Colors[Color::Background]);
 		painter.fillRect(xitr.getScreenX(), *yitr, width(), config_.byteHeight(), brush);
 	}
@@ -271,7 +271,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Redraw line
-	const quint64 line = cursor_->Position / HexConfig::Num;
+	const quint64 line = cursor_->Position / config_.getNum();
 	if (cursor_->Top <= line && line - cursor_->Top < static_cast<unsigned int>(config_.drawableLines(height()))) {
 		drawView(DRAW_LINE, line - cursor_->Top);
 	}
@@ -288,8 +288,8 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	painter.setFont(config_.Font);
 
 	// Get caret coordinates
-	const int x = pos % HexConfig::Num;
-	const int y = config_.top() + config_.byteHeight() * (pos / HexConfig::Num - cursor_->Top);
+	const int x = pos % config_.getNum();
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->Top);
 
 	// Draw shape
 	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
@@ -454,7 +454,7 @@ quint64 HexView::posAt(const QPoint &pos) const
 		x = y = 0;
 	}
 
-	return qMin((cursor_->Top + y) * HexConfig::Num + x, document_->length());
+	return qMin((cursor_->Top + y) * config_.getNum() + x, document_->length());
 }
 
 // Enable caret blink
@@ -628,7 +628,7 @@ void HexView::changeData(quint64 pos, uchar character, bool highNibble)
 	document_->insert(pos, &character, 1);
 	cursor_->HighNibble = !highNibble;
 	// TODO: implement Redraw Event
-	//drawView(DRAW_LINE, pos / HexConfig::Num - cursor_->Top);
+	//drawView(DRAW_LINE, pos / config_.getNum() - cursor_->Top);
 	drawView();
 }
 

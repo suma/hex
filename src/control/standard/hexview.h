@@ -17,10 +17,9 @@ namespace Standard {
 
 	class HexConfig
 	{
+	private:
+		uint Num;
 	public:
-		enum {
-			Num = 16,
-		};
 		QRect Margin;
 		QRect ByteMargin;
 		QFont Font;
@@ -31,13 +30,21 @@ namespace Standard {
 
 	private:
 		QFontMetrics FontMetrics;
-		int x_begin[Num];	// pos of value
-		int x_end[Num];		// pos of end
-		int x_area[Num];
+		std::vector<int> x_begin;	// pos of value
+		std::vector<int> x_end;		// pos of end
+		std::vector<int> x_area;
 	
 	public:
 		HexConfig();
 
+		inline uint getNum() const
+		{
+			return Num;
+		}
+		inline uint getNumV() const
+		{
+			return Num + 1;
+		}
 		inline void updateFont()
 		{
 			FontMetrics = QFontMetrics(Font);
@@ -125,7 +132,7 @@ namespace Standard {
 			XIterator &operator+=(uint i)
 			{
 				const uint old = pos;
-				pos = (pos + i) % HexConfig::Num;
+				pos = (pos + i) % conf.getNum();
 				set_next_flag(pos < old);
 				return *this;
 			}

@@ -14,11 +14,9 @@ namespace Standard {
 
 	class TextConfig
 	{
+	private:
+		uint Num;
 	public:
-		enum {
-			Num = 16,
-			NumV = Num + 1,
-		};
 		QRect Margin;
 		QRect ByteMargin;
 		QFont Font;
@@ -29,13 +27,22 @@ namespace Standard {
 
 	private:
 		QFontMetrics FontMetrics;
-		// Num + 1(for multibyte letter)
-		int x_begin[Num];	// pos of value
-		int x_end[Num];		// pos of end
-		int x_area[Num];
+		std::vector<int> x_begin;	// pos of value
+		std::vector<int> x_end;		// pos of end
+		std::vector<int> x_area;
 	
 	public:
 		TextConfig();
+
+		inline uint getNum() const
+		{
+			return Num;
+		}
+
+		inline uint getNumV() const
+		{
+			return Num + 1;
+		}
 
 		inline void updateFont()
 		{
@@ -75,26 +82,26 @@ namespace Standard {
 		}
 		inline int maxWidth() const
 		{
-			return X(util::countof(x_begin) - 1) + Margin.right();
+			return X(x_begin.size() - 1) + Margin.right();
 		}
 		inline int x(int i) const
 		{
-			Q_ASSERT(0 <= i && i < util::countof(x_begin));
+			Q_ASSERT(0 <= i && i < x_begin.size());
 			return Margin.left() + x_begin[i];
 		}
 		inline int X(int i) const
 		{
-			Q_ASSERT(0 <= i && i < util::countof(x_end));
+			Q_ASSERT(0 <= i && i < x_end.size());
 			return Margin.left() + x_end[i];
 		}
 		inline int x_(int i) const
 		{
-			Q_ASSERT(0 <= i && i < util::countof(x_begin));
+			Q_ASSERT(0 <= i && i < x_begin.size());
 			return x_begin[i];
 		}
 		inline int X_(int i) const
 		{
-			Q_ASSERT(0 <= i && i < util::countof(x_end));
+			Q_ASSERT(0 <= i && i < x_end.size());
 			return x_end[i];
 		}
 		inline int posWidth(int begin)
@@ -116,7 +123,7 @@ namespace Standard {
 		}
 		inline int width()
 		{
-			return charWidth(NumV) + Margin.left() + Margin.right();
+			return charWidth(getNumV()) + Margin.left() + Margin.right();
 		}
 		int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
@@ -142,22 +149,19 @@ namespace Standard {
 		public:
 			XIterator operator++()
 			{
-				//pos = (pos + 1) % TextConfig::Num;
-				//return *this;
 				return *this += 1;
 			}
 
 			XIterator &operator+=(uint i)
 			{
 				const uint old = pos;
-				pos = (pos + i) % TextConfig::Num;
+				pos = (pos + i) % conf.getNum();
 				set_next_flag(pos < old);
 				return *this;
 			}
 
 			void operator++(int)
 			{
-				//pos = (pos + 1) % TextConfig::Num;
 				*this += 1;
 			}
 

@@ -16,7 +16,8 @@ namespace Standard {
 ////////////////////////////////////////
 // Config
 TextConfig::TextConfig()
-	: Margin(2, 2, 3, 3)
+	: Num(16)
+	, Margin(2, 2, 3, 3)
 	, Font("Monaco", 17)
 	, ByteMargin(0, 0, 0, 0)
 	, EnableCaret(true)
@@ -40,25 +41,26 @@ TextConfig::TextConfig()
 void TextConfig::update()
 {
 	// TODO: set ByteMargin value(left=charWidth/2, right=charWidth/2)
+	//TODO::  resize x_begin ,x_end, x_area
 
 	// Pos
-	x_begin[0] = 0;
-	for (int i = 1; i < util::countof(x_begin); i++) {
-		x_begin[i] = x_begin[i-1] + byteWidth();
+	x_begin.push_back(0);
+	for (int i = 1; i < Num; i++) {
+		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
 	// Pos of end
-	for (int i = 0; i < util::countof(x_begin); i++) {
-		x_end[i] = x_begin[i] + charWidth(1);
+	for (int i = 0; i < x_begin.size(); i++) {
+		x_end.push_back(x_begin[i] + charWidth(1));
 	}
-	x_end[util::countof(x_end) - 1] += byteWidth();
+	x_end.back() += byteWidth();
 
 	// Area
-	x_area[0] = 0;
-	for (int i = 1; i < util::countof(x_area); i++) {
-		x_area[i] = x_area[i-1] + byteWidth();
+	x_area.push_back(0);
+	for (int i = 1; i < Num; i++) {
+		x_area.push_back(x_area.back() + byteWidth());
 	}
-	x_area[util::countof(x_area) - 1] += byteWidth();
+	x_area.back() += byteWidth();
 
 	//x_area[Num] = x_area[Num-1] + byteWidth();
 }
@@ -75,7 +77,7 @@ int TextConfig::XToPos(int x) const
 		return -1;
 	}
 
-	return (int)distance(x_area, lower_bound(x_area, x_area + Num + 1, x)) - 1;
+	return (int)distance(x_area.begin(), lower_bound(x_area.begin(), x_area.end(), x)) - 1;
 }
 
 int TextConfig::YToLine(int y) const
@@ -126,7 +128,7 @@ void TextView::drawView()
 
 	// TODO: draw Empty Background only
 
-	//Q_ASSERT(static_cast<uint>(end) <= document_->length() / TextConfig::Num + 1);
+	//Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.getNumV());
 
 	// Get draw range
 	int y_top = config_.top();
@@ -134,8 +136,8 @@ void TextView::drawView()
 	int count_draw_line = config_.drawableLines(height());
 
 	// Get top position of view
-	const quint64 top = cursor_->Top * TextConfig::Num;
-	const uint size = qMin(document_->length() - top, (quint64)TextConfig::Num * count_draw_line);
+	const quint64 top = cursor_->Top * config_.getNum();
+	const uint size = qMin(document_->length() - top, (quint64)config_.getNum() * count_draw_line);
 
 	qDebug("refresh event line:%llu end:%d", cursor_->Top, count_draw_line);
 	//qDebug(" pos:%llu, anchor:%llu", cursor_->Position, cursor_->PositionAnchor);
@@ -190,13 +192,13 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
-			int epos = qMin(*xitr + printableBytes, (uint)TextConfig::Num - 1);
+			int epos = qMin(*xitr + printableBytes, config_.getNum() - 1);
 			QPixmap pix(QSize(config_.posWidth(*xitr, epos), config_.byteHeight()));
 
 			QPainter letterPainter(&pix);
 			letterPainter.setFont(config_.Font);
 			uint i = 0;
-			while (i < printableBytes && *xitr + i < TextConfig::Num) {
+			while (i < printableBytes && *xitr + i < config_.getNum()) {
 				// Set color
 				ColorType color = getColorType(selection, docpos);
 				QBrush brush = QBrush(config_.Colors[color.Background]);
@@ -266,7 +268,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	}
 
 	// Draw empty area(after end line)
-	if (0 < *xitr && *xitr < TextConfig::Num) {
+	if (0 < *xitr && *xitr < config_.getNum()) {
 		QBrush brush(config_.Colors[Color::Background]);
 		painter.fillRect(xitr.getTextX(), yitr.getScreenY(), width(), config_.byteHeight(), brush);
 	}
@@ -295,7 +297,7 @@ void TextView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Redraw line
-	const quint64 line = cursor_->Position / TextConfig::Num;
+	const quint64 line = cursor_->Position / config_.getNum();
 	if (cursor_->Top <= line && line - cursor_->Top < static_cast<unsigned int>(config_.drawableLines(height()))) {
 		drawView();
 	}
@@ -312,8 +314,8 @@ void TextView::drawCaret(bool visible, quint64 pos)
 	painter.setFont(config_.Font);
 
 	// Get caret coordinates
-	const int x = pos % TextConfig::Num;
-	const int y = config_.top() + config_.byteHeight() * (pos / TextConfig::Num - cursor_->Top);
+	const int x = pos % config_.getNum();
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->Top);
 
 	// Draw shape
 	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
@@ -440,7 +442,7 @@ quint64 TextView::posAt(const QPoint &pos) const
 		x = y = 0;
 	}
 
-	return qMin((cursor_->Top + y) * TextConfig::Num + x, document_->length());
+	return qMin((cursor_->Top + y) * config_.getNum() + x, document_->length());
 }
 
 // Enable caret blink

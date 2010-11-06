@@ -38,7 +38,7 @@ namespace Standard {
 	// Compute virtual position of caret
 	int vwOldPosLine = 0;
 	if (holdViewPos) {
-		vwOldPosLine = Top - Position / HexConfig::Num;
+		vwOldPosLine = Top - Position / view->getConfig().getNum();
 	}
 
 	const uint vwCountLine = view->getConfig().drawableLines(view->height()) - 1;
@@ -46,19 +46,19 @@ namespace Standard {
 	//-- Update Cursor::Top with Position
 	const bool goDown = Position < pos;
 	if (goDown) {
-		const quint64 posLine = pos / HexConfig::Num;
+		const quint64 posLine = pos / view->getConfig().getNum();
 
 		// if Top + vwCountLine < posLine then Pos is invisible
 		if (vwCountLine <= posLine && Top <= posLine - vwCountLine) {
 			Top = posLine - vwCountLine + 1;
 		}
 	} else {
-		Top = qMin(pos / HexConfig::Num, Top);
+		Top = qMin(pos / view->getConfig().getNum(), Top);
 	}
 
 	// Hold virtual position of caret
 	if (holdViewPos) {
-		const int vwNewPosLine = Top - pos / HexConfig::Num;
+		const int vwNewPosLine = Top - pos / view->getConfig().getNum();
 		const uint diff = qAbs(vwOldPosLine - vwNewPosLine);
 		if (vwOldPosLine < vwNewPosLine) {
 			if (diff < Top) {
@@ -67,7 +67,7 @@ namespace Standard {
 				Top = 0;
 			}
 		} else {
-			const quint64 maxTop = document->length() / HexConfig::Num - vwCountLine + 1;
+			const quint64 maxTop = document->length() / view->getConfig().getNum()- vwCountLine + 1;
 			if (Top < numeric_limits<quint64>::max() - diff && Top + diff <= maxTop) {
 				Top += diff;
 			} else {
@@ -94,7 +94,7 @@ namespace Standard {
 			redrawSelection(begin, end);
 		}
 		// Clear old caret
-		view->drawView(DRAW_LINE, oldPos / HexConfig::Num - Top);
+		view->drawView(DRAW_LINE, oldPos / view->getConfig().getNum()- Top);
 	} else {
 		view->drawView();
 	}
@@ -127,8 +127,8 @@ void HexCursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 void HexCursor::redrawSelection(quint64 begin, quint64 end)
 {
 	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
-	begin /= HexConfig::Num;
-	end   /= HexConfig::Num;
+	begin /= view->getConfig().getNum();
+	end   /= view->getConfig().getNum();
 
 	const int beginLine = qMax(begin, Top) - Top;
 	const int endLine   = qMax(end, Top) - Top;
