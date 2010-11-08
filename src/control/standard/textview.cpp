@@ -40,8 +40,9 @@ TextConfig::TextConfig()
 
 void TextConfig::update()
 {
-	// TODO: set ByteMargin value(left=charWidth/2, right=charWidth/2)
-	//TODO::  resize x_begin ,x_end, x_area
+	x_begin.clear();
+	x_end.clear();
+	x_area.clear();
 
 	// Pos
 	x_begin.push_back(0);
@@ -505,13 +506,13 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 		cursor_->moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_Down:
-		cursor_->moveRelativePosition(16, keepAnchor, false);
+		cursor_->moveRelativePosition((qint64)config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
 		cursor_->moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
-		cursor_->moveRelativePosition(16 * 15, keepAnchor, true);
+		cursor_->moveRelativePosition((qint64)config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
 		if (cursor_->hasSelection()) {

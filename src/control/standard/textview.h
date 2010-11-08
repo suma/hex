@@ -126,7 +126,7 @@ namespace Standard {
 			return charWidth(getNumV()) + Margin.left() + Margin.right();
 		}
 		int drawableLines(int height) const;
-		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
+		int XToPos(int x) const;	// -1, 0..N => N + 2 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void update();
 

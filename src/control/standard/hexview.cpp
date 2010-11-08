@@ -38,7 +38,9 @@ HexConfig::HexConfig()
 
 void HexConfig::update()
 {
-	// TODO: set ByteMargin value(left=charWidth/2, right=charWidth/2)
+	x_begin.clear();
+	x_end.clear();
+	x_area.clear();
 
 	// Pos
 	x_begin.push_back(Margin.left() + ByteMargin.left());
@@ -523,7 +525,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Down:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(16, keepAnchor, false);
+		cursor_->moveRelativePosition((qint64)config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
 		cursor_->HighNibble = true;
@@ -531,7 +533,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_PageDown:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(16 * 15, keepAnchor, true);
+		cursor_->moveRelativePosition((qint64)config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
 		if (cursor_->hasSelection()) {
