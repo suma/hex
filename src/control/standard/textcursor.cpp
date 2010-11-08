@@ -17,10 +17,6 @@ TextCursor::TextCursor(Document *Doc, TextView *View)
 	, Position(0)
 	, PositionAnchor(0)
 	, Insert(true)
-	, CaretVisibleShape(CARET_BLOCK)
-	, CaretInvisibleShape(CARET_BLOCK)
-	, CaretTimerId(0)
-	, CaretVisible(true)
 {
 }
 

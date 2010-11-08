@@ -14,8 +14,6 @@ namespace Standard {
 	{
 	public:
 		HexCursor(Document *, HexView *);
-		void refreshSelected();
-		bool selMoved();
 
 	private:
 		Document *document;

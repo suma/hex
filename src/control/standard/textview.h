@@ -7,6 +7,7 @@
 #include "../view.h"
 #include "../highlight.h"
 #include "textcursor.h"
+#include "caret.h"
 #include "hexview.h"
 
 namespace Standard {
@@ -308,6 +309,7 @@ namespace Standard {
 		// Main components
 		TextConfig config_;
 		TextCursor *cursor_;
+		Caret caret_;
 		TextDecodeHelper *decode_helper_;
 	};
 

@@ -10,20 +10,20 @@ using namespace std;
 
 namespace Standard {
 
-	HexCursor::HexCursor(Document *Doc, HexView *View)
-		: document(Doc)
-		, view(View)
-		, Top(0)
-		, Position(0)
-		, PositionAnchor(0)
-		, HighNibble(true)
-		, Insert(true)
-		, CaretVisibleShape(CARET_BLOCK)
-		, CaretInvisibleShape(CARET_FRAME)
-		, CaretTimerId(0)
-		, CaretVisible(true)
-	{
-	}
+HexCursor::HexCursor(Document *Doc, HexView *View)
+	: document(Doc)
+	, view(View)
+	, Top(0)
+	, Position(0)
+	, PositionAnchor(0)
+	, HighNibble(true)
+	, Insert(true)
+	, CaretVisibleShape(CARET_BLOCK)
+	, CaretInvisibleShape(CARET_FRAME)
+	, CaretTimerId(0)
+	, CaretVisible(true)
+{
+}
 
 	void HexCursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 {

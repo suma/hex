@@ -14,8 +14,6 @@ namespace Standard {
 	{
 	public:
 		TextCursor(Document *, TextView *);
-		void refreshSelected();
-		bool selMoved();
 
 	private:
 		Document *document;
@@ -32,12 +30,6 @@ namespace Standard {
 		//bool Selection;
 		bool Insert;
 	
-		// for Caret
-		CaretShape CaretVisibleShape;
-		CaretShape CaretInvisibleShape;
-		int CaretTimerId;
-		bool CaretVisible;
-
 		//QColor StrCaretColor;
 	
 	public:
@@ -57,9 +49,6 @@ namespace Standard {
 		void setSelection(bool);
 
 		void reverseInsert();
-
-		void setCaretVisible(bool t);
-		void turnCaretVisible();
 
 		CursorSelection getSelection() const;
 	
@@ -86,16 +75,6 @@ namespace Standard {
 	inline void TextCursor::reverseInsert()
 	{
 		Insert = !Insert;
-	}
-
-	inline void TextCursor::setCaretVisible(bool t)
-	{
-		CaretVisible = t;
-	}
-
-	inline void TextCursor::turnCaretVisible()
-	{
-		CaretVisible = !CaretVisible;
 	}
 
 	inline CursorSelection TextCursor::getSelection() const
