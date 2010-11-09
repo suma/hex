@@ -82,14 +82,14 @@ namespace Standard {
 		{
 			return X(Num - 1) + Margin.right();
 		}
-		inline int x(int i) const
+		inline int x(size_t i) const
 		{
-			Q_ASSERT(0 <= i && i < Num);
+			Q_ASSERT(i < Num);
 			return x_begin[i];
 		}
-		inline int X(int i) const
+		inline int X(size_t i) const
 		{
-			Q_ASSERT(0 <= i && i < Num);
+			Q_ASSERT(i < Num);
 			return x_end[i];
 		}
 		inline int caretWidth() const
@@ -114,12 +114,12 @@ namespace Standard {
 		{
 		private:
 			const HexConfig &conf;
-			int pos;
+			int pos_;
 			bool next_flag_;
 		public:
 			XIterator(const HexConfig &conf, int pos)
 				: conf(conf)
-				, pos(pos)
+				, pos_(pos)
 				, next_flag_(false)
 			{
 			}
@@ -132,9 +132,9 @@ namespace Standard {
 
 			XIterator &operator+=(uint i)
 			{
-				const uint old = pos;
-				pos = (pos + i) % conf.getNum();
-				setNext(pos < old);
+				const int old = pos_;
+				pos_ = (pos_ + i) % conf.getNum();
+				setNext(pos_ < old);
 				return *this;
 			}
 
@@ -145,17 +145,17 @@ namespace Standard {
 
 			int operator*() const
 			{
-				return pos;
+				return pos_;
 			}
 
 			int screenX() const
 			{
-				return conf.x(pos);
+				return conf.x(pos_);
 			}
 
 			int textX() const
 			{
-				return conf.x(pos) + conf.ByteMargin.left();
+				return conf.x(pos_) + conf.ByteMargin.left();
 			}
 
 			bool isNext() const
@@ -173,34 +173,34 @@ namespace Standard {
 		{
 		private:
 			const HexConfig &conf;
-			int pos;
+			int pos_;
 		public:
 			YIterator(const HexConfig &conf, int pos)
 				: conf(conf)
-				, pos(pos)
+				, pos_(pos)
 			{
 			}
 
 		public:
 			YIterator operator++()
 			{
-				pos += conf.byteHeight();
+				pos_ += conf.byteHeight();
 				return *this;
 			}
 
 			void operator++(int)
 			{
-				pos += conf.byteHeight();
+				pos_ += conf.byteHeight();
 			}
 
 			int operator*() const
 			{
-				return pos;
+				return pos_;
 			}
 
 			int screenY() const
 			{
-				return pos + conf.ByteMargin.top();
+				return pos_ + conf.ByteMargin.top();
 			}
 		};
 

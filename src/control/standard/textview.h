@@ -85,31 +85,31 @@ namespace Standard {
 		{
 			return X(x_begin.size() - 1) + Margin.right();
 		}
-		inline int x(int i) const
+		inline int x(size_t i) const
 		{
-			Q_ASSERT(0 <= i && i < x_begin.size());
+			Q_ASSERT(i < x_begin.size());
 			return Margin.left() + x_begin[i];
 		}
-		inline int X(int i) const
+		inline int X(size_t i) const
 		{
-			Q_ASSERT(0 <= i && i < x_end.size());
+			Q_ASSERT(i < x_end.size());
 			return Margin.left() + x_end[i];
 		}
-		inline int x_(int i) const
+		inline int x_(size_t i) const
 		{
-			Q_ASSERT(0 <= i && i < x_begin.size());
+			Q_ASSERT(i < x_begin.size());
 			return x_begin[i];
 		}
-		inline int X_(int i) const
+		inline int X_(size_t i) const
 		{
-			Q_ASSERT(0 <= i && i < x_end.size());
+			Q_ASSERT(i < x_end.size());
 			return x_end[i];
 		}
-		inline int posWidth(int begin)
+		inline int posWidth(size_t begin)
 		{
 			return x_end[begin] - x_begin[begin];
 		}
-		inline int posWidth(int begin, int end)
+		inline int posWidth(size_t begin, size_t end)
 		{
 			return x_end[end] - x_begin[begin];
 		}
@@ -135,14 +135,14 @@ namespace Standard {
 		{
 		private:
 			const TextConfig &conf;
-			int pos;
+			int pos_;
 
 			// 次の行を描画するか表すフラグ
 			bool next_flag_;
 		public:
 			XIterator(const TextConfig &conf, int pos)
 				: conf(conf)
-				, pos(pos)
+				, pos_(pos)
 				, next_flag_(false)
 			{
 			}
@@ -155,9 +155,9 @@ namespace Standard {
 
 			XIterator &operator+=(uint i)
 			{
-				const uint old = pos;
-				pos = (pos + i) % conf.getNum();
-				setNext(pos < old);
+				const int old = pos_;
+				pos_ = (pos_ + i) % conf.getNum();
+				setNext(pos_ < old);
 				return *this;
 			}
 
@@ -168,12 +168,12 @@ namespace Standard {
 
 			int operator*() const
 			{
-				return pos;
+				return pos_;
 			}
 
 			int textX() const
 			{
-				return conf.x(pos);
+				return conf.x(pos_);
 			}
 
 			bool isNext() const
@@ -191,34 +191,34 @@ namespace Standard {
 		{
 		private:
 			const TextConfig &conf;
-			int pos;
+			int pos_;
 		public:
 			YIterator(const TextConfig &conf, int pos)
 				: conf(conf)
-				, pos(pos)
+				, pos_(pos)
 			{
 			}
 
 		public:
 			YIterator operator++()
 			{
-				pos += conf.byteHeight();
+				pos_ += conf.byteHeight();
 				return *this;
 			}
 
 			void operator++(int)
 			{
-				pos += conf.byteHeight();
+				pos_ += conf.byteHeight();
 			}
 
 			int operator*() const
 			{
-				return pos;
+				return pos_;
 			}
 
 			int screenY() const
 			{
-				return pos + conf.ByteMargin.top();
+				return pos_ + conf.ByteMargin.top();
 			}
 		};
 

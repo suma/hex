@@ -46,19 +46,19 @@ void TextConfig::update()
 
 	// Pos
 	x_begin.push_back(0);
-	for (int i = 1; i < Num; i++) {
+	for (size_t i = 1; i < Num; i++) {
 		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
 	// Pos of end
-	for (int i = 0; i < x_begin.size(); i++) {
+	for (size_t i = 0; i < x_begin.size(); i++) {
 		x_end.push_back(x_begin[i] + charWidth(1));
 	}
 	x_end.back() += byteWidth();
 
 	// Area
 	x_area.push_back(0);
-	for (int i = 1; i < Num; i++) {
+	for (size_t i = 1; i < Num; i++) {
 		x_area.push_back(x_area.back() + byteWidth());
 	}
 	x_area.back() += byteWidth();
@@ -134,7 +134,6 @@ void TextView::drawView()
 
 	// Get draw range
 	int y_top = config_.top();
-	int y = config_.top() + config_.byteMargin().top();
 	int count_draw_line = config_.drawableLines(height());
 
 	// Get top position of view

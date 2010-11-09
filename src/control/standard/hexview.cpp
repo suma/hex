@@ -44,18 +44,18 @@ void HexConfig::update()
 
 	// Pos
 	x_begin.push_back(Margin.left() + ByteMargin.left());
-	for (int i = 1; i < Num; i++) {
+	for (size_t i = 1; i < Num; i++) {
 		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
 	// Pos of end
-	for (int i = 0; i < Num; i++) {
+	for (size_t i = 0; i < Num; i++) {
 		x_end.push_back(x_begin[i] + charWidth(2) + ByteMargin.right());
 	}
 
 	// Area
 	x_area.push_back(Margin.left() + ByteMargin.left());
-	for (int i = 1; i < getNumV(); i++) {
+	for (size_t i = 1; i < getNumV(); i++) {
 		x_area.push_back(x_area.back() + byteWidth());
 	}
 }
@@ -250,7 +250,7 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 	}
 
 	// Draw empty area(after end line)
-	if (0 < *xitr && *xitr < x_end && *xitr < config_.getNum()) {
+	if (0 < *xitr && *xitr < x_end && (int)*xitr < config_.getNum()) {
 		QBrush brush(config_.Colors[Color::Background]);
 		painter.fillRect(xitr.screenX(), *yitr, width(), config_.byteHeight(), brush);
 	}
