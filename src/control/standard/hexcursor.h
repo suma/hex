@@ -31,14 +31,6 @@ namespace Standard {
 		bool HighNibble;
 		bool Insert;
 	
-		// for Caret
-		CaretShape CaretVisibleShape;
-		CaretShape CaretInvisibleShape;
-		int CaretTimerId;
-		bool CaretVisible;
-
-		//QColor StrCaretColor;
-	
 	public:
 
 		/*
@@ -56,9 +48,6 @@ namespace Standard {
 		void setSelection(bool);
 
 		void reverseInsert();
-
-		void setCaretVisible(bool t);
-		void turnCaretVisible();
 
 		CursorSelection getSelection() const;
 	
@@ -85,16 +74,6 @@ namespace Standard {
 	inline void HexCursor::reverseInsert()
 	{
 		Insert = !Insert;
-	}
-
-	inline void HexCursor::setCaretVisible(bool t)
-	{
-		CaretVisible = t;
-	}
-
-	inline void HexCursor::turnCaretVisible()
-	{
-		CaretVisible = !CaretVisible;
 	}
 
 	inline CursorSelection HexCursor::getSelection() const

@@ -18,10 +18,6 @@ HexCursor::HexCursor(Document *Doc, HexView *View)
 	, PositionAnchor(0)
 	, HighNibble(true)
 	, Insert(true)
-	, CaretVisibleShape(CARET_BLOCK)
-	, CaretInvisibleShape(CARET_FRAME)
-	, CaretTimerId(0)
-	, CaretVisible(true)
 {
 }
 

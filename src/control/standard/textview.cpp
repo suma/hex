@@ -96,7 +96,7 @@ TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor_(new TextCursor(doc, this))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->Top))
-	, caret_(CARET_BLOCK, CARET_BLOCK)
+	, caret_(CARET_BLOCK, CARET_FRAME)
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -305,7 +305,7 @@ void TextView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Shape
-	const CaretShape shape = caret_.getCurrentShape(visible);
+	const CaretShape shape = caret_.getShape(visible);
 	if (shape == CARET_NONE) {
 		return;
 	}
@@ -468,6 +468,7 @@ void TextView::setCaretBlink(bool enable)
 void TextView::timerEvent(QTimerEvent *ev)
 {
 	if (caret_.getTimerId() == ev->timerId()) {
+		drawCaret(caret_.getVisible());
 		caret_.inverseVisible();
 	}
 }

@@ -6,6 +6,7 @@
 #include "../view.h"
 #include "../highlight.h"
 #include "hexcursor.h"
+#include "caret.h"
 
 namespace Standard {
 	enum DrawMode {
@@ -297,6 +298,7 @@ namespace Standard {
 		// Main components
 		HexConfig config_;
 		HexCursor *cursor_;
+		Caret caret_;
 	};
 
 }

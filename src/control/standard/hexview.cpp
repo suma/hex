@@ -89,6 +89,7 @@ int HexConfig::YToLine(int y) const
 HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor_(new HexCursor(doc, this))
+	, caret_(CARET_BLOCK, CARET_FRAME)
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -279,7 +280,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Shape
-	const CaretShape shape = visible ? cursor_->CaretVisibleShape : cursor_->CaretInvisibleShape;
+	const CaretShape shape = caret_.getShape(visible);
 	if (shape == CARET_NONE) {
 		return;
 	}
@@ -466,23 +467,22 @@ void HexView::setCaretBlink(bool enable)
 		return;
 	}
 	if (enable) {
-		if (cursor_->CaretTimerId == 0) {
-			cursor_->CaretTimerId = startTimer(config_.CaretBlinkTime);
+		if (caret_.getTimerId() == 0) {
+			caret_.setTimerId(startTimer(config_.CaretBlinkTime));
 		}
 	} else {
-		if (cursor_->CaretTimerId != 0) {
-			killTimer(cursor_->CaretTimerId);
-			cursor_->CaretTimerId = 0;
+		if (caret_.getTimerId() != 0) {
+			killTimer(caret_.getTimerId());
+			caret_.setTimerId(0);
 		}
 	}
 }
 
 void HexView::timerEvent(QTimerEvent *ev)
 {
-	if (cursor_->CaretTimerId == ev->timerId()) {
-		// Caret blink
-		drawCaret(cursor_->CaretVisible);
-		cursor_->turnCaretVisible();
+	if (caret_.getTimerId() == ev->timerId()) {
+		drawCaret(caret_.getVisible());
+		caret_.inverseVisible();
 	}
 }
 

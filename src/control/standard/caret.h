@@ -39,10 +39,10 @@ namespace Standard {
 
 		CaretShape getCurrentShape() const
 		{
-			return getCurrentShape(is_visible_);
+			return getShape(is_visible_);
 		}
 
-		CaretShape getCurrentShape(bool visible) const
+		CaretShape getShape(bool visible) const
 		{
 			if (visible) {
 				return visible_shape_;
