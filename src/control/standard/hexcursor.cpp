@@ -21,7 +21,7 @@ HexCursor::HexCursor(Document *Doc, HexView *View)
 {
 }
 
-	void HexCursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
+void HexCursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 {
 	Q_ASSERT(pos <= document->length());
 	// FIXME: replace drawView/drawCaret callings by doc udpate event
