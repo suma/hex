@@ -250,7 +250,7 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 	}
 
 	// Draw empty area(after end line)
-	if (0 < *xitr && *xitr < x_end && (int)*xitr < config_.getNum()) {
+	if (0 < *xitr && *xitr < x_end && static_cast<uint>(*xitr) < config_.getNum()) {
 		QBrush brush(config_.Colors[Color::Background]);
 		painter.fillRect(xitr.screenX(), *yitr, width(), config_.byteHeight(), brush);
 	}
@@ -275,7 +275,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 
 	// Redraw line
 	const quint64 line = cursor_->Position / config_.getNum();
-	if (cursor_->Top <= line && line - cursor_->Top < static_cast<unsigned int>(config_.drawableLines(height()))) {
+	if (cursor_->Top <= line && line - cursor_->Top < static_cast<uint>(config_.drawableLines(height()))) {
 		drawView(DRAW_LINE, line - cursor_->Top);
 	}
 
