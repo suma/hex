@@ -309,8 +309,8 @@ namespace Standard {
 		// Main components
 		TextConfig config_;
 		TextCursor *cursor_;
-		Caret caret_;
 		TextDecodeHelper *decode_helper_;
+		Caret caret_;
 	};
 
 }

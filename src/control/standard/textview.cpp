@@ -299,7 +299,8 @@ void TextView::drawCaret(bool visible, quint64 pos)
 
 	// Redraw line
 	const quint64 line = cursor_->Position / config_.getNum();
-	if (cursor_->Top <= line && line - cursor_->Top < static_cast<unsigned int>(config_.drawableLines(height()))) {
+	if (cursor_->Top <= line && line - cursor_->Top < static_cast<uint>(config_.drawableLines(height()))) {
+		// 1行だけ再描画したい
 		drawView();
 	}
 
@@ -328,15 +329,6 @@ void TextView::drawCaret(bool visible, quint64 pos)
 
 void TextView::drawCaretShape(CaretDrawInfo info)
 {
-	if (info.caret_middle) {
-		// Copy from document
-		uchar data;
-		document_->get(info.pos, &data, 1);
-
-		info.hex.resize(2);
-		//byteToHex(data, info.hex);
-	}
-
 	switch (info.shape) {
 	case CARET_LINE:
 		drawCaretLine(info);
@@ -375,6 +367,7 @@ void TextView::drawCaretBlock(const CaretDrawInfo &info)
 		info.painter.setBackground(brush);
 		info.painter.setPen(config_.Colors[Color::CaretText]);
 		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
+		// TODO: 本当はここで文字描画
 	} else {
 		// Draw block without data
 		QBrush brush(config_.Colors[Color::CaretBackground]);
