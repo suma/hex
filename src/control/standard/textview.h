@@ -157,7 +157,7 @@ namespace Standard {
 			{
 				const uint old = pos;
 				pos = (pos + i) % conf.getNum();
-				set_next_flag(pos < old);
+				setNext(pos < old);
 				return *this;
 			}
 
@@ -171,17 +171,17 @@ namespace Standard {
 				return pos;
 			}
 
-			int getTextX() const
+			int textX() const
 			{
 				return conf.x(pos);
 			}
 
-			bool is_next_flag() const
+			bool isNext() const
 			{
 				return next_flag_;
 			}
 
-			void set_next_flag(bool t)
+			void setNext(bool t)
 			{
 				next_flag_ = t;
 			}
@@ -216,7 +216,7 @@ namespace Standard {
 				return pos;
 			}
 
-			int getScreenY() const
+			int screenY() const
 			{
 				return pos + conf.ByteMargin.top();
 			}

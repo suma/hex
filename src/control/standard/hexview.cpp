@@ -233,18 +233,18 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 			painter.setPen(config_.Colors[color.Text]);
 
 			// Draw background
-			painter.fillRect(xitr.getScreenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
+			painter.fillRect(xitr.screenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
 
 			// Draw text
 			byteToHex(buff_[index], hex);
-			drawText(painter, hex, xitr.getTextX(), yitr.getScreenY());
+			drawText(painter, hex, xitr.textX(), yitr.screenY());
 		}
 
 		// Move next line
 		++xitr;
 		//if (*xitr == 0) {
-		if (xitr.is_next_flag()) {
-			xitr.set_next_flag(false);
+		if (xitr.isNext()) {
+			xitr.setNext(false);
 			++yitr;
 		}
 	}
@@ -252,7 +252,7 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 	// Draw empty area(after end line)
 	if (0 < *xitr && *xitr < x_end && *xitr < config_.getNum()) {
 		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(xitr.getScreenX(), *yitr, width(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.screenX(), *yitr, width(), config_.byteHeight(), brush);
 	}
 }
 

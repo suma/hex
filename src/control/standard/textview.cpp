@@ -212,7 +212,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 				drawText(letterPainter, text, 0, 0);
 
 				// Copy letterPainter to painter
-				painter.drawPixmap(config_.x(*xitr + i), yitr.getScreenY(), pix, config_.x_(i), 0, config_.posWidth(*xitr + i), pix.height());
+				painter.drawPixmap(config_.x(*xitr + i), yitr.screenY(), pix, config_.x_(i), 0, config_.posWidth(*xitr + i), pix.height());
 
 				++i;
 				++docpos;
@@ -220,8 +220,8 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 			xitr += i;
 			// 次の行
-			if (xitr.is_next_flag()) {
-				xitr.set_next_flag(false);
+			if (xitr.isNext()) {
+				xitr.setNext(false);
 				++yitr;
 
 				while (i < printableBytes) {
@@ -233,9 +233,9 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 					QString text = QString(QChar('_'));
 
 					// Draw background
-					painter.fillRect(xitr.getTextX(), yitr.getScreenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
+					painter.fillRect(xitr.textX(), yitr.screenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
 
-					drawText(painter, text, xitr.getTextX(), yitr.getScreenY(), 1);
+					drawText(painter, text, xitr.textX(), yitr.screenY(), 1);
 
 					++i;
 					++docpos;
@@ -254,16 +254,16 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			QString text = QString(QChar('.'));
 
 			// Draw
-			painter.fillRect(xitr.getTextX(), yitr.getScreenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
-			drawText(painter, text, xitr.getTextX(), yitr.getScreenY(), 1);
+			painter.fillRect(xitr.textX(), yitr.screenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
+			drawText(painter, text, xitr.textX(), yitr.screenY(), 1);
 
 			++index;
 			++xitr;
 			++docpos;
 
 			// 描画座標を次の行にする
-			if (xitr.is_next_flag()) {
-				xitr.set_next_flag(false);
+			if (xitr.isNext()) {
+				xitr.setNext(false);
 				++yitr;
 			}
 		}
@@ -272,7 +272,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 	// Draw empty area(after end line)
 	if (0 < *xitr && *xitr < config_.getNum()) {
 		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(xitr.getTextX(), yitr.getScreenY(), width(), config_.byteHeight(), brush);
+		painter.fillRect(xitr.textX(), yitr.screenY(), width(), config_.byteHeight(), brush);
 	}
 }
 
