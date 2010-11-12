@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "../view.h"
+#include "hexview.h"
 
 namespace Standard {
 
@@ -13,13 +14,13 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		AddressView(QWidget *parent = NULL, Document *doc = NULL, HexCursor *cur = NULL);
+		AddressView(QWidget *parent = NULL, Document *doc = NULL, Cursor<HexView> *cur = NULL);
 
 	protected:
 		void drawView();
 
 	protected:
-		HexCursor *cursor;
+		Cursor<HexView> *cursor;
 	
 	};
 

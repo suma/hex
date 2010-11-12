@@ -333,7 +333,7 @@ void HexView::drawCaretShape(CaretDrawInfo info)
 void HexView::drawCaretLine(const CaretDrawInfo &info)
 {
 	int x;
-	if (cursor_->HighNibble || !info.caret_middle) {
+	if (cursor_->nibble() || !info.caret_middle) {
 		x = config_.x(info.x);
 	} else {
 		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
@@ -345,7 +345,7 @@ void HexView::drawCaretLine(const CaretDrawInfo &info)
 void HexView::drawCaretBlock(const CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
-		if (cursor_->HighNibble || cursor_->hasSelection()) {
+		if (cursor_->nibble() || cursor_->hasSelection()) {
 			// Draw block byte
 			QBrush brush(config_.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
@@ -371,7 +371,7 @@ void HexView::drawCaretBlock(const CaretDrawInfo &info)
 void HexView::drawCaretFrame(const CaretDrawInfo &info)
 {
 	int width, x;
-	if (cursor_->HighNibble || !info.caret_middle) {
+	if (cursor_->nibble() || !info.caret_middle) {
 		width = config_.byteWidth() - 1;
 		x = config_.x(info.x);
 	} else {
@@ -385,7 +385,7 @@ void HexView::drawCaretFrame(const CaretDrawInfo &info)
 void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
 {
 	int width, x;
-	if (cursor_->HighNibble || !info.caret_middle) {
+	if (cursor_->nibble() || !info.caret_middle) {
 		width = config_.byteWidth() - 1;
 		x = config_.x(info.x);
 	} else {
@@ -418,7 +418,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		//qDebug("mouse press");
 
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		movePosition(posAt(ev->pos()), false, false);
 
 		// Start mouse capture
@@ -503,35 +503,35 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
 	case Qt::Key_Home:
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		movePosition(0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		movePosition(document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		moveRelativePosition(-1, keepAnchor, false);
 		break;
 	case Qt::Key_Right:
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		moveRelativePosition(1, keepAnchor, false);
 		break;
 	case Qt::Key_Up:
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_Down:
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		moveRelativePosition((qint64)config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
-		cursor_->HighNibble = true;
+		cursor_->setNibble(true);
 		moveRelativePosition((qint64)config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
@@ -542,11 +542,11 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 			moveRelativePosition(pos, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
-			cursor_->HighNibble = true;
+			cursor_->setNibble(true);
 		} else if (0 < cursor_->Position) {
 			removeData(cursor_->Position - 1, 1);
 			moveRelativePosition(-1, false, false);
-			cursor_->HighNibble = true;
+			cursor_->setNibble(true);
 		}
 		break;
 	case Qt::Key_Insert:
@@ -561,11 +561,11 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 			moveRelativePosition(0, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
-			cursor_->HighNibble = true;
+			cursor_->setNibble(true);
 		} else if (cursor_->Position < document_->length()) {
 			removeData(cursor_->Position, 1);
 			moveRelativePosition(0, false, false);
-			cursor_->HighNibble = true;
+			cursor_->setNibble(true);
 		}
 		break;
 	default:
@@ -600,15 +600,15 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 					}
 
 					insertData(pos, nibble << 4);
-					cursor_->HighNibble = false;
+					cursor_->setNibble(false);
 					drawCaret();
 				} else if (cursor_->Position < document_->length()) {
 					// Ovewrite mode
 					uchar currentCharacter;
 					document_->get(cursor_->Position, &currentCharacter, 1);
-					if (cursor_->HighNibble) {
+					if (cursor_->nibble()) {
 						changeData(cursor_->Position, (nibble << 4) + (currentCharacter & 0x0f), true);
-						cursor_->HighNibble = false;
+						cursor_->setNibble(false);
 						drawCaret();
 					} else {
 						moveRelativePosition(1, false, false);
@@ -677,7 +677,7 @@ void HexView::changeData(quint64 pos, uchar character, bool highNibble)
 {
 	document_->remove(pos, 1);
 	document_->insert(pos, &character, 1);
-	cursor_->HighNibble = !highNibble;
+	cursor_->inverseNibble();
 	// TODO: implement Redraw Event
 	//drawView(DRAW_LINE, pos / config_.getNum() - cursor_->Top);
 	drawView();
