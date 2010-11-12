@@ -27,7 +27,6 @@ Editor::Editor()
 	high_ = NULL;
 	//high_ = new Highlight(doc_);
 
-	//cur_ = new Standard::Cursor(doc_);
 	hview_ = new Standard::HexView(this, doc_, high_);
 	hview_->setCaretBlink(true);
 

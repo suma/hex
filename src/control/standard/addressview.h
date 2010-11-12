@@ -7,7 +7,6 @@
 
 namespace Standard {
 
-	class HexCursor;
 
 	class AddressView : public ::View
 	{

@@ -1,5 +1,5 @@
-#ifndef EDITOR_H_INC
-#define EDITOR_H_INC
+
+#pragma once
 
 #include <QWidget>
 #include <QLabel>
@@ -10,7 +10,7 @@ namespace Standard {
 	class HexView;
 	class TextView;
 	class AddressView;
-	class Cursor;
+	template <class T> class Cursor;
 }
 
 class Highlight;
@@ -33,8 +33,7 @@ protected:
 	Standard::HexView *hview_;
 	Standard::TextView *tview_;
 	Standard::AddressView *aview_;
-	//Standard::Cursor *cur_;
 
 };
 
-#endif
+
