@@ -10,7 +10,6 @@ namespace Standard {
 	class HexView;
 	class TextView;
 	class AddressView;
-	template <class T> class Cursor;
 }
 
 class Highlight;

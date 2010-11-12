@@ -87,7 +87,7 @@ int HexConfig::YToLine(int y) const
 
 HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
-	, cursor_(new Cursor<HexView>(doc, this))
+	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {
 	// Enable keyboard input
@@ -633,7 +633,7 @@ void HexView::movePosition(quint64 pos, bool sel, bool holdViewPos)
 	const bool oldSelection = cursor_->hasSelection();
 
 	// movePosition
-	cursor_->movePosition(pos, sel, holdViewPos);
+	cursor_->movePosition(this, pos, sel, holdViewPos);
 
 	// Redraw view
 	if (cursor_->Top == oldTop) {

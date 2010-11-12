@@ -310,7 +310,7 @@ namespace Standard {
 	private:
 		// Main components
 		TextConfig config_;
-		Cursor<TextView> *cursor_;
+		Cursor *cursor_;
 		TextDecodeHelper *decode_helper_;
 		Caret caret_;
 	};

@@ -4,7 +4,7 @@
 
 namespace Standard {
 
-AddressView::AddressView(QWidget *parent, Document *doc, Cursor<HexView> *cur)
+AddressView::AddressView(QWidget *parent, Document *doc, Cursor *cur)
 	: ::View(parent, doc)
 	, cursor(cur)
 {

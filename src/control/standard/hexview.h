@@ -300,7 +300,7 @@ namespace Standard {
 	private:
 		// Main components
 		HexConfig config_;
-		Cursor<HexView> *cursor_;
+		Cursor *cursor_;
 		Caret caret_;
 	};
 

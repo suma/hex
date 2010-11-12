@@ -93,7 +93,7 @@ int TextConfig::YToLine(int y) const
 
 TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
-	, cursor_(new Cursor<TextView>(doc, this))
+	, cursor_(new Cursor(doc))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->Top))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {
@@ -556,7 +556,7 @@ void TextView::movePosition(quint64 pos, bool sel, bool holdViewPos)
 	const bool oldSelection = cursor_->hasSelection();
 
 	// movePosition
-	cursor_->movePosition(pos, sel, holdViewPos);
+	cursor_->movePosition(this, pos, sel, holdViewPos);
 
 	// Redraw view
 	if (cursor_->Top == oldTop) {
