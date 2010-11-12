@@ -24,11 +24,6 @@ void TextCursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 {
 	Q_ASSERT(pos <= document->length());
 	
-	const quint64 oldTop = Top;
-	const quint64 oldPos = Position;
-	const quint64 oldPosAnchor = PositionAnchor;
-	const bool oldSelection = hasSelection();
-
 	// Compute virtual position of caret
 	int vwOldPosLine = 0;
 	if (holdViewPos) {
@@ -72,32 +67,10 @@ void TextCursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 
 	Position = pos;
 	PositionAnchor = sel ? PositionAnchor : Position;
-
-	// Reset Nibble
-	//HighNibble = true;
-
-	// Redraw view
-	if (Top == oldTop) {
-		if (!sel && oldSelection) {
-			// Clear selection
-			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
-		} else if (Position != oldPos) {
-			// Draw/Redraw selection
-			const quint64 begin = qMin(qMin(Position, PositionAnchor), oldPos);
-			const quint64 end   = qMax(qMax(Position, PositionAnchor), oldPos);
-			redrawSelection(begin, end);
-		}
-		// TODO: Clear old caret only
-		view->drawView();
-	} else {
-		view->drawView();
-	}
-
-	view->drawCaret();
 }
 
 
-void TextCursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
+quint64 TextCursor::getRelativePosition(qint64 pos)
 {
 	const quint64 diff = static_cast<quint64>(qAbs(pos));
 	quint64 okPos = 0;
@@ -114,18 +87,8 @@ void TextCursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 			okPos = document->length();
 		}
 	}
-	//qDebug("pos:%lld, diff:%llu, okPos: %llu", pos, diff, okPos);
-	movePosition(okPos, sel, holdViewPos);
-}
-
-void TextCursor::redrawSelection(quint64 begin, quint64 end)
-{
-	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
-	begin /= view->getConfig().getNum();
-	end   /= view->getConfig().getNum();
-
-	// FIXIME: redraw [beginLine, endLine]
-	view->drawView();
+	
+	return okPos;
 }
 
 

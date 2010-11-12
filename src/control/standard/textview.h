@@ -250,7 +250,6 @@ namespace Standard {
 		{
 			QPainter &painter;
 			CaretShape shape;
-			QString hex;
 			quint64 pos;
 			bool caret_middle;
 			int x;
@@ -275,6 +274,9 @@ namespace Standard {
 		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
 
+		void movePosition(quint64 pos, bool sel, bool holdViewPos);
+		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
+		void redrawSelection(quint64 begin, quint64 end);
 
 	public slots:
 		// TODO change signal

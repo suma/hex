@@ -1,18 +1,13 @@
-#ifndef KEYBOARD_H_INC
-#define KEYBOARD_H_INC
 
+#pragma once
+
+#include <QKeyEvent>
 
 class Keyboard
 {
-
-
-
-
-
-
-
-
+public:
+	void keyPressEvent(QKeyEvent *);
 
 };
 
-#endif
+

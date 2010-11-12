@@ -34,15 +34,6 @@ namespace Standard {
 	
 	public:
 
-		/*
-		quint64 getSelectBegin();
-		quint64 getSelectEnd();
-		quint64 getSelectEndOld();
-		void setSelectBegin(quint64);
-		void setSelectEnd(quint64);
-		void setSelectEndOld(quint64);
-		*/
-
 		void resetAnchor();
 
 		bool hasSelection();
@@ -55,10 +46,7 @@ namespace Standard {
 	public:
 
 		void movePosition(quint64 pos, bool sel, bool holdViewPos);
-		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
-
-	private:
-		void redrawSelection(quint64, quint64);
+		quint64 getRelativePosition(qint64 pos);
 
 	};
 
