@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <vector>
 #include "textview.h"
-#include "textcursor.h"
 #include "../util/util.h"
 #include "../document.h"
 #include "../highlight.h"
@@ -94,7 +93,7 @@ int TextConfig::YToLine(int y) const
 
 TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
-	, cursor_(new TextCursor(doc, this))
+	, cursor_(new Cursor<TextView>(doc, this))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->Top))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {

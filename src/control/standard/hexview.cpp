@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <vector>
 #include "hexview.h"
-#include "hexcursor.h"
 #include "../document.h"
 #include "../highlight.h"
 
@@ -88,7 +87,7 @@ int HexConfig::YToLine(int y) const
 
 HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
-	, cursor_(new HexCursor(doc, this))
+	, cursor_(new Cursor<HexView>(doc, this))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {
 	// Enable keyboard input

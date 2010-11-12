@@ -14,10 +14,9 @@ HEADERS += \
     view.h \
     standard/addressview.h \
 	standard/caret.h \
+	standard/cursor.h \
 	standard/cursorutil.h \
-	standard/hexcursor.h \
     standard/hexview.h \
-	standard/textcursor.h \
 	standard/textdecodehelper.h \
 	standard/textview.h
 
@@ -32,8 +31,6 @@ SOURCES += \
 	standard/caret.cpp \
     standard/hexview.cpp \
 	standard/textview.cpp \
-	standard/hexcursor.cpp \
-	standard/textcursor.cpp \
 	standard/textdecodehelper.cpp
 
 

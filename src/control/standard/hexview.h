@@ -5,7 +5,7 @@
 #include <QFontMetrics>
 #include "../view.h"
 #include "../highlight.h"
-#include "hexcursor.h"
+#include "cursor.h"
 #include "caret.h"
 
 namespace Standard {
@@ -224,7 +224,6 @@ namespace Standard {
 		~HexView();
 
 		HexConfig & getConfig() { return config_; }
-		HexCursor & getCursor() { return *cursor_; }
 		void setCaretBlink(bool enable);
 
 
@@ -301,7 +300,7 @@ namespace Standard {
 	private:
 		// Main components
 		HexConfig config_;
-		HexCursor *cursor_;
+		Cursor<HexView> *cursor_;
 		Caret caret_;
 	};
 
