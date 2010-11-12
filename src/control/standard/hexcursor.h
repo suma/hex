@@ -54,7 +54,7 @@ namespace Standard {
 	public:
 
 		void movePosition(quint64 pos, bool sel, bool holdViewPos);
-		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
+		quint64 getRelativePosition(qint64 pos);
 
 	private:
 		void redrawSelection(quint64, quint64);

@@ -258,6 +258,10 @@ namespace Standard {
 		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
 
+		void movePosition(quint64 pos, bool sel, bool holdViewPos);
+		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
+		void redrawSelection(quint64 begin, quint64 end);
+
 	public:
 		// TODO change signal
 		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);

@@ -26,11 +26,6 @@ void HexCursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 	Q_ASSERT(pos <= document->length());
 	// FIXME: replace drawView/drawCaret callings by doc udpate event
 	
-	const quint64 oldTop = Top;
-	const quint64 oldPos = Position;
-	const quint64 oldPosAnchor = PositionAnchor;
-	const bool oldSelection = hasSelection();
-
 	// Compute virtual position of caret
 	int vwOldPosLine = 0;
 	if (holdViewPos) {
@@ -77,29 +72,10 @@ void HexCursor::movePosition(quint64 pos, bool sel, bool holdViewPos)
 
 	// Reset Nibble
 	//HighNibble = true;
-
-	// Redraw view
-	if (Top == oldTop) {
-		if (!sel && oldSelection) {
-			// Clear selection
-			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
-		} else if (Position != oldPos) {
-			// Draw/Redraw selection
-			const quint64 begin = qMin(qMin(Position, PositionAnchor), oldPos);
-			const quint64 end   = qMax(qMax(Position, PositionAnchor), oldPos);
-			redrawSelection(begin, end);
-		}
-		// Clear old caret
-		view->drawView(DRAW_LINE, oldPos / view->getConfig().getNum() - Top);
-	} else {
-		view->drawView();
-	}
-
-	view->drawCaret();
 }
 
 
-void HexCursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
+quint64 HexCursor::getRelativePosition(qint64 pos)
 {
 	const quint64 diff = static_cast<quint64>(qAbs(pos));
 	quint64 okPos = 0;
@@ -116,8 +92,8 @@ void HexCursor::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 			okPos = document->length();
 		}
 	}
-	//qDebug("pos:%lld, diff:%llu, okPos: %llu", pos, diff, okPos);
-	movePosition(okPos, sel, holdViewPos);
+	
+	return okPos;
 }
 
 void HexCursor::redrawSelection(quint64 begin, quint64 end)

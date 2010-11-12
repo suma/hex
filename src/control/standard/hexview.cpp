@@ -420,7 +420,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		//qDebug("mouse press");
 
 		cursor_->HighNibble = true;
-		cursor_->movePosition(posAt(ev->pos()), false, false);
+		movePosition(posAt(ev->pos()), false, false);
 
 		// Start mouse capture
 		grabMouse();
@@ -434,7 +434,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	if (height() < ev->pos().y()) {
 		return;
 	}
-	cursor_->movePosition(posAt(ev->pos()), true, false);
+	movePosition(posAt(ev->pos()), true, false);
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *)
@@ -505,48 +505,48 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	switch (ev->key()) {
 	case Qt::Key_Home:
 		cursor_->HighNibble = true;
-		cursor_->movePosition(0, keepAnchor, false);
+		movePosition(0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
 		cursor_->HighNibble = true;
-		cursor_->movePosition(document_->length(), keepAnchor, false);
+		movePosition(document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(-1, keepAnchor, false);
+		moveRelativePosition(-1, keepAnchor, false);
 		break;
 	case Qt::Key_Right:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(1, keepAnchor, false);
+		moveRelativePosition(1, keepAnchor, false);
 		break;
 	case Qt::Key_Up:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
+		moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_Down:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition((qint64)config_.getNum(), keepAnchor, false);
+		moveRelativePosition((qint64)config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
+		moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
 		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition((qint64)config_.getNum() * 15, keepAnchor, true);
+		moveRelativePosition((qint64)config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
 		if (cursor_->hasSelection()) {
 			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
 			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
 			removeData(pos, len);
-			cursor_->moveRelativePosition(pos, false, false);
+			moveRelativePosition(pos, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
 			cursor_->HighNibble = true;
 		} else if (0 < cursor_->Position) {
 			removeData(cursor_->Position - 1, 1);
-			cursor_->moveRelativePosition(-1, false, false);
+			moveRelativePosition(-1, false, false);
 			cursor_->HighNibble = true;
 		}
 		break;
@@ -559,13 +559,13 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
 			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
 			removeData(pos, len);
-			cursor_->moveRelativePosition(0, false, false);
+			moveRelativePosition(0, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
 			cursor_->HighNibble = true;
 		} else if (cursor_->Position < document_->length()) {
 			removeData(cursor_->Position, 1);
-			cursor_->moveRelativePosition(0, false, false);
+			moveRelativePosition(0, false, false);
 			cursor_->HighNibble = true;
 		}
 		break;
@@ -612,7 +612,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 						cursor_->HighNibble = false;
 						drawCaret();
 					} else {
-						cursor_->moveRelativePosition(1, false, false);
+						moveRelativePosition(1, false, false);
 						changeData(cursor_->Position - 1, nibble + (currentCharacter & 0xf0));
 					}
 				} else {
@@ -624,6 +624,56 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	}
 }
 
+void HexView::movePosition(quint64 pos, bool sel, bool holdViewPos)
+{
+	Q_ASSERT(pos <= document_->length());
+	
+	const quint64 oldTop = cursor_->Top;
+	const quint64 oldPos = cursor_->Position;
+	const quint64 oldPosAnchor = cursor_->PositionAnchor;
+	const bool oldSelection = cursor_->hasSelection();
+
+	// movePosition
+	cursor_->movePosition(pos, sel, holdViewPos);
+
+	// Redraw view
+	if (cursor_->Top == oldTop) {
+		if (!sel && oldSelection) {
+			// Clear selection
+			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
+		} else if (cursor_->Position != oldPos) {
+			// Draw/Redraw selection
+			const quint64 begin = qMin(qMin(cursor_->Position, cursor_->PositionAnchor), oldPos);
+			const quint64 end   = qMax(qMax(cursor_->Position, cursor_->PositionAnchor), oldPos);
+			redrawSelection(begin, end);
+		}
+		// TODO: Clear old caret only
+		drawView();
+	} else {
+		drawView();
+	}
+
+	drawCaret();
+}
+
+
+void HexView::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
+{
+	movePosition(cursor_->getRelativePosition(pos), sel, holdViewPos);
+}
+
+void HexView::redrawSelection(quint64 begin, quint64 end)
+{
+	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
+	begin /= config_.getNum();
+	end   /= config_.getNum();
+
+	const int beginLine = qMax(begin, cursor_->Top) - cursor_->Top;
+	const int endLine   = qMax(end, cursor_->Top) - cursor_->Top;
+
+	//qDebug("redrawSelection %d, %d, Top:%llu", beginLine, endLine, Top);
+	drawView(DRAW_RANGE, beginLine, endLine + 1);
+}
 void HexView::changeData(quint64 pos, uchar character, bool highNibble)
 {
 	document_->remove(pos, 1);
