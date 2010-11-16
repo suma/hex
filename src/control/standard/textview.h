@@ -17,10 +17,10 @@ namespace Standard {
 	{
 	private:
 		uint Num;
-	public:
-		QRect Margin;
 		QRect ByteMargin;
 		QFont Font;
+	public:
+		QRect Margin;
 		QColor Colors[Color::ColorCount];
 
 		bool EnableCaret;
@@ -35,94 +35,102 @@ namespace Standard {
 	public:
 		TextConfig();
 
-		inline uint getNum() const
+		uint getNum() const
 		{
 			return Num;
 		}
 
-		inline uint getNumV() const
+		uint getNumV() const
 		{
 			return Num + 1;
 		}
 
-		inline void updateFont()
+		const QFont &font() const
+		{
+			return Font;
+		}
+		void updateFont()
 		{
 			FontMetrics = QFontMetrics(Font);
 		}
-		inline int textWidth(const QString &string) const
+		int textWidth(const QString &string) const
 		{
 			return FontMetrics.width(string);
 		}
-		inline int charWidth(int num = 1) const
+		int charWidth(int num = 1) const
 		{
 			return FontMetrics.width(QChar('A')) * num;
 		}
-		inline int charHeight() const
+		int charHeight() const
 		{
 			return FontMetrics.height();
 		}
-		inline int byteWidth() const
+		int byteWidth() const
 		{
 			return charWidth(1);
 		}
-		inline int byteHeight() const
+		int byteHeight() const
 		{
 			return ByteMargin.top() + FontMetrics.height() + ByteMargin.bottom();
 		}
-		inline const QRect &byteMargin() const
+		const QRect &margin() const
+		{
+			return Margin;
+		}
+		const QRect &byteMargin() const
 		{
 			return ByteMargin;
 		}
-		inline const QFontMetrics &fontMetrics() const
+		const QFontMetrics &fontMetrics() const
 		{
 			return FontMetrics;
 		}
-		inline int top() const
+		int top() const
 		{
 			return Margin.top();
 		}
-		inline int maxWidth() const
+		int maxWidth() const
 		{
 			return X(x_begin.size() - 1) + Margin.right();
 		}
-		inline int x(size_t i) const
+		int x(size_t i) const
 		{
 			Q_ASSERT(i < x_begin.size());
 			return Margin.left() + x_begin[i];
 		}
-		inline int X(size_t i) const
+		int X(size_t i) const
 		{
 			Q_ASSERT(i < x_end.size());
 			return Margin.left() + x_end[i];
 		}
-		inline int x_(size_t i) const
+		int x_(size_t i) const
 		{
 			Q_ASSERT(i < x_begin.size());
 			return x_begin[i];
 		}
-		inline int X_(size_t i) const
+		int X_(size_t i) const
 		{
 			Q_ASSERT(i < x_end.size());
 			return x_end[i];
 		}
-		inline int posWidth(size_t begin)
+		int posWidth(size_t begin)
 		{
 			return x_end[begin] - x_begin[begin];
 		}
-		inline int posWidth(size_t begin, size_t end)
+		int posWidth(size_t begin, size_t end)
 		{
 			return x_end[end] - x_begin[begin];
 		}
-		inline int caretWidth() const
+		int caretWidth() const
 		{
 			return 3;
 			//return ByteMargin.left() + charWidth();
 		}
-		inline int caretHeight() const
+		int caretHeight() const
 		{
 			return byteHeight();
 		}
-		inline int width()
+		int width()
 		{
 			return charWidth(getNumV()) + Margin.left() + Margin.right();
 		}

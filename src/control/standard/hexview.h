@@ -20,10 +20,10 @@ namespace Standard {
 	{
 	private:
 		uint Num;
-	public:
-		QRect Margin;
 		QRect ByteMargin;
 		QFont Font;
+	public:
+		QRect Margin;
 		QColor Colors[Color::ColorCount];
 
 		bool EnableCaret;
@@ -38,70 +38,80 @@ namespace Standard {
 	public:
 		HexConfig();
 
-		inline uint getNum() const
+		uint getNum() const
 		{
 			return Num;
 		}
-		inline uint getNumV() const
+		uint getNumV() const
 		{
 			return Num + 1;
 		}
-		inline void updateFont()
+
+		const QFont &font() const
+		{
+			return Font;
+		}
+
+		void updateFont()
 		{
 			FontMetrics = QFontMetrics(Font);
 		}
-		inline int charWidth(int num = 1) const
+		int charWidth(int num = 1) const
 		{
 			return FontMetrics.width(QChar('A')) * num;
 		}
-		inline int charHeight() const
+		int charHeight() const
 		{
 			return FontMetrics.height();
 		}
-		inline int byteWidth() const
+		int byteWidth() const
 		{
 			return ByteMargin.left() + charWidth(2) + ByteMargin.right();
 		}
-		inline int byteHeight() const
+		int byteHeight() const
 		{
 			return ByteMargin.top() + FontMetrics.height() + ByteMargin.bottom();
 		}
-		inline const QRect &byteMargin() const
+		const QRect &margin() const
+		{
+			return Margin;
+		}
+		const QRect &byteMargin() const
 		{
 			return ByteMargin;
 		}
-		inline const QFontMetrics &fontMetrics() const
+		const QFontMetrics &fontMetrics() const
 		{
 			return FontMetrics;
 		}
-		inline int top() const
+		int top() const
 		{
 			return Margin.top();
 		}
-		inline int maxWidth() const
+		int maxWidth() const
 		{
 			return X(Num - 1) + Margin.right();
 		}
-		inline int x(size_t i) const
+		int x(size_t i) const
 		{
 			Q_ASSERT(i < Num);
 			return x_begin[i];
 		}
-		inline int X(size_t i) const
+		int X(size_t i) const
 		{
 			Q_ASSERT(i < Num);
 			return x_end[i];
 		}
-		inline int caretWidth() const
+		int caretWidth() const
 		{
 			return 3;
 			//return ByteMargin.left() + charWidth();
 		}
-		inline int caretHeight() const
+		int caretHeight() const
 		{
 			return byteHeight();
 		}
-		inline int width()
+		int width()
 		{
 			return byteWidth() * Num + Margin.left() + Margin.right();
 		}

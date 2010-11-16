@@ -125,7 +125,7 @@ void TextView::drawView()
 	// FIXME: refactoring refresh event
 	QPainter painter;
 	painter.begin(&pix_);
-	painter.setFont(config_.Font);
+	painter.setFont(config_.font());
 
 	// TODO: draw Empty Background only
 
@@ -196,7 +196,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			QPixmap pix(QSize(config_.posWidth(*xitr, epos), config_.byteHeight()));
 
 			QPainter letterPainter(&pix);
-			letterPainter.setFont(config_.Font);
+			letterPainter.setFont(config_.font());
 			uint i = 0;
 			while (i < printableBytes && *xitr + i < config_.getNum()) {
 				// Set color
@@ -312,7 +312,7 @@ void TextView::drawCaret(bool visible, quint64 pos)
 	// Begin paint
 	QPainter painter;
 	painter.begin(&pix_);
-	painter.setFont(config_.Font);
+	painter.setFont(config_.font());
 
 	// Get caret coordinates
 	const int x = pos % config_.getNum();

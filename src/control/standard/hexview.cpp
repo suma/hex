@@ -118,7 +118,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	// FIXME: refactoring refresh event
 	QPainter painter;
 	painter.begin(&pix_);
-	painter.setFont(config_.Font);
+	painter.setFont(config_.font());
 
 	if (!document_->length()) {
 		// TODO: draw Empty Background only
@@ -287,7 +287,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	// Begin paint
 	QPainter painter;
 	painter.begin(&pix_);
-	painter.setFont(config_.Font);
+	painter.setFont(config_.font());
 
 	// Get caret coordinates
 	const int x = pos % config_.getNum();
@@ -336,7 +336,7 @@ void HexView::drawCaretLine(const CaretDrawInfo &info)
 	if (cursor_->nibble() || !info.caret_middle) {
 		x = config_.x(info.x);
 	} else {
-		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
+		x = config_.x(info.x) + config_.byteMargin().left() + config_.charWidth();
 	}
 	QBrush brush(config_.Colors[Color::CaretBackground]);
 	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
@@ -351,15 +351,15 @@ void HexView::drawCaretBlock(const CaretDrawInfo &info)
 			info.painter.setBackground(brush);
 			info.painter.setPen(config_.Colors[Color::CaretText]);
 			info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-			info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, info.hex);
+			info.painter.drawText(config_.x(info.x) + config_.byteMargin().left(), info.y + config_.byteMargin().top(), config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, info.hex);
 		} else {
 			// Draw block lowwer nibble
 			QBrush brush(config_.Colors[Color::CaretBackground]);
 			info.painter.setBackground(brush);
 			info.painter.setPen(config_.Colors[Color::CaretText]);
-			info.painter.fillRect(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y, config_.charWidth() + config_.ByteMargin.right(), config_.byteHeight(), brush);
+			info.painter.fillRect(config_.x(info.x) + config_.byteMargin().left() + config_.charWidth(), info.y, config_.charWidth() + config_.byteMargin().right(), config_.byteHeight(), brush);
 			QString low(info.hex[1]);
-			info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignLeft, low);
+			info.painter.drawText(config_.x(info.x) + config_.byteMargin().left() + config_.charWidth(), info.y + config_.byteMargin().top(), config_.charWidth(2), config_.charHeight(), Qt::AlignLeft, low);
 		}
 	} else {
 		// Draw block without data
@@ -375,8 +375,8 @@ void HexView::drawCaretFrame(const CaretDrawInfo &info)
 		width = config_.byteWidth() - 1;
 		x = config_.x(info.x);
 	} else {
-		width = config_.charWidth() + config_.ByteMargin.right() - 1;
-		x = config_.x(info.x) + config_.charWidth() + config_.ByteMargin.left();
+		width = config_.charWidth() + config_.byteMargin().right() - 1;
+		x = config_.x(info.x) + config_.charWidth() + config_.byteMargin().left();
 	}
 	info.painter.setPen(config_.Colors[Color::CaretBackground]);
 	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
@@ -389,8 +389,8 @@ void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
 		width = config_.byteWidth() - 1;
 		x = config_.x(info.x);
 	} else {
-		width = config_.charWidth() + config_.ByteMargin.right() - 1;
-		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
+		width = config_.charWidth() + config_.byteMargin().right() - 1;
+		x = config_.x(info.x) + config_.byteMargin().left() + config_.charWidth();
 	}
 
 	QBrush brush(config_.Colors[Color::CaretBackground]);
