@@ -288,7 +288,6 @@ void Document::remove(quint64 pos, quint64 len)
 	Q_ASSERT(pos <= length());
 	Q_ASSERT(len <= length());
 	Q_ASSERT(pos <= length() - len);
-	// TODO: collect QFile remove pieces
 	impl_->remove_data(pos, len);
 }
 
