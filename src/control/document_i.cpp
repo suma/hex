@@ -36,7 +36,7 @@
 /* original by src/gui/text/qtextdocument_p.cpp */
 
 #include "document_i.h"
-#include "document.h"
+
 
 DocumentImpl::DocumentImpl()
 	: length_(0)
