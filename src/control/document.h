@@ -73,7 +73,7 @@ public:
 	// バッファにコピーする
 	void get(quint64 pos, uchar *buf, uint len) const;
 
-	// イテレータにDocumentFragmentをコピーする
+	// イテレータの先へDocumentFragmentをコピーする
 	template <class T> T get(quint64 pos, quint64 len, T t) const;
 
 
