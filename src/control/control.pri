@@ -3,6 +3,7 @@
 # Input
 HEADERS += \
     color.h \
+	commands.h \
     control.h \
     cursor.h \
     document.h \
@@ -22,6 +23,7 @@ HEADERS += \
 
 SOURCES += \
     control.cpp \
+	commands.cpp \
     cursor.cpp \
     document.cpp \
     document_i.cpp \

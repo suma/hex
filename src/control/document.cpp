@@ -1,6 +1,7 @@
 
-#include <QFile>
 #include <limits>
+#include <QFile>
+#include <QUndoStack>
 #include "document.h"
 #include "document_i.h"
 
@@ -19,7 +20,7 @@ public:
 		return 0;
 	}
 
-	void get(quint64 pos, uchar *buf, quint64 len) const
+	void get(quint64, uchar *, quint64) const
 	{
 		// TODO: throw Exception
 	}
@@ -141,14 +142,16 @@ Document::Document(QFile *file, uint buffer_size)
 	: impl_(new DocumentImpl())
 	, original_(new FileOriginal(file, buffer_size))
 	, file_(file)
+	, undo_stack_(new QUndoStack())
 {
 	impl_->insert_data(0, 0, file->size(), DOCTYPE_ORIGINAL);
 }
 
 Document::~Document()
 {
-	delete impl_;
+	delete undo_stack_;
 	delete file_;
+	delete impl_;
 	delete original_;
 }
 
@@ -157,7 +160,47 @@ quint64 Document::length() const
 	return impl_->length();
 }
 
+class Document::FragmentCopier {
+public:
+	FragmentCopier(const Document *doc, uchar *buf)
+		: document_(doc)
+		, buf_(buf)
+	{
+	}
+	FragmentCopier &operator=(DocumentFragment fragment)
+	{
+		document_->copy(fragment.type(), fragment.position(), fragment.length(), buf_);
+		buf_ += fragment.length();
+		return *this;
+	}
+
+	FragmentCopier &operator*()
+	{
+		return *this;
+	}
+
+	FragmentCopier &operator++()
+	{
+		return *this;
+	}
+
+	FragmentCopier &operator++(int)
+	{
+		return *this;
+	}
+
+private:
+	const Document *document_;
+	uchar *buf_;
+};
+
 void Document::get(quint64 pos, uchar *buf, uint len) const
+{
+	get(pos, len, FragmentCopier(this, buf));
+}
+
+template <class T>
+T Document::get(quint64 pos, quint64 len, T result) const
 {
 	Q_ASSERT(pos <= length());
 	Q_ASSERT(len <= length());
@@ -171,13 +214,14 @@ void Document::get(quint64 pos, uchar *buf, uint len) const
 		const quint64 fragmentSize = impl_->documents_.size(x) - diff;
 		DocumentData *X = impl_->documents_.fragment(x);
 		if (fragmentSize < len) {
-			copy(X->type, X->bufferPosition + diff, fragmentSize, buf);
+			*result =  DocumentFragment(X->type, X->bufferPosition + diff, fragmentSize);
+			
+			++result;
 			len -= fragmentSize;
-			buf += fragmentSize;
 			x = impl_->documents_.next(x);
 		} else {
-			copy(X->type, X->bufferPosition + diff, len, buf);
-			return;
+			*result = DocumentFragment(X->type, X->bufferPosition + diff, len);
+			return result;
 		}
 	}
 
@@ -186,11 +230,14 @@ void Document::get(quint64 pos, uchar *buf, uint len) const
 		const quint64 fragmentSize = impl_->documents_.size(x);
 		const uint copy_size = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
 		const DocumentData *X = impl_->documents_.fragment(x);
-		copy(X->type, X->bufferPosition, copy_size, buf);
+		*result = DocumentFragment(X->type, X->bufferPosition, copy_size);
+		++result;
+
 		len -= copy_size;
-		buf += copy_size;
 		x = impl_->documents_.next(x);
 	}
+
+	return result;
 }
 
 void Document::copy(uint type, quint64 pos, quint64 len, uchar *buf) const
@@ -223,7 +270,17 @@ void Document::insert(quint64 pos, const uchar *buf, uint len)
 
 	const quint64 bufPos = buffer_.size();
 	buffer_.insert(buffer_.end(), buf, buf + len);
-	impl_->insert_data(pos, bufPos, len, DOCTYPE_BUFFER);
+	insert(pos, bufPos, len);
+}
+
+void Document::insert(quint64 pos, size_t offset, uint len)
+{
+	impl_->insert_data(pos, offset, len, DOCTYPE_BUFFER);
+}
+
+void Document::insert(quint64 pos, DocumentFragment fragment)
+{
+	impl_->insert_data(pos, fragment.position(), fragment.length(), fragment.type());
 }
 
 void Document::remove(quint64 pos, quint64 len)
@@ -235,6 +292,15 @@ void Document::remove(quint64 pos, quint64 len)
 	impl_->remove_data(pos, len);
 }
 
+Document::Buffer &Document::buffer()
+{
+	return buffer_;
+}
+
+QUndoStack *Document::undoStack() const
+{
+	return undo_stack_;
+}
 
 
 
