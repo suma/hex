@@ -65,22 +65,23 @@ public:
 	virtual ~Document();
 
 
-	// immutable methods
+	//-- immutable methods
+
+	// 
 	quint64 length() const;
+
+	// バッファにコピーする
 	void get(quint64 pos, uchar *buf, uint len) const;
 
-	template <class T>
-	T get(quint64 pos, quint64 len, T t) const;
+	// イテレータにDocumentFragmentをコピーする
+	template <class T> T get(quint64 pos, quint64 len, T t) const;
 
 
-	// mutable methods
+	//-- mutable methods
 	void insert(quint64 pos, const uchar *buf, uint len);
 	void insert(quint64 pos, size_t offset, uint len);
 	void insert(quint64 pos, DocumentFragment fragment);
 	void remove(quint64 pos, quint64 len);
-
-	// TODO: undo/redo
-
 
 	// file method
 	//  save, saveAs, ....
@@ -94,7 +95,10 @@ public:
 	const static int DEFAULT_BUFFER_SIZE;
 
 private:
+	// ドキュメントの実体をバッファへコピーする
 	void copy(uint type, quint64 pos, quint64 len, uchar *buf) const;
+
+	// Fragment Copy iterator
 	class FragmentCopier;
 
 
