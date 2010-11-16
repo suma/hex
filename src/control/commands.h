@@ -37,4 +37,15 @@ private:
 
 
 
+class ReplaceCommand : public QUndoCommand
+{
+public:
+	ReplaceCommand(Document *doc, quint64 pos, quint64 len, const uchar *data, uint length, QUndoCommand *parent = 0);
+	void undo();
+	void redo();
+
+private:
+	DeleteCommand *delete_;
+	InsertCommand *insert_;
+};
 

@@ -120,6 +120,41 @@ private:
 	}
 };
 
+class Document::FragmentCopier
+{
+public:
+	FragmentCopier(const Document *doc, uchar *buf)
+		: document_(doc)
+		, buf_(buf)
+	{
+	}
+	FragmentCopier &operator=(DocumentFragment fragment)
+	{
+		document_->copy(fragment.type(), fragment.position(), fragment.length(), buf_);
+		buf_ += fragment.length();
+		return *this;
+	}
+
+	FragmentCopier &operator*()
+	{
+		return *this;
+	}
+
+	FragmentCopier &operator++()
+	{
+		return *this;
+	}
+
+	FragmentCopier &operator++(int)
+	{
+		return *this;
+	}
+
+private:
+	const Document *document_;
+	uchar *buf_;
+};
+
 
 Document::Document()
 	: impl_(new DocumentImpl())
@@ -159,40 +194,6 @@ quint64 Document::length() const
 {
 	return impl_->length();
 }
-
-class Document::FragmentCopier {
-public:
-	FragmentCopier(const Document *doc, uchar *buf)
-		: document_(doc)
-		, buf_(buf)
-	{
-	}
-	FragmentCopier &operator=(DocumentFragment fragment)
-	{
-		document_->copy(fragment.type(), fragment.position(), fragment.length(), buf_);
-		buf_ += fragment.length();
-		return *this;
-	}
-
-	FragmentCopier &operator*()
-	{
-		return *this;
-	}
-
-	FragmentCopier &operator++()
-	{
-		return *this;
-	}
-
-	FragmentCopier &operator++(int)
-	{
-		return *this;
-	}
-
-private:
-	const Document *document_;
-	uchar *buf_;
-};
 
 void Document::get(quint64 pos, uchar *buf, uint len) const
 {
