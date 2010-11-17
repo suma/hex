@@ -19,9 +19,10 @@ namespace Standard {
 	class HexConfig
 	{
 	private:
-		uint Num;
-		QRect ByteMargin;
-		QFont Font;
+		uint num_;
+		QRect byteMargin_;
+		QFont font_;
+		int charWidth_;
 	public:
 		QRect Margin;
 		QColor Colors[Color::ColorCount];
@@ -30,7 +31,7 @@ namespace Standard {
 		int CaretBlinkTime;
 
 	private:
-		QFontMetrics FontMetrics;
+		QFontMetrics fontMetrics_;
 		std::vector<int> x_begin;	// pos of value
 		std::vector<int> x_end;		// pos of end
 		std::vector<int> x_area;
@@ -40,37 +41,37 @@ namespace Standard {
 
 		uint getNum() const
 		{
-			return Num;
+			return num_;
 		}
 		uint getNumV() const
 		{
-			return Num + 1;
+			return num_ + 1;
 		}
 
 		const QFont &font() const
 		{
-			return Font;
+			return font_;
 		}
 
 		void updateFont()
 		{
-			FontMetrics = QFontMetrics(Font);
+			fontMetrics_ = QFontMetrics(font_);
 		}
 		int charWidth(int num = 1) const
 		{
-			return FontMetrics.width(QChar('A')) * num;
+			return charWidth_ * num;
 		}
 		int charHeight() const
 		{
-			return FontMetrics.height();
+			return fontMetrics_.height();
 		}
 		int byteWidth() const
 		{
-			return ByteMargin.left() + charWidth(2) + ByteMargin.right();
+			return byteMargin_.left() + charWidth(2) + byteMargin_.right();
 		}
 		int byteHeight() const
 		{
-			return ByteMargin.top() + FontMetrics.height() + ByteMargin.bottom();
+			return byteMargin_.top() + fontMetrics_.height() + byteMargin_.bottom();
 		}
 		const QRect &margin() const
 		{
@@ -78,11 +79,11 @@ namespace Standard {
 		}
 		const QRect &byteMargin() const
 		{
-			return ByteMargin;
+			return byteMargin_;
 		}
 		const QFontMetrics &fontMetrics() const
 		{
-			return FontMetrics;
+			return fontMetrics_;
 		}
 		int top() const
 		{
@@ -90,22 +91,22 @@ namespace Standard {
 		}
 		int maxWidth() const
 		{
-			return X(Num - 1) + Margin.right();
+			return X(num_ - 1) + Margin.right();
 		}
 		int x(size_t i) const
 		{
-			Q_ASSERT(i < Num);
+			Q_ASSERT(i < num_);
 			return x_begin[i];
 		}
 		int X(size_t i) const
 		{
-			Q_ASSERT(i < Num);
+			Q_ASSERT(i < num_);
 			return x_end[i];
 		}
 		int caretWidth() const
 		{
 			return 3;
-			//return ByteMargin.left() + charWidth();
+			//return byteMargin_.left() + charWidth();
 		}
 		int caretHeight() const
 		{
@@ -113,7 +114,7 @@ namespace Standard {
 		}
 		int width()
 		{
-			return byteWidth() * Num + Margin.left() + Margin.right();
+			return byteWidth() * num_ + Margin.left() + Margin.right();
 		}
 		int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..N => N + 1 patterns
@@ -165,7 +166,7 @@ namespace Standard {
 
 			int textX() const
 			{
-				return conf.x(pos_) + conf.ByteMargin.left();
+				return conf.x(pos_) + conf.byteMargin_.left();
 			}
 
 			bool isNext() const
@@ -210,7 +211,7 @@ namespace Standard {
 
 			int screenY() const
 			{
-				return pos_ + conf.ByteMargin.top();
+				return pos_ + conf.byteMargin_.top();
 			}
 		};
 

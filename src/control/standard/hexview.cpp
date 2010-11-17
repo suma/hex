@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include "hexview.h"
+#include "../util/util.h"
 #include "../document.h"
 #include "../highlight.h"
 
@@ -13,13 +14,14 @@ namespace Standard {
 ////////////////////////////////////////
 // Config
 HexConfig::HexConfig()
-	: Num(16)
+	: num_(16)
 	, Margin(2, 2, 3, 3)
-	, ByteMargin(3, 0, 2, 0)
-	, Font("Monaco", 17)
+	, byteMargin_(3, 0, 2, 0)
+	, font_("Monaco", 17)
+	, charWidth_(0)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
-	, FontMetrics(Font)
+	, fontMetrics_(font_)
 {
 	// Coloring
 	Colors[Color::Background] = QColor(0xEF,0xEF,0xEF);
@@ -30,30 +32,36 @@ HexConfig::HexConfig()
 	Colors[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
 
 	// Font
-	Font.setFixedPitch(true);
+	font_.setFixedPitch(true);
 
 	update();
 }
 
 void HexConfig::update()
 {
+
+	// get charWidth
+	for (int i = 0; i < 16; i++) {
+		charWidth_ = qMax(charWidth_, fontMetrics_.width(QChar(util::itohex(i))));
+	}
+
 	x_begin.clear();
 	x_end.clear();
 	x_area.clear();
 
 	// Pos
-	x_begin.push_back(Margin.left() + ByteMargin.left());
-	for (size_t i = 1; i < Num; i++) {
+	x_begin.push_back(Margin.left() + byteMargin_.left());
+	for (size_t i = 1; i < num_; i++) {
 		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
 	// Pos of end
-	for (size_t i = 0; i < Num; i++) {
-		x_end.push_back(x_begin[i] + charWidth(2) + ByteMargin.right());
+	for (size_t i = 0; i < num_; i++) {
+		x_end.push_back(x_begin[i] + charWidth(2) + byteMargin_.right());
 	}
 
 	// Area
-	x_area.push_back(Margin.left() + ByteMargin.left());
+	x_area.push_back(Margin.left() + byteMargin_.left());
 	for (size_t i = 1; i < getNumV(); i++) {
 		x_area.push_back(x_area.back() + byteWidth());
 	}
