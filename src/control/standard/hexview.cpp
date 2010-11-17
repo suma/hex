@@ -15,21 +15,22 @@ namespace Standard {
 // Config
 HexConfig::HexConfig()
 	: num_(16)
-	, Margin(2, 2, 3, 3)
+	, margin_(2, 2, 3, 3)
 	, byteMargin_(3, 0, 2, 0)
 	, font_("Monaco", 17)
 	, charWidth_(0)
+	, fontMetrics_(font_)
+
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
-	, fontMetrics_(font_)
 {
 	// Coloring
-	Colors[Color::Background] = QColor(0xEF,0xEF,0xEF);
-	Colors[Color::Text] = QColor(0,0,0);
-	Colors[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
-	Colors[Color::SelText] = QColor(0,0,0);
-	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
-	Colors[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
+	colors_[Color::Background] = QColor(0xEF,0xEF,0xEF);
+	colors_[Color::Text] = QColor(0,0,0);
+	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
+	colors_[Color::SelText] = QColor(0,0,0);
+	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
+	colors_[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
 
 	// Font
 	font_.setFixedPitch(true);
@@ -51,7 +52,7 @@ void HexConfig::update()
 	x_area.clear();
 
 	// Pos
-	x_begin.push_back(Margin.left() + byteMargin_.left());
+	x_begin.push_back(margin_.left() + byteMargin_.left());
 	for (size_t i = 1; i < num_; i++) {
 		x_begin.push_back(x_begin.back() + byteWidth());
 	}
@@ -62,7 +63,7 @@ void HexConfig::update()
 	}
 
 	// Area
-	x_area.push_back(Margin.left() + byteMargin_.left());
+	x_area.push_back(margin_.left() + byteMargin_.left());
 	for (size_t i = 1; i < getNumV(); i++) {
 		x_area.push_back(x_area.back() + byteWidth());
 	}
@@ -76,7 +77,7 @@ int HexConfig::drawableLines(int height) const
 
 int HexConfig::XToPos(int x) const
 {
-	if (x < Margin.left()) {
+	if (x < margin_.left()) {
 		return -1;
 	}
 
@@ -115,7 +116,7 @@ void HexView::resizeEvent(QResizeEvent *rs)
 	QSize size(qMin(rs->size().width(), config_.maxWidth()), rs->size().height());
 	QResizeEvent resize(size, rs->oldSize());
 	View::resizeEvent(&resize);
-	pix_.fill(config_.Colors[Color::Background]);
+	pix_.fill(config_.color(Color::Background));
 	drawView();
 }
 
@@ -131,7 +132,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 
 	if (!document_->length()) {
 		// TODO: draw Empty Background only
-		QBrush brush(config_.Colors[Color::Background]);
+		QBrush brush(config_.color(Color::Background));
 		painter.fillRect(0, 0, width(), height(), brush);
 		painter.end();
 		// Update screen buffer
@@ -183,7 +184,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	// Draw empty area(after end line)
 	if (mode == DRAW_ALL || mode == DRAW_AFTER) {
 		//qDebug("draw empty area DRAW_ALL or DRAW_AFTER");
-		QBrush brush(config_.Colors[Color::Background]);
+		QBrush brush(config_.color(Color::Background));
 		const int y_start = y_top + qMax(0, count_draw_line - 1) * config_.byteHeight();
 		painter.fillRect(0, y_start, width(), height(), brush);
 	}
@@ -195,7 +196,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	document_->get(top, &buff_[0], size);
 
 	// Get selectead area
-	const int x_count_max = (width() - config_.Margin.left()) / config_.byteWidth() + 1;
+	const int x_count_max = (width() - config_.margin().left()) / config_.byteWidth() + 1;
 	drawLines(painter, top, y_top, 0, x_count_max, size);
 
 	// Update screen buffer
@@ -236,9 +237,9 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 		if (x_begin <= *xitr && *xitr < x_end) {
 			// Set color
 			ColorType color = getColorType(selection, docpos++);
-			QBrush brush = QBrush(config_.Colors[color.Background]);
+			QBrush brush = QBrush(config_.color(color.Background));
 			painter.setBackground(brush);
-			painter.setPen(config_.Colors[color.Text]);
+			painter.setPen(config_.color(color.Text));
 
 			// Draw background
 			painter.fillRect(xitr.screenX(), *yitr, config_.byteWidth(), config_.byteHeight(), brush);
@@ -259,7 +260,7 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 
 	// Draw empty area(after end line)
 	if (0 < *xitr && *xitr < x_end && static_cast<uint>(*xitr) < config_.getNum()) {
-		QBrush brush(config_.Colors[Color::Background]);
+		QBrush brush(config_.color(Color::Background));
 		painter.fillRect(xitr.screenX(), *yitr, width(), config_.byteHeight(), brush);
 	}
 }
@@ -347,7 +348,7 @@ void HexView::drawCaretLine(const CaretDrawInfo &info)
 	} else {
 		x = config_.x(info.x) + config_.byteMargin().left() + config_.charWidth();
 	}
-	QBrush brush(config_.Colors[Color::CaretBackground]);
+	QBrush brush(config_.color(Color::CaretBackground));
 	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
 }
 
@@ -356,23 +357,23 @@ void HexView::drawCaretBlock(const CaretDrawInfo &info)
 	if (info.caret_middle) {
 		if (cursor_->nibble() || cursor_->hasSelection()) {
 			// Draw block byte
-			QBrush brush(config_.Colors[Color::CaretBackground]);
+			QBrush brush(config_.color(Color::CaretBackground));
 			info.painter.setBackground(brush);
-			info.painter.setPen(config_.Colors[Color::CaretText]);
+			info.painter.setPen(config_.color(Color::CaretText));
 			info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 			info.painter.drawText(config_.x(info.x) + config_.byteMargin().left(), info.y + config_.byteMargin().top(), config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, info.hex);
 		} else {
 			// Draw block lowwer nibble
-			QBrush brush(config_.Colors[Color::CaretBackground]);
+			QBrush brush(config_.color(Color::CaretBackground));
 			info.painter.setBackground(brush);
-			info.painter.setPen(config_.Colors[Color::CaretText]);
+			info.painter.setPen(config_.color(Color::CaretText));
 			info.painter.fillRect(config_.x(info.x) + config_.byteMargin().left() + config_.charWidth(), info.y, config_.charWidth() + config_.byteMargin().right(), config_.byteHeight(), brush);
 			QString low(info.hex[1]);
 			info.painter.drawText(config_.x(info.x) + config_.byteMargin().left() + config_.charWidth(), info.y + config_.byteMargin().top(), config_.charWidth(2), config_.charHeight(), Qt::AlignLeft, low);
 		}
 	} else {
 		// Draw block without data
-		QBrush brush(config_.Colors[Color::CaretBackground]);
+		QBrush brush(config_.color(Color::CaretBackground));
 		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 	}
 }
@@ -387,7 +388,7 @@ void HexView::drawCaretFrame(const CaretDrawInfo &info)
 		width = config_.charWidth() + config_.byteMargin().right() - 1;
 		x = config_.x(info.x) + config_.charWidth() + config_.byteMargin().left();
 	}
-	info.painter.setPen(config_.Colors[Color::CaretBackground]);
+	info.painter.setPen(config_.color(Color::CaretBackground));
 	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
 }
 
@@ -402,7 +403,7 @@ void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
 		x = config_.x(info.x) + config_.byteMargin().left() + config_.charWidth();
 	}
 
-	QBrush brush(config_.Colors[Color::CaretBackground]);
+	QBrush brush(config_.color(Color::CaretBackground));
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
 }
 

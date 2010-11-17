@@ -20,21 +20,22 @@ namespace Standard {
 	{
 	private:
 		uint num_;
+		QRect margin_;
 		QRect byteMargin_;
 		QFont font_;
 		int charWidth_;
-	public:
-		QRect Margin;
-		QColor Colors[Color::ColorCount];
 
-		bool EnableCaret;
-		int CaretBlinkTime;
+		QColor colors_[Color::ColorCount];
 
 	private:
 		QFontMetrics fontMetrics_;
 		std::vector<int> x_begin;	// pos of value
 		std::vector<int> x_end;		// pos of end
 		std::vector<int> x_area;
+
+	public:
+		bool EnableCaret;
+		int CaretBlinkTime;
 	
 	public:
 		HexConfig();
@@ -46,6 +47,18 @@ namespace Standard {
 		uint getNumV() const
 		{
 			return num_ + 1;
+		}
+
+		QColor color(size_t index) const
+		{
+			Q_ASSERT(index < Color::ColorCount);
+			return colors_[index];
+		}
+
+		void setColor(size_t index, QColor color)
+		{
+			Q_ASSERT(index < Color::ColorCount);
+			colors_[index] = color;
 		}
 
 		const QFont &font() const
@@ -75,7 +88,7 @@ namespace Standard {
 		}
 		const QRect &margin() const
 		{
-			return Margin;
+			return margin_;
 		}
 		const QRect &byteMargin() const
 		{
@@ -87,11 +100,11 @@ namespace Standard {
 		}
 		int top() const
 		{
-			return Margin.top();
+			return margin_.top();
 		}
 		int maxWidth() const
 		{
-			return X(num_ - 1) + Margin.right();
+			return X(num_ - 1) + margin_.right();
 		}
 		int x(size_t i) const
 		{
@@ -114,7 +127,7 @@ namespace Standard {
 		}
 		int width()
 		{
-			return byteWidth() * num_ + Margin.left() + Margin.right();
+			return byteWidth() * num_ + margin_.left() + margin_.right();
 		}
 		int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..N => N + 1 patterns
@@ -166,7 +179,7 @@ namespace Standard {
 
 			int textX() const
 			{
-				return conf.x(pos_) + conf.byteMargin_.left();
+				return conf.x(pos_) + conf.byteMargin().left();
 			}
 
 			bool isNext() const

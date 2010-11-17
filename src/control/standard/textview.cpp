@@ -15,24 +15,24 @@ namespace Standard {
 ////////////////////////////////////////
 // Config
 TextConfig::TextConfig()
-	: Num(16)
-	, Margin(2, 2, 3, 3)
-	, Font("Monaco", 17)
-	, ByteMargin(0, 0, 0, 0)
+	: num_(16)
+	, margin_(2, 2, 3, 3)
+	, font_("Monaco", 17)
+	, byteMargin_(0, 0, 0, 0)
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
-	, FontMetrics(Font)
+	, fontMetrics_(font_)
 {
 	// Coloring
-	Colors[Color::Background] = QColor(0xEF,0xDF,0xDF);
-	Colors[Color::Text] = QColor(0,0,0);
-	Colors[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
-	Colors[Color::SelText] = QColor(0,0,0);
-	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
-	Colors[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
+	colors_[Color::Background] = QColor(0xEF,0xDF,0xDF);
+	colors_[Color::Text] = QColor(0,0,0);
+	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
+	colors_[Color::SelText] = QColor(0,0,0);
+	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
+	colors_[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
 
 	// Font
-	Font.setFixedPitch(true);
+	font_.setFixedPitch(true);
 
 	update();
 }
@@ -45,7 +45,7 @@ void TextConfig::update()
 
 	// Pos
 	x_begin.push_back(0);
-	for (size_t i = 1; i < Num; i++) {
+	for (size_t i = 1; i < num_; i++) {
 		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
@@ -57,23 +57,21 @@ void TextConfig::update()
 
 	// Area
 	x_area.push_back(0);
-	for (size_t i = 1; i < Num; i++) {
+	for (size_t i = 1; i < num_; i++) {
 		x_area.push_back(x_area.back() + byteWidth());
 	}
 	x_area.back() += byteWidth();
-
-	//x_area[Num] = x_area[Num-1] + byteWidth();
 }
 
 int TextConfig::drawableLines(int height) const
 {
-	const int y = top() + byteMargin().top();
+	const int y = top() + byteMargin_.top();
 	return (height - y + byteHeight()) / byteHeight();
 }
 
 int TextConfig::XToPos(int x) const
 {
-	if (x < Margin.left()) {
+	if (x < margin_.left()) {
 		return -1;
 	}
 
@@ -116,7 +114,7 @@ void TextView::resizeEvent(QResizeEvent *rs)
 	QSize size(qMin(rs->size().width(), config_.maxWidth()), rs->size().height());
 	QResizeEvent resize(size, rs->oldSize());
 	View::resizeEvent(&resize);
-	pix_.fill(config_.Colors[Color::Background]);
+	pix_.fill(config_.color(Color::Background));
 	drawView();
 }
 
@@ -147,7 +145,7 @@ void TextView::drawView()
 	}
 
 	// Draw empty area(after end line)
-	QBrush brush(config_.Colors[Color::Background]);
+	QBrush brush(config_.color(Color::Background));
 	const int y_start = y_top + qMax(0, count_draw_line - 1) * config_.byteHeight();
 	painter.fillRect(0, y_start, width(), height(), brush);
 
@@ -201,9 +199,9 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			while (i < printableBytes && *xitr + i < config_.getNum()) {
 				// Set color
 				ColorType color = getColorType(selection, docpos);
-				QBrush brush = QBrush(config_.Colors[color.Background]);
+				QBrush brush = QBrush(config_.color(color.Background));
 				letterPainter.setBackground(brush);
-				letterPainter.setPen(config_.Colors[color.Text]);
+				letterPainter.setPen(config_.color(color.Text));
 
 				// Draw background/text
 				letterPainter.fillRect(pix.rect(), brush);
@@ -224,9 +222,9 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 				while (i < printableBytes) {
 					ColorType color = getColorType(selection, docpos);
-					QBrush brush = QBrush(config_.Colors[color.Background]);
+					QBrush brush = QBrush(config_.color(color.Background));
 					painter.setBackground(brush);
-					painter.setPen(config_.Colors[color.Text]);
+					painter.setPen(config_.color(color.Text));
 
 					QString text = QString(QChar('_'));
 
@@ -244,9 +242,9 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 		} else {
 			// Set color
 			ColorType color = getColorType(selection, docpos);
-			QBrush brush = QBrush(config_.Colors[color.Background]);
+			QBrush brush = QBrush(config_.color(color.Background));
 			painter.setBackground(brush);
-			painter.setPen(config_.Colors[color.Text]);
+			painter.setPen(config_.color(color.Text));
 
 			// 印字不可なのでドットを描画
 			QString text = QString(QChar('.'));
@@ -269,7 +267,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 	// Draw empty area(after end line)
 	if (0 < *xitr && *xitr < config_.getNum()) {
-		QBrush brush(config_.Colors[Color::Background]);
+		QBrush brush(config_.color(Color::Background));
 		painter.fillRect(xitr.textX(), yitr.screenY(), width(), config_.byteHeight(), brush);
 	}
 }
@@ -355,21 +353,21 @@ void TextView::drawCaretLine(const CaretDrawInfo &info)
 	} else {
 		x = config_.x(info.x) + config_.charWidth();
 	}
-	QBrush brush(config_.Colors[Color::CaretBackground]);
+	QBrush brush(config_.color(Color::CaretBackground));
 	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
 }
 
 void TextView::drawCaretBlock(const CaretDrawInfo &info)
 {
 	if (info.caret_middle) {
-		QBrush brush(config_.Colors[Color::CaretBackground]);
+		QBrush brush(config_.color(Color::CaretBackground));
 		info.painter.setBackground(brush);
-		info.painter.setPen(config_.Colors[Color::CaretText]);
+		info.painter.setPen(config_.color(Color::CaretText));
 		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 		// TODO: 本当はここで文字描画
 	} else {
 		// Draw block without data
-		QBrush brush(config_.Colors[Color::CaretBackground]);
+		QBrush brush(config_.color(Color::CaretBackground));
 		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 	}
 }
@@ -379,7 +377,7 @@ void TextView::drawCaretFrame(const CaretDrawInfo &info)
 	int width = config_.byteWidth() - 1;
 	int x = config_.x(info.x);
 
-	info.painter.setPen(config_.Colors[Color::CaretBackground]);
+	info.painter.setPen(config_.color(Color::CaretBackground));
 	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
 }
 
@@ -388,7 +386,7 @@ void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
 	int width = config_.byteWidth() - 1;
 	int x = config_.x(info.x);
 
-	QBrush brush(config_.Colors[Color::CaretBackground]);
+	QBrush brush(config_.color(Color::CaretBackground));
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
 }
 
