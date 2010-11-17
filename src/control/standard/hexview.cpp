@@ -42,7 +42,8 @@ void HexConfig::update()
 
 	// get charWidth
 	for (int i = 0; i < 16; i++) {
-		charWidth_ = qMax(charWidth_, fontMetrics_.width(QChar(util::itohex(i))));
+		QChar ch(util::itohex(i));
+		charWidth_ = qMax(charWidth_, fontMetrics_.boundingRect(ch).width());
 	}
 
 	x_begin.clear();
