@@ -321,6 +321,10 @@ namespace Standard {
 		void insertData(quint64 pos, uchar character);
 		void removeData(quint64 pos, quint64 len);
 
+	private slots:
+		void inserted(quint64 pos, quint64 len);
+		void removed(quint64 pos, quint64 len);
+
 	private:
 		// Main components
 		HexConfig config_;

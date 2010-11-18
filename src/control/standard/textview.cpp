@@ -98,6 +98,11 @@ TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
 
+
+	// Add document event
+	connect(document_, SIGNAL(inserted(quint64, quint64)), this, SLOT(inserted(quint64, quint64)));
+	connect(document_, SIGNAL(removed(quint64, quint64)), this, SLOT(removed(quint64, quint64)));
+
 	// for Qt4.6?
 	//setEnabled(true);
 	//setMouseTracking(true);
@@ -597,7 +602,7 @@ void TextView::changeData(quint64 pos, uchar character)
 	document_->remove(pos, 1);
 	document_->insert(pos, &character, 1);
 	// TODO: implement Redraw Event
-	drawView();
+	//drawView();
 }
 
 void TextView::insertData(quint64 pos, uchar character)
@@ -605,16 +610,30 @@ void TextView::insertData(quint64 pos, uchar character)
 	document_->insert(pos, &character, 1);
 	// TODO: implement Redraw Event
 	//drawCaret();
-	drawView();
+	//drawView();
 }
 
 void TextView::removeData(quint64 pos, quint64 len)
 {
 	document_->remove(pos, len);
 	// TODO: implement Redraw Event
+	//drawView();
+}
+
+void TextView::inserted(quint64 pos, quint64 len)
+{
+	// TODO: lazy redraw
+	//drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
 	drawView();
 }
 
+
+void TextView::removed(quint64 pos, quint64 len)
+{
+	// TODO: lazy redraw
+	//drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+	drawView();
+}
 
 
 

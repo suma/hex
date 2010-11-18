@@ -103,6 +103,10 @@ HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
 
+	// Add document event
+	connect(document_, SIGNAL(inserted(quint64, quint64)), this, SLOT(inserted(quint64, quint64)));
+	connect(document_, SIGNAL(removed(quint64, quint64)), this, SLOT(removed(quint64, quint64)));
+
 	//setMouseTracking(true);
 }
 
@@ -690,25 +694,33 @@ void HexView::changeData(quint64 pos, uchar character, bool highNibble)
 	cursor_->inverseNibble();
 	// TODO: implement Redraw Event
 	//drawView(DRAW_LINE, pos / config_.getNum() - cursor_->Top);
-	drawView();
+	//drawView();
 }
 
 void HexView::insertData(quint64 pos, uchar character)
 {
 	document_->insert(pos, &character, 1);
-	// TODO: implement Redraw Event
-	//drawViewAfter(pos);
-	//drawCaret();
-	drawView();
 }
 
 void HexView::removeData(quint64 pos, quint64 len)
 {
 	document_->remove(pos, len);
-	// TODO: implement Redraw Event
-	//drawViewAfter(pos);
-	drawView();
 }
+
+
+void HexView::inserted(quint64 pos, quint64 len)
+{
+	// TODO: lazy redraw
+	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+}
+
+
+void HexView::removed(quint64 pos, quint64 len)
+{
+	// TODO: lazy redraw
+	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+}
+
 
 
 
