@@ -92,7 +92,7 @@ int TextConfig::YToLine(int y) const
 TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor_(new Cursor(doc))
-	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->Top))
+	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {
 	// Enable keyboard input
@@ -139,11 +139,11 @@ void TextView::drawView()
 	int count_draw_line = config_.drawableLines(height());
 
 	// Get top position of view
-	const quint64 top = cursor_->Top * config_.getNum();
+	const quint64 top = cursor_->top() * config_.getNum();
 	const uint size = qMin(document_->length() - top, (quint64)config_.getNum() * count_draw_line);
 
-	qDebug("refresh event line:%llu end:%d", cursor_->Top, count_draw_line);
-	//qDebug(" pos:%llu, anchor:%llu", cursor_->Position, cursor_->PositionAnchor);
+	qDebug("refresh event line:%llu end:%d", cursor_->top(), count_draw_line);
+	//qDebug(" pos:%llu, anchor:%llu", cursor_->position(), cursor_->anchor());
 
 	if (size == 0) {
 		return;
@@ -289,7 +289,7 @@ inline void TextView::drawText(QPainter &painter, const QString &str, int x, int
 
 void TextView::drawCaret(bool visible)
 {
-	drawCaret(visible, cursor_->Position);
+	drawCaret(visible, cursor_->position());
 }
 
 void TextView::drawCaret(bool visible, quint64 pos)
@@ -300,8 +300,8 @@ void TextView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Redraw line
-	const quint64 line = cursor_->Position / config_.getNum();
-	if (cursor_->Top <= line && line - cursor_->Top < static_cast<uint>(config_.drawableLines(height()))) {
+	const quint64 line = cursor_->position() / config_.getNum();
+	if (cursor_->top() <= line && line - cursor_->top() < static_cast<uint>(config_.drawableLines(height()))) {
 		// 1行だけ再描画したい
 		drawView();
 	}
@@ -319,7 +319,7 @@ void TextView::drawCaret(bool visible, quint64 pos)
 
 	// Get caret coordinates
 	const int x = pos % config_.getNum();
-	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->Top);
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
 
 	// Draw shape
 	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
@@ -438,7 +438,7 @@ quint64 TextView::posAt(const QPoint &pos) const
 		x = y = 0;
 	}
 
-	return qMin((cursor_->Top + y) * config_.getNum() + x, document_->length());
+	return qMin((cursor_->top() + y) * config_.getNum() + x, document_->length());
 }
 
 // Enable caret blink
@@ -510,14 +510,14 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Backspace:
 		if (cursor_->hasSelection()) {
-			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
-			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
+			const quint64 pos = qMin(cursor_->position(), cursor_->anchor());
+			const quint64 len = qMax(cursor_->position(), cursor_->anchor()) - pos;
 			removeData(pos, len);
 			moveRelativePosition(pos, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
-		} else if (0 < cursor_->Position) {
-			removeData(cursor_->Position - 1, 1);
+		} else if (0 < cursor_->position()) {
+			removeData(cursor_->position() - 1, 1);
 			moveRelativePosition(-1, false, false);
 		}
 		break;
@@ -527,14 +527,14 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Delete:
 		if (cursor_->hasSelection()) {
-			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
-			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
+			const quint64 pos = qMin(cursor_->position(), cursor_->anchor());
+			const quint64 len = qMax(cursor_->position(), cursor_->anchor()) - pos;
 			removeData(pos, len);
 			moveRelativePosition(0, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
-		} else if (cursor_->Position < document_->length()) {
-			removeData(cursor_->Position, 1);
+		} else if (cursor_->position() < document_->length()) {
+			removeData(cursor_->position(), 1);
 			moveRelativePosition(0, false, false);
 		}
 		break;
@@ -553,23 +553,23 @@ void TextView::movePosition(quint64 pos, bool sel, bool holdViewPos)
 {
 	Q_ASSERT(pos <= document_->length());
 	
-	const quint64 oldTop = cursor_->Top;
-	const quint64 oldPos = cursor_->Position;
-	const quint64 oldPosAnchor = cursor_->PositionAnchor;
+	const quint64 oldTop = cursor_->top();
+	const quint64 oldPos = cursor_->position();
+	const quint64 oldPosAnchor = cursor_->anchor();
 	const bool oldSelection = cursor_->hasSelection();
 
 	// movePosition
 	cursor_->movePosition(this, pos, sel, holdViewPos);
 
 	// Redraw view
-	if (cursor_->Top == oldTop) {
+	if (cursor_->top() == oldTop) {
 		if (!sel && oldSelection) {
 			// Clear selection
 			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
-		} else if (cursor_->Position != oldPos) {
+		} else if (cursor_->position() != oldPos) {
 			// Draw/Redraw selection
-			const quint64 begin = qMin(qMin(cursor_->Position, cursor_->PositionAnchor), oldPos);
-			const quint64 end   = qMax(qMax(cursor_->Position, cursor_->PositionAnchor), oldPos);
+			const quint64 begin = qMin(qMin(cursor_->position(), cursor_->anchor()), oldPos);
+			const quint64 end   = qMax(qMax(cursor_->position(), cursor_->anchor()), oldPos);
 			redrawSelection(begin, end);
 		}
 		// TODO: Clear old caret only

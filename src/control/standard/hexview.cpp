@@ -1,4 +1,3 @@
-
 #include <QtGui>
 #include <algorithm>
 #include <vector>
@@ -127,7 +126,7 @@ void HexView::resizeEvent(QResizeEvent *rs)
 void HexView::drawView(DrawMode mode, int line_start, int end)
 {
 	//qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
-	//qDebug(" pos:%llu, anchor:%llu", cursor_->Position, cursor_->PositionAnchor);
+	//qDebug(" pos:%llu, anchor:%llu", cursor_->position(), cursor_->anchor());
 
 	// FIXME: refactoring refresh event
 	QPainter painter;
@@ -179,7 +178,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	}
 
 	// Get top position of view
-	const quint64 top = (cursor_->Top + line_start) * config_.getNum();
+	const quint64 top = (cursor_->top() + line_start) * config_.getNum();
 	const uint size = qMin(document_->length() - top, (quint64)config_.getNum() * count_draw_line);
 	if (size == 0) {
 		return;
@@ -276,7 +275,7 @@ inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int 
 
 void HexView::drawCaret(bool visible)
 {
-	drawCaret(visible, cursor_->Position);
+	drawCaret(visible, cursor_->position());
 }
 
 void HexView::drawCaret(bool visible, quint64 pos)
@@ -287,9 +286,9 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Redraw line
-	const quint64 line = cursor_->Position / config_.getNum();
-	if (cursor_->Top <= line && line - cursor_->Top < static_cast<uint>(config_.drawableLines(height()))) {
-		drawView(DRAW_LINE, line - cursor_->Top);
+	const quint64 line = cursor_->position() / config_.getNum();
+	if (cursor_->top() <= line && line - cursor_->top() < static_cast<uint>(config_.drawableLines(height()))) {
+		drawView(DRAW_LINE, line - cursor_->top());
 	}
 
 	// Shape
@@ -305,7 +304,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 
 	// Get caret coordinates
 	const int x = pos % config_.getNum();
-	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->Top);
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
 
 	// Draw shape
 	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
@@ -470,7 +469,7 @@ quint64 HexView::posAt(const QPoint &pos) const
 		x = y = 0;
 	}
 
-	return qMin((cursor_->Top + y) * config_.getNum() + x, document_->length());
+	return qMin((cursor_->top() + y) * config_.getNum() + x, document_->length());
 }
 
 // Enable caret blink
@@ -550,15 +549,15 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Backspace:
 		if (cursor_->hasSelection()) {
-			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
-			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
+			const quint64 pos = qMin(cursor_->position(), cursor_->anchor());
+			const quint64 len = qMax(cursor_->position(), cursor_->anchor()) - pos;
 			removeData(pos, len);
 			moveRelativePosition(pos, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
 			cursor_->setNibble(true);
-		} else if (0 < cursor_->Position) {
-			removeData(cursor_->Position - 1, 1);
+		} else if (0 < cursor_->position()) {
+			removeData(cursor_->position() - 1, 1);
 			moveRelativePosition(-1, false, false);
 			cursor_->setNibble(true);
 		}
@@ -569,15 +568,15 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Delete:
 		if (cursor_->hasSelection()) {
-			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
-			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
+			const quint64 pos = qMin(cursor_->position(), cursor_->anchor());
+			const quint64 len = qMax(cursor_->position(), cursor_->anchor()) - pos;
 			removeData(pos, len);
 			moveRelativePosition(0, false, false);
 			// TODO: drawView [pos. pos+len]
 			drawView();
 			cursor_->setNibble(true);
-		} else if (cursor_->Position < document_->length()) {
-			removeData(cursor_->Position, 1);
+		} else if (cursor_->position() < document_->length()) {
+			removeData(cursor_->position(), 1);
 			moveRelativePosition(0, false, false);
 			cursor_->setNibble(true);
 		}
@@ -600,14 +599,14 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 				//if (cursor_->Insert && cursor_->HighNibble) {
 				if (false) {
 					// Inserte mode
-					quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
+					quint64 pos = qMin(cursor_->position(), cursor_->anchor());
 
 					// Replace data if selected
 					if (cursor_->hasSelection()) {
 						// TODO: Support Undo
 						// Off redrawing temporary for redrawing on insertion
-						document_->remove(pos, qMax(cursor_->Position, cursor_->PositionAnchor) - pos);
-						cursor_->Position = pos;
+						document_->remove(pos, qMax(cursor_->position(), cursor_->anchor()) - pos);
+						cursor_->setPosition(pos);
 						cursor_->resetAnchor();
 						// TODO: remove and refresh collectly
 						//cursor_->moveRelativePosition(0, false, false);
@@ -616,17 +615,17 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 					insertData(pos, nibble << 4);
 					cursor_->setNibble(false);
 					drawCaret();
-				} else if (cursor_->Position < document_->length()) {
+				} else if (cursor_->position() < document_->length()) {
 					// Ovewrite mode
 					uchar currentCharacter;
-					document_->get(cursor_->Position, &currentCharacter, 1);
+					document_->get(cursor_->position(), &currentCharacter, 1);
 					if (cursor_->nibble()) {
-						changeData(cursor_->Position, (nibble << 4) + (currentCharacter & 0x0f), true);
+						changeData(cursor_->position(), (nibble << 4) + (currentCharacter & 0x0f), true);
 						cursor_->setNibble(false);
 						drawCaret();
 					} else {
 						moveRelativePosition(1, false, false);
-						changeData(cursor_->Position - 1, nibble + (currentCharacter & 0xf0));
+						changeData(cursor_->position() - 1, nibble + (currentCharacter & 0xf0));
 					}
 				} else {
 					break;
@@ -641,23 +640,23 @@ void HexView::movePosition(quint64 pos, bool sel, bool holdViewPos)
 {
 	Q_ASSERT(pos <= document_->length());
 	
-	const quint64 oldTop = cursor_->Top;
-	const quint64 oldPos = cursor_->Position;
-	const quint64 oldPosAnchor = cursor_->PositionAnchor;
+	const quint64 oldTop = cursor_->top();
+	const quint64 oldPos = cursor_->position();
+	const quint64 oldPosAnchor = cursor_->anchor();
 	const bool oldSelection = cursor_->hasSelection();
 
 	// movePosition
 	cursor_->movePosition(this, pos, sel, holdViewPos);
 
 	// Redraw view
-	if (cursor_->Top == oldTop) {
+	if (cursor_->top() == oldTop) {
 		if (!sel && oldSelection) {
 			// Clear selection
 			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
-		} else if (cursor_->Position != oldPos) {
+		} else if (cursor_->position() != oldPos) {
 			// Draw/Redraw selection
-			const quint64 begin = qMin(qMin(cursor_->Position, cursor_->PositionAnchor), oldPos);
-			const quint64 end   = qMax(qMax(cursor_->Position, cursor_->PositionAnchor), oldPos);
+			const quint64 begin = qMin(qMin(cursor_->position(), cursor_->anchor()), oldPos);
+			const quint64 end   = qMax(qMax(cursor_->position(), cursor_->anchor()), oldPos);
 			redrawSelection(begin, end);
 		}
 		// TODO: Clear old caret only
@@ -681,8 +680,8 @@ void HexView::redrawSelection(quint64 begin, quint64 end)
 	begin /= config_.getNum();
 	end   /= config_.getNum();
 
-	const int beginLine = qMax(begin, cursor_->Top) - cursor_->Top;
-	const int endLine   = qMax(end, cursor_->Top) - cursor_->Top;
+	const int beginLine = qMax(begin, cursor_->top()) - cursor_->top();
+	const int endLine   = qMax(end, cursor_->top()) - cursor_->top();
 
 	//qDebug("redrawSelection %d, %d, Top:%llu", beginLine, endLine, Top);
 	drawView(DRAW_RANGE, beginLine, endLine + 1);
@@ -711,14 +710,14 @@ void HexView::removeData(quint64 pos, quint64 len)
 void HexView::inserted(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
-	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_->top());
 }
 
 
 void HexView::removed(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
-	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_->top());
 }
 
 
