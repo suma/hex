@@ -8,23 +8,21 @@
 InsertCommand::InsertCommand(Document *doc, quint64 pos, const uchar *data, uint length, QUndoCommand *parent)
 	: QUndoCommand(parent)
 	, document_(doc)
-	, position_(pos)
-	, length_(length)
+	, fragment_(Document::DOCTYPE_BUFFER, doc->buffer().size(), static_cast<quint64>(length))
 
 {
 	Document::Buffer &buffer = doc->buffer();
-	offset_ = buffer.size();
 	buffer.insert(buffer.end(), data, data + length);
 }
 
 void InsertCommand::undo()
 {
-	document_->remove(position_, length_);
+	document_->remove(position_, fragment_.length());
 }
 
 void InsertCommand::redo()
 {
-	document_->insert(position_, offset_, length_);
+	document_->insert(position_, fragment_);
 }
 
 

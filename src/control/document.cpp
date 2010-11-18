@@ -5,11 +5,6 @@
 #include "document.h"
 #include "document_i.h"
 
-enum {
-	DOCTYPE_BUFFER = 0,
-	DOCTYPE_ORIGINAL = 1,
-};
-
 const int Document::DEFAULT_BUFFER_SIZE = 0x100000;
 
 class EmptyOriginal : public DocumentOriginal
@@ -271,17 +266,14 @@ void Document::insert(quint64 pos, const uchar *buf, uint len)
 
 	const quint64 bufPos = buffer_.size();
 	buffer_.insert(buffer_.end(), buf, buf + len);
-	insert(pos, bufPos, len);
-}
-
-void Document::insert(quint64 pos, size_t offset, uint len)
-{
-	impl_->insert_data(pos, offset, len, DOCTYPE_BUFFER);
+	impl_->insert_data(pos, bufPos, len, DOCTYPE_BUFFER);
+	emit inserted(pos, static_cast<quint64>(len));
 }
 
 void Document::insert(quint64 pos, DocumentFragment fragment)
 {
 	impl_->insert_data(pos, fragment.position(), fragment.length(), fragment.type());
+	emit inserted(pos, fragment.length());
 }
 
 void Document::remove(quint64 pos, quint64 len)
@@ -290,6 +282,7 @@ void Document::remove(quint64 pos, quint64 len)
 	Q_ASSERT(len <= length());
 	Q_ASSERT(pos <= length() - len);
 	impl_->remove_data(pos, len);
+	emit removed(pos, len);
 }
 
 Document::Buffer &Document::buffer()

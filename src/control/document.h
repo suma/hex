@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <QObject>
 #include <QString>
 #include <vector>
 
@@ -45,10 +46,18 @@ public:
 	}
 };
 
-class Document
+class Document : public QObject
 {
+	Q_OBJECT
+
 public:
 	typedef std::vector<uchar> Buffer;
+
+	enum {
+		DOCTYPE_BUFFER = 0,
+		DOCTYPE_ORIGINAL = 1,
+	};
+
 
 	// 空で作成
 	Document();
@@ -79,10 +88,6 @@ public:
 
 	//-- mutable methods
 	void insert(quint64 pos, const uchar *buf, uint len);
-	void insert(quint64 pos, size_t offset, uint len);
-	void insert(quint64 pos, DocumentFragment fragment);
-	void remove(quint64 pos, quint64 len);
-
 	// file method
 	//  save, saveAs, ....
 	// 
@@ -90,6 +95,15 @@ public:
 
 	QUndoStack *undoStack() const;
 	Buffer &buffer();
+
+public slots:
+	//-- mutable methods
+	void insert(quint64 pos, DocumentFragment fragment);
+	void remove(quint64 pos, quint64 len);
+
+signals:
+	void inserted(quint64 pos, quint64 len);
+	void removed(quint64 pos, quint64 len);
 
 public:
 	const static int DEFAULT_BUFFER_SIZE;

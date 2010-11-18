@@ -16,8 +16,7 @@ public:
 private:
 	Document *document_;
 	quint64 position_;
-	size_t offset_;
-	uint length_;
+	DocumentFragment fragment_;
 };
 
 
