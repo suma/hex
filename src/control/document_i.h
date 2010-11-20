@@ -26,7 +26,7 @@ public:
 	DocumentImpl();
 	~DocumentImpl();
 
-	uint insert_data(ulint pos, ulint bufPos, uint length, quint8 type);
+	uint insert_data(ulint pos, ulint bufPos, ulint length, quint8 type);
 	uint remove_data(ulint pos, ulint length);
 	bool split(ulint pos);
 	bool unite(uint f);

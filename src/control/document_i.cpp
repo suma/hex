@@ -47,7 +47,7 @@ DocumentImpl::~DocumentImpl()
 {
 }
 
-uint DocumentImpl::insert_data(ulint pos, ulint bufPos, uint len, quint8 type)
+uint DocumentImpl::insert_data(ulint pos, ulint bufPos, ulint len, quint8 type)
 {
     split(pos);
     uint x = documents_.insert_single(pos, len);
