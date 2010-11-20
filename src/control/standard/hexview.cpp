@@ -94,10 +94,11 @@ int HexConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-HexView::HexView(QWidget *parent, Document *doc, Highlight *hi)
+HexView::HexView(QWidget *parent, ::Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)
+	, keyboard_(new Keyboard(doc, this))
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -500,140 +501,8 @@ void HexView::timerEvent(QTimerEvent *ev)
 
 void HexView::keyPressEvent(QKeyEvent *ev)
 {
-	if (ev == QKeySequence::SelectAll) {
-		//ev->accept();
-		//all
-		return;
-	} else if (ev == QKeySequence::Undo) {
-		return;
-	} else if (ev == QKeySequence::Redo) {
-		return;
-	}
-
-
-	// TODO: support keyboard remap
-
-	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
-	switch (ev->key()) {
-	case Qt::Key_Home:
-		cursor_->setNibble(true);
-		movePosition(0, keepAnchor, false);
-		break;
-	case Qt::Key_End:
-		cursor_->setNibble(true);
-		movePosition(document_->length(), keepAnchor, false);
-		break;
-	case Qt::Key_Left:
-		cursor_->setNibble(true);
-		moveRelativePosition(-1, keepAnchor, false);
-		break;
-	case Qt::Key_Right:
-		cursor_->setNibble(true);
-		moveRelativePosition(1, keepAnchor, false);
-		break;
-	case Qt::Key_Up:
-		cursor_->setNibble(true);
-		moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
-		break;
-	case Qt::Key_Down:
-		cursor_->setNibble(true);
-		moveRelativePosition((qint64)config_.getNum(), keepAnchor, false);
-		break;
-	case Qt::Key_PageUp:
-		cursor_->setNibble(true);
-		moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
-		break;
-	case Qt::Key_PageDown:
-		cursor_->setNibble(true);
-		moveRelativePosition((qint64)config_.getNum() * 15, keepAnchor, true);
-		break;
-	case Qt::Key_Backspace:
-		if (cursor_->hasSelection()) {
-			const quint64 pos = qMin(cursor_->position(), cursor_->anchor());
-			const quint64 len = qMax(cursor_->position(), cursor_->anchor()) - pos;
-			removeData(pos, len);
-			moveRelativePosition(pos, false, false);
-			// TODO: drawView [pos. pos+len]
-			drawView();
-			cursor_->setNibble(true);
-		} else if (0 < cursor_->position()) {
-			removeData(cursor_->position() - 1, 1);
-			moveRelativePosition(-1, false, false);
-			cursor_->setNibble(true);
-		}
-		break;
-	case Qt::Key_Insert:
-		qDebug("key insert");
-		cursor_->reverseInsert();
-		break;
-	case Qt::Key_Delete:
-		if (cursor_->hasSelection()) {
-			const quint64 pos = qMin(cursor_->position(), cursor_->anchor());
-			const quint64 len = qMax(cursor_->position(), cursor_->anchor()) - pos;
-			removeData(pos, len);
-			moveRelativePosition(0, false, false);
-			// TODO: drawView [pos. pos+len]
-			drawView();
-			cursor_->setNibble(true);
-		} else if (cursor_->position() < document_->length()) {
-			removeData(cursor_->position(), 1);
-			moveRelativePosition(0, false, false);
-			cursor_->setNibble(true);
-		}
-		break;
-	default:
-		{
-			// copy from QtCreator
-			QString text = ev->text();
-			for (int i = 0; i < text.length(); i++) {
-				QChar c = text.at(i).toLower();
-				int nibble = -1;
-				if (c.unicode() >= 'a' && c.unicode() <= 'f') {
-					nibble = c.unicode() - 'a' + 10;
-				} else if (c.unicode() >= '0' && c.unicode() <= '9') {
-					nibble = c.unicode() - '0';
-				}
-				if (nibble < 0) {
-					continue;
-				}
-				//if (cursor_->Insert && cursor_->HighNibble) {
-				if (false) {
-					// Inserte mode
-					quint64 pos = qMin(cursor_->position(), cursor_->anchor());
-
-					// Replace data if selected
-					if (cursor_->hasSelection()) {
-						// TODO: Support Undo
-						// Off redrawing temporary for redrawing on insertion
-						document_->remove(pos, qMax(cursor_->position(), cursor_->anchor()) - pos);
-						cursor_->setPosition(pos);
-						cursor_->resetAnchor();
-						// TODO: remove and refresh collectly
-						//cursor_->moveRelativePosition(0, false, false);
-					}
-
-					insertData(pos, nibble << 4);
-					cursor_->setNibble(false);
-					drawCaret();
-				} else if (cursor_->position() < document_->length()) {
-					// Ovewrite mode
-					uchar currentCharacter;
-					document_->get(cursor_->position(), &currentCharacter, 1);
-					if (cursor_->nibble()) {
-						changeData(cursor_->position(), (nibble << 4) + (currentCharacter & 0x0f), true);
-						cursor_->setNibble(false);
-						drawCaret();
-					} else {
-						moveRelativePosition(1, false, false);
-						changeData(cursor_->position() - 1, nibble + (currentCharacter & 0xf0));
-					}
-				} else {
-					break;
-				}
-			}
-		}
-		return;
-	}
+	qDebug() << "keyPress" << ev->text();
+	keyboard_->keyPressEvent(ev);
 }
 
 void HexView::movePosition(quint64 pos, bool sel, bool holdViewPos)
@@ -686,38 +555,20 @@ void HexView::redrawSelection(quint64 begin, quint64 end)
 	//qDebug("redrawSelection %d, %d, Top:%llu", beginLine, endLine, Top);
 	drawView(DRAW_RANGE, beginLine, endLine + 1);
 }
-void HexView::changeData(quint64 pos, uchar character, bool highNibble)
-{
-	document_->remove(pos, 1);
-	document_->insert(pos, &character, 1);
-	cursor_->inverseNibble();
-	// TODO: implement Redraw Event
-	//drawView(DRAW_LINE, pos / config_.getNum() - cursor_->Top);
-	//drawView();
-}
-
-void HexView::insertData(quint64 pos, uchar character)
-{
-	document_->insert(pos, &character, 1);
-}
-
-void HexView::removeData(quint64 pos, quint64 len)
-{
-	document_->remove(pos, len);
-}
-
 
 void HexView::inserted(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
-	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_->top());
+	//drawViewAfter(pos);
+	drawView();
 }
 
 
 void HexView::removed(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
-	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_->top());
+	//drawViewAfter(pos);
+	drawView();
 }
 
 

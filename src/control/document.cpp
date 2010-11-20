@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QUndoStack>
 #include "document.h"
-#include "document_i.h"
 
 const int Document::DEFAULT_BUFFER_SIZE = 0x100000;
 
@@ -156,7 +155,6 @@ Document::Document()
 	, original_(new EmptyOriginal())
 	, file_(NULL)
 {
-	buffer_.resize(1024 * 256);
 }
 
 Document::Document(QFile *file)
@@ -172,7 +170,7 @@ Document::Document(QFile *file, uint buffer_size)
 	: impl_(new DocumentImpl())
 	, original_(new FileOriginal(file, buffer_size))
 	, file_(file)
-	, undo_stack_(new QUndoStack())
+	, undo_stack_(new QUndoStack(this))
 {
 	impl_->insert_data(0, 0, file->size(), DOCTYPE_ORIGINAL);
 }
@@ -195,46 +193,6 @@ void Document::get(quint64 pos, uchar *buf, uint len) const
 	get(pos, len, FragmentCopier(this, buf));
 }
 
-template <class T>
-T Document::get(quint64 pos, quint64 len, T result) const
-{
-	Q_ASSERT(pos <= length());
-	Q_ASSERT(len <= length());
-	Q_ASSERT(pos <= length() - len);
-
-	uint x = impl_->documents_.findNode(pos);
-
-	Q_ASSERT(x != 0);
-	const quint64 diff = pos - impl_->documents_.position(x);
-	if (diff) {
-		const quint64 fragmentSize = impl_->documents_.size(x) - diff;
-		DocumentData *X = impl_->documents_.fragment(x);
-		if (fragmentSize < len) {
-			*result =  DocumentFragment(X->type, X->bufferPosition + diff, fragmentSize);
-			
-			++result;
-			len -= fragmentSize;
-			x = impl_->documents_.next(x);
-		} else {
-			*result = DocumentFragment(X->type, X->bufferPosition + diff, len);
-			return result;
-		}
-	}
-
-	Q_ASSERT(x != 0);
-	while (0 < len) {
-		const quint64 fragmentSize = impl_->documents_.size(x);
-		const uint copy_size = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
-		const DocumentData *X = impl_->documents_.fragment(x);
-		*result = DocumentFragment(X->type, X->bufferPosition, copy_size);
-		++result;
-
-		len -= copy_size;
-		x = impl_->documents_.next(x);
-	}
-
-	return result;
-}
 
 void Document::copy(uint type, quint64 pos, quint64 len, uchar *buf) const
 {

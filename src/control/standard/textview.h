@@ -259,10 +259,14 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		TextView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
+		TextView(QWidget *parent = NULL, ::Document *doc = NULL, Highlight *hi = NULL);
 		~TextView();
 
-		TextConfig & getConfig() { return config_; }
+		TextConfig &config()
+		{
+			return config_;
+		}
+
 		void setCaretBlink(bool enable);
 
 

@@ -90,7 +90,7 @@ int TextConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
+TextView::TextView(QWidget *parent, ::Document *doc, Highlight *hi)
 	: ::View(parent, doc, hi)
 	, cursor_(new Cursor(doc))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))

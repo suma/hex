@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <vector>
+#include "document_i.h"
 
 class DocumentImpl;
 class QFile;
@@ -83,7 +84,46 @@ public:
 	void get(quint64 pos, uchar *buf, uint len) const;
 
 	// イテレータの先へDocumentFragmentをコピーする
-	template <class T> T get(quint64 pos, quint64 len, T t) const;
+	template <class T>
+	T get(quint64 pos, quint64 len, T result) const
+	{
+		Q_ASSERT(pos <= length());
+		Q_ASSERT(len <= length());
+		Q_ASSERT(pos <= length() - len);
+
+		uint x = impl_->documents_.findNode(pos);
+
+		Q_ASSERT(x != 0);
+		const quint64 diff = pos - impl_->documents_.position(x);
+		if (diff) {
+			const quint64 fragmentSize = impl_->documents_.size(x) - diff;
+			DocumentData *X = impl_->documents_.fragment(x);
+			if (fragmentSize < len) {
+				*result =  DocumentFragment(X->type, X->bufferPosition + diff, fragmentSize);
+				
+				++result;
+				len -= fragmentSize;
+				x = impl_->documents_.next(x);
+			} else {
+				*result = DocumentFragment(X->type, X->bufferPosition + diff, len);
+				return result;
+			}
+		}
+
+		Q_ASSERT(x != 0);
+		while (0 < len) {
+			const quint64 fragmentSize = impl_->documents_.size(x);
+			const uint copy_size = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
+			const DocumentData *X = impl_->documents_.fragment(x);
+			*result = DocumentFragment(X->type, X->bufferPosition, copy_size);
+			++result;
+
+			len -= copy_size;
+			x = impl_->documents_.next(x);
+		}
+
+		return result;
+	}
 
 
 	//-- mutable methods

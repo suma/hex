@@ -48,7 +48,7 @@ private:
 public:
 
 	// relative pos from Top
-	uint getPrintableBytes(const Document &document, uint position)
+	uint getPrintableBytes(const ::Document &document, uint position)
 	{
 		uchar data[32];
 		uint len = (uint)qMin((quint64)32, document.length() - position);
@@ -70,7 +70,7 @@ public:
 
 
 
-TextDecodeHelper::TextDecodeHelper(Document &doc, QString textEncoding, quint64 top)
+TextDecodeHelper::TextDecodeHelper(::Document &doc, QString textEncoding, quint64 top)
 	: document_(doc)
 	, textEncoding_(textEncoding)
 	, top_(top)

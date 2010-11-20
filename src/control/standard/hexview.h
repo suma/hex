@@ -7,6 +7,7 @@
 #include "../highlight.h"
 #include "cursor.h"
 #include "caret.h"
+#include "keyboard.h"
 
 namespace Standard {
 	enum DrawMode {
@@ -244,10 +245,19 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
+		HexView(QWidget *parent = NULL, ::Document *doc = NULL, Highlight *hi = NULL);
 		~HexView();
 
-		HexConfig & getConfig() { return config_; }
+		HexConfig &config()
+		{
+			return config_;
+		}
+
+		Cursor &cursor() const
+		{
+			return *cursor_;
+		}
+
 		void setCaretBlink(bool enable);
 
 
@@ -281,9 +291,11 @@ namespace Standard {
 		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
 
+		void redrawSelection(quint64 begin, quint64 end);
+
+	public:
 		void movePosition(quint64 pos, bool sel, bool holdViewPos);
 		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
-		void redrawSelection(quint64 begin, quint64 end);
 
 	public:
 		// TODO change signal
@@ -317,10 +329,6 @@ namespace Standard {
 		void drawCaretBlock(const CaretDrawInfo &);
 		void drawCaretUnderbar(const CaretDrawInfo &);
 
-		void changeData(quint64 pos, uchar character, bool highNibble = false);
-		void insertData(quint64 pos, uchar character);
-		void removeData(quint64 pos, quint64 len);
-
 	private slots:
 		void inserted(quint64 pos, quint64 len);
 		void removed(quint64 pos, quint64 len);
@@ -330,6 +338,7 @@ namespace Standard {
 		HexConfig config_;
 		Cursor *cursor_;
 		Caret caret_;
+		Keyboard *keyboard_;
 	};
 
 }

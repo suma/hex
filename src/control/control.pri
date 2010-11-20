@@ -9,7 +9,7 @@ HEADERS += \
     document.h \
     document_i.h \
     highlight.h \
-    keyboard.h \
+    keyboardhandler.h \
     qfragmentmap_p.h \
     standard.h \
     view.h \
@@ -18,6 +18,7 @@ HEADERS += \
 	standard/cursor.h \
 	standard/cursorutil.h \
     standard/hexview.h \
+    standard/keyboard.h \
 	standard/textdecodehelper.h \
 	standard/textview.h
 
@@ -28,10 +29,12 @@ SOURCES += \
     document.cpp \
     document_i.cpp \
     highlight.cpp \
+    keyboardhandler.cpp \
     view.cpp \
     standard/addressview.cpp \
 	standard/caret.cpp \
     standard/hexview.cpp \
+    standard/keyboard.cpp \
 	standard/textview.cpp \
 	standard/textdecodehelper.cpp
 

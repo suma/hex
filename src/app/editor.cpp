@@ -39,14 +39,14 @@ Editor::Editor()
 
 	resize(900,400);
 	hview_->move(0,0);
-	hview_->resize(hview_->getConfig().width(), 270);
-	qDebug("%d ", hview_->getConfig().width());
+	hview_->resize(hview_->config().width(), 270);
+	qDebug("%d ", hview_->config().width());
 	hview_->show();
 
 	tview_ = new Standard::TextView(this, doc_, high_);
 	tview_->setCaretBlink(true);
-	tview_->move(hview_->getConfig().width() + 20, 0);
-	tview_->resize(tview_->getConfig().width(), 270);
+	tview_->move(hview_->config().width() + 20, 0);
+	tview_->resize(tview_->config().width(), 270);
 	tview_->show();
 
 	////connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)), tview_, SLOT(drawView(DrawMode, int ,int)));
@@ -89,7 +89,7 @@ void Editor::resizeEvent(QResizeEvent *resize)
 		hview_->resize(hview_->width(), height());
 	}
 	if (tview_) {
-		tview_->resize(tview_->getConfig().width(), height());
+		tview_->resize(tview_->config().width(), height());
 	}
 }
 

@@ -13,7 +13,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		AddressView(QWidget *parent = NULL, Document *doc = NULL, Cursor *cur = NULL);
+		AddressView(QWidget *parent = NULL, ::Document *doc = NULL, Cursor *cur = NULL);
 
 	protected:
 		void drawView();

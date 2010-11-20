@@ -13,6 +13,7 @@ InsertCommand::InsertCommand(Document *doc, quint64 pos, const uchar *data, uint
 {
 	Document::Buffer &buffer = doc->buffer();
 	buffer.insert(buffer.end(), data, data + length);
+	qDebug() << "insert fragment" << fragment_.position() << fragment_.length();
 }
 
 void InsertCommand::undo()
