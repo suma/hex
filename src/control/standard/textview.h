@@ -295,6 +295,9 @@ namespace Standard {
 		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
 
+		void inputMethodEvent(QInputMethodEvent *);
+		QVariant inputMethodQuery(Qt::InputMethodQuery query) const;
+
 		void movePosition(quint64 pos, bool sel, bool holdViewPos);
 		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
 		void redrawSelection(quint64 begin, quint64 end);

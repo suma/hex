@@ -6,10 +6,12 @@
 #include <vector>
 #include <deque>
 #include <algorithm>
+#include <iterator>
 #include <stdlib.h>
 
 #include <QApplication>
 #include <QtGlobal>
+#include <QObject>
 
 #include <QString>
 #include <QMap>
@@ -18,5 +20,8 @@
 #include <QWidget>
 #include <QFont>
 #include <QFontMetrics>
+
+#include <QUndoCommand>
+#include <QUndoStack>
 
 #endif

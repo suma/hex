@@ -1,5 +1,6 @@
 
 #include <QtGui>
+#include <QInputContextFactory>
 #include <algorithm>
 #include <vector>
 #include "textview.h"
@@ -106,6 +107,16 @@ TextView::TextView(QWidget *parent, Document *doc, Highlight *hi)
 	// for Qt4.6?
 	//setEnabled(true);
 	//setMouseTracking(true);
+	
+	// Input Method
+	setAttribute(Qt::WA_InputMethodEnabled);
+#ifdef Q_WS_MAC
+	setInputContext(QInputContextFactory::create(QString("mac"), this));
+#endif
+
+#ifdef Q_WS_WIN
+	setInputContext(QInputContextFactory::create(QString("win"), this));
+#endif
 }
 
 TextView::~TextView()
@@ -547,6 +558,16 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 		}
 		return;
 	}
+}
+
+void TextView::inputMethodEvent(QInputMethodEvent *ev)
+{
+	qDebug() << "input method" << ev->commitString();
+	qDebug() << "input method" << ev->preeditString();
+}
+
+QVariant TextView::inputMethodQuery(Qt::InputMethodQuery query) const
+{
 }
 
 void TextView::movePosition(quint64 pos, bool sel, bool holdViewPos)
