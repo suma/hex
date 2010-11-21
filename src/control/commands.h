@@ -44,7 +44,7 @@ public:
 	void redo();
 
 private:
-	DeleteCommand *delete_;
-	InsertCommand *insert_;
+	DeleteCommand delete_;
+	InsertCommand insert_;
 };
 

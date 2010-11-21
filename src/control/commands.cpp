@@ -57,22 +57,22 @@ void DeleteCommand::redo()
 
 ReplaceCommand::ReplaceCommand(Document *doc, quint64 pos, quint64 len, const uchar *data, uint insert_length, QUndoCommand *parent)
 	: QUndoCommand(parent)
-	, delete_(new DeleteCommand(doc, pos, len, parent))
-	, insert_(new InsertCommand(doc, pos, data, insert_length, parent))
+	, delete_(doc, pos, len, parent)
+	, insert_(doc, pos, data, insert_length, parent)
 {
 }
 
 
 void ReplaceCommand::undo()
 {
-	insert_->undo();
-	delete_->undo();
+	insert_.undo();
+	delete_.undo();
 }
 
 void ReplaceCommand::redo()
 {
-	delete_->redo();
-	insert_->redo();
+	delete_.redo();
+	insert_.redo();
 }
 
 
