@@ -29,8 +29,8 @@ namespace Standard {
 			, top_(0)
 			, position_(0)
 			, anchor_(0)
-			, highNibble_(true)
 			, insert_(true)
+			, highNibble_(true)
 		{
 		}
 

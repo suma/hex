@@ -18,11 +18,12 @@ namespace Standard {
 TextConfig::TextConfig()
 	: num_(16)
 	, margin_(2, 2, 3, 3)
-	, font_("Monaco", 17)
 	, byteMargin_(0, 0, 0, 0)
+	, font_("Monaco", 17)
+	, fontMetrics_(font_)
+	
 	, EnableCaret(true)
 	, CaretBlinkTime(500)
-	, fontMetrics_(font_)
 {
 	// Coloring
 	colors_[Color::Background] = QColor(0xEF,0xDF,0xDF);
