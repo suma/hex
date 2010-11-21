@@ -154,6 +154,7 @@ Document::Document()
 	: impl_(new DocumentImpl())
 	, original_(new EmptyOriginal())
 	, file_(NULL)
+	, undo_stack_(new QUndoStack(this))
 {
 }
 
@@ -161,6 +162,7 @@ Document::Document(QFile *file)
 	: impl_(new DocumentImpl())
 	, original_(new FileOriginal(file, DEFAULT_BUFFER_SIZE))
 	, file_(file)
+	, undo_stack_(new QUndoStack(this))
 {
 	impl_->insert_data(0, 0, file->size(), DOCTYPE_ORIGINAL);
 }
