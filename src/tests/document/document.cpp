@@ -27,7 +27,7 @@ private:
 	Document *doc_;
 	QFile *file_;
 	QTemporaryFile *temp_file_;
-	std::vector<char> data_;
+	std::vector<uchar> data_;
 };
 
 const int SIZE = 1024 * 1024 * 2;	// 64MB
@@ -47,7 +47,7 @@ void TestDocument::initTestCase()
 	data_.resize(SIZE);
 	qsrand(107);
 	for (int i = 0; i < SIZE; i++) {
-		data_.push_back(static_cast<char>(qrand() & 0xFF));
+		data_.push_back(static_cast<uchar>(qrand() & 0xFF));
 	}
 
 	temp_file_ = new QTemporaryFile();
@@ -59,7 +59,7 @@ void TestDocument::initTestCase()
 	QVERIFY(file_->seek(0));
 
 	QDataStream outStream(file_);
-	QVERIFY(outStream.writeRawData(&data_[0], SIZE) == SIZE);
+	QVERIFY(outStream.writeRawData(reinterpret_cast<char*>(&data_[0]), SIZE) == SIZE);
 }
 
 void TestDocument::cleanupTestCase()
