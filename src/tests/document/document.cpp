@@ -3,24 +3,43 @@
 #include <QDataStream>
 #include <vector>
 #include "control/document.h"
+#include "control/commands.h"
 
 class TestDocument: public QObject
 {
 	Q_OBJECT
+public:
+	TestDocument();
+
 private slots:
 	void initTestCase();
 	void cleanupTestCase();
-	void openFile();
+	void testOpenFile();
+	void testUndoDelete();
+	void testUndoInsert();
+	void testUndoReplace();
 
 private:
-	QFile* open();
+	QFile *openFile();
+	Document *open();
 
 private:
+	Document *doc_;
+	QFile *file_;
 	QTemporaryFile *temp_file_;
 	std::vector<char> data_;
 };
 
 const int SIZE = 1024 * 1024 * 2;	// 64MB
+const uint MAP_BLOCK_SIZE = 0x1000;
+
+
+TestDocument::TestDocument()
+	: doc_(NULL)
+	, file_(NULL)
+	, temp_file_(NULL)
+{
+}
 
 void TestDocument::initTestCase()
 {
@@ -36,43 +55,49 @@ void TestDocument::initTestCase()
 
 	temp_file_->setAutoRemove(true);
 
-	QFile *file = open();
-	QVERIFY(file->seek(0));
+	openFile();
+	QVERIFY(file_->seek(0));
 
-	QDataStream outStream(file);
+	QDataStream outStream(file_);
 	QVERIFY(outStream.writeRawData(&data_[0], SIZE) == SIZE);
 }
 
 void TestDocument::cleanupTestCase()
 {
+	delete doc_;	// 同時にfile_も削除される
+	doc_ = NULL;
+
 	// delete dummy file
 	delete temp_file_;
+	temp_file_ = NULL;
 
 }
 
-QFile* TestDocument::open()
+QFile* TestDocument::openFile()
 {
-	QFile *file = new QFile(temp_file_->fileName());
-	file->open(QIODevice::ReadWrite);
-	return file;
+	file_ = new QFile(temp_file_->fileName());
+	file_->open(QIODevice::ReadWrite);
+	return file_;
 }
 
 
+Document *TestDocument::open()
+{
+	openFile();
+	doc_ = new Document(file_, MAP_BLOCK_SIZE);
+	return doc_;
+}
 
 
 // TEST
 
 
-void TestDocument::openFile()
+void TestDocument::testOpenFile()
 {
-	QFile *file = open();
-	const uint MAP_BLOCK_SIZE = 0x1000;
-	Document *doc = new Document(file, MAP_BLOCK_SIZE);
-	//Document *doc = new Document(file, Document::DEFAULT_BUFFER_SIZE);
-
+	Document *doc = open();
 
 	// check length
-	QVERIFY(file->size() == doc->length());
+	QVERIFY(file_->size() == doc->length());
 
 	// verify data
 	const quint64 COPY_SIZE = 1000;
@@ -86,8 +111,82 @@ void TestDocument::openFile()
 		QVERIFY(memcmp(buff, &data_[pos], copy_size) == 0);
 	}
 	
+}
 
-	delete doc;
+void TestDocument::testUndoDelete()
+{
+	Document *doc = open();
+
+	// check check length
+	QVERIFY(file_->size() == doc->length());
+
+	size_t DELETE_SIZE = 100;
+	for (int i = 0; i < DELETE_SIZE; i++) {
+		doc->undoStack()->push(new DeleteCommand(doc, i, 1));
+	}
+
+	// after delete
+	QVERIFY(file_->size() == (doc->length() + DELETE_SIZE));
+
+	while (doc->undoStack()->canUndo()) {
+		doc->undoStack()->undo();
+	}
+
+	// 元のサイズ
+	QVERIFY(file_->size() == doc->length());
+}
+
+void TestDocument::testUndoInsert()
+{
+	Document *doc = open();
+
+	// check check length(before insert)
+	QVERIFY(file_->size() == doc->length());
+
+	// Insert data
+	size_t INSERT_SIZE = 1000;
+	uchar data = 0x90;
+	for (int i = 0; i < INSERT_SIZE; i++) {
+		doc->undoStack()->push(new InsertCommand(doc, doc->length() / 2 + i, &data, 1));
+	}
+
+	// after insert
+	QVERIFY(file_->size() == (doc->length() - INSERT_SIZE));
+
+	// Undo
+	while (doc->undoStack()->canUndo()) {
+		doc->undoStack()->undo();
+	}
+
+	// 元のサイズ
+	QVERIFY(file_->size() == doc->length());
+}
+
+void TestDocument::testUndoReplace()
+{
+	Document *doc = open();
+
+	// check check length
+	QVERIFY(file_->size() == doc->length());
+
+	// Replace data
+	size_t REPLACE_SIZE = 3;
+	uchar data = 0x90;
+	for (int i = 0; i < REPLACE_SIZE; i++) {
+		doc->undoStack()->push(new ReplaceCommand(doc, i, 1, &data, 1));
+	}
+
+	
+	// after replace
+	QVERIFY(file_->size() == doc->length());
+	
+	// Undo
+	while (doc->undoStack()->canUndo()) {
+		doc->undoStack()->undo();
+	}
+
+	// 元のサイズ
+	QVERIFY(file_->size() == doc->length());
 }
 
 QTEST_MAIN(TestDocument)
