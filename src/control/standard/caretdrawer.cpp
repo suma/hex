@@ -65,15 +65,12 @@ void CaretDrawer::drawCaretLine(const CaretDrawInfo &info)
 
 void CaretDrawer::drawCaretBlock(const CaretDrawInfo &info)
 {
+	QBrush brush(config_.color(Color::CaretBackground));
 	if (info.caret_middle) {
-		QBrush brush(config_.color(Color::CaretBackground));
-		info.painter.setBackground(brush);
-		info.painter.setPen(config_.color(Color::CaretText));
 		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 		// TODO: 本当はここで文字描画
 	} else {
 		// Draw block without data
-		QBrush brush(config_.color(Color::CaretBackground));
 		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 	}
 }

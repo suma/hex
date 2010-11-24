@@ -30,7 +30,6 @@ HexConfig::HexConfig()
 	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
 	colors_[Color::SelText] = QColor(0,0,0);
 	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
-	colors_[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
 
 	// Font
 	font_.setFixedPitch(true);
@@ -323,15 +322,6 @@ void HexView::drawCaret(bool visible, quint64 pos)
 
 void HexView::drawCaretShape(CaretDrawInfo info)
 {
-	if (info.caret_middle) {
-		// Copy from document
-		uchar data;
-		document_->get(info.pos, &data, 1);
-
-		info.hex.resize(2);
-		byteToHex(data, info.hex);
-	}
-
 	switch (info.shape) {
 	case CARET_LINE:
 		drawCaretLine(info);
@@ -364,26 +354,19 @@ void HexView::drawCaretLine(const CaretDrawInfo &info)
 
 void HexView::drawCaretBlock(const CaretDrawInfo &info)
 {
+	QBrush brush(config_.color(Color::CaretBackground));
+	ColorType color = getColorType(cursor_->getSelection(), info.pos);
+	
 	if (info.caret_middle) {
 		if (cursor_->nibble() || cursor_->hasSelection()) {
 			// Draw block byte
-			QBrush brush(config_.color(Color::CaretBackground));
-			info.painter.setBackground(brush);
-			info.painter.setPen(config_.color(Color::CaretText));
 			info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-			info.painter.drawText(config_.x(info.x) + config_.byteMargin().left(), info.y + config_.byteMargin().top(), config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, info.hex);
 		} else {
 			// Draw block lowwer nibble
-			QBrush brush(config_.color(Color::CaretBackground));
-			info.painter.setBackground(brush);
-			info.painter.setPen(config_.color(Color::CaretText));
 			info.painter.fillRect(config_.x(info.x) + config_.byteMargin().left() + config_.charWidth(), info.y, config_.charWidth() + config_.byteMargin().right(), config_.byteHeight(), brush);
-			QString low(info.hex[1]);
-			info.painter.drawText(config_.x(info.x) + config_.byteMargin().left() + config_.charWidth(), info.y + config_.byteMargin().top(), config_.charWidth(2), config_.charHeight(), Qt::AlignLeft, low);
 		}
 	} else {
 		// Draw block without data
-		QBrush brush(config_.color(Color::CaretBackground));
 		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 	}
 }

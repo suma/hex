@@ -32,7 +32,6 @@ TextConfig::TextConfig()
 	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
 	colors_[Color::SelText] = QColor(0,0,0);
 	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
-	colors_[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
 
 	// Font
 	font_.setFixedPitch(true);

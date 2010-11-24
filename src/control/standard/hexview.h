@@ -269,7 +269,6 @@ namespace Standard {
 		{
 				QPainter &painter;
 				CaretShape shape;
-				QString hex;
 				quint64 pos;
 				bool caret_middle;
 				int x;
