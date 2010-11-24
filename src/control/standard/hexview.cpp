@@ -98,7 +98,7 @@ HexView::HexView(QWidget *parent, ::Document *doc, Highlight *hi)
 	: View(parent, doc)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)
-	, caret_drawer_(new HexCaretDrawer(caret_, config_))
+	, caret_drawer_(new HexCaretDrawer(config_, cursor_))
 	, keyboard_(new Keyboard(doc, this))
 {
 	// Enable keyboard input
@@ -222,7 +222,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 
 ColorType HexView::getColorType(const CursorSelection &c, quint64 pos)
 {
-	if (c.begin <= pos && pos < c.end) {
+	if (c.selected(pos)) {
 		return ColorType(Color::SelBackground, Color::SelText);
 	} else {
 		return ColorType(Color::Background, Color::Text);
@@ -275,6 +275,7 @@ inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int 
 	painter.drawText(x, y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
 }
 
+
 void HexView::caretDrawEvent(QPainter *painter)
 {
 }
@@ -313,13 +314,14 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
 
 	// Draw shape
-	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
+	//drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
 
 	// Finish paint and update screen buffer
 	painter.end();
 	update(config_.x(x), y, config_.byteWidth(), config_.charHeight());
 }
 
+/*
 void HexView::drawCaretShape(CaretDrawInfo info)
 {
 	switch (info.shape) {
@@ -399,6 +401,7 @@ void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
 	QBrush brush(config_.color(Color::CaretBackground));
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
 }
+*/
 
 void HexView::byteToHex(uchar c, QString &h)
 {

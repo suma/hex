@@ -1,5 +1,5 @@
-#ifndef COLOR_H_INC
-#define COLOR_H_INC
+
+#pragma once
 
 namespace Color {
 	enum color {
@@ -23,4 +23,4 @@ struct ColorType {
 	}
 };
 
-#endif
+

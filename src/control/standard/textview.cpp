@@ -96,7 +96,7 @@ TextView::TextView(QWidget *parent, ::Document *doc, Highlight *hi)
 	, cursor_(new Cursor(doc))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))
 	, caret_(CARET_BLOCK, CARET_FRAME)
-	, caret_drawer_(new TextCaretDrawer(caret_, config_))
+	, caret_drawer_(new TextCaretDrawer(config_))
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -310,7 +310,9 @@ void TextView::caretDrawEvent(QPainter *painter)
 	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
 
 	const bool caret_middle = pos < document_->length();
-	caret_drawer_->drawCaret(painter, x, y, caret_.visible(), caret_middle);
+
+	CaretDrawInfo info(*painter, caret_.currentShape(), pos, x, y, caret_middle);
+	caret_drawer_->drawCaret(info);
 }
 
 void TextView::drawCaret(bool visible)

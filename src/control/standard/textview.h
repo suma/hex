@@ -282,27 +282,6 @@ namespace Standard {
 
 
 	private:
-		struct CaretDrawInfo
-		{
-			QPainter &painter;
-			CaretShape shape;
-			quint64 pos;
-			bool caret_middle;
-			int x;
-			int y;
-
-			CaretDrawInfo(QPainter &p, CaretShape shape, quint64 pos, int x, int y, bool caret_middle)
-				: painter(p)
-			{
-				this->pos = pos;
-				this->shape = shape;
-				this->x = x;
-				this->y = y;
-				this->caret_middle = caret_middle;
-			}
-		};
-
-	private:
 		void resizeEvent(QResizeEvent *);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);

@@ -270,25 +270,6 @@ namespace Standard {
 
 
 	private:
-		struct CaretDrawInfo
-		{
-				QPainter &painter;
-				CaretShape shape;
-				quint64 pos;
-				bool caret_middle;
-				int x;
-				int y;
-
-				CaretDrawInfo(QPainter &p, CaretShape shape, quint64 pos, int x, int y, bool caret_middle)
-					: painter(p)
-				{
-					this->pos = pos;
-					this->shape = shape;
-					this->x = x;
-					this->y = y;
-					this->caret_middle = caret_middle;
-				}
-		};
 
 	private:
 		void resizeEvent(QResizeEvent *);
@@ -331,11 +312,11 @@ namespace Standard {
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
 	private:
-		void drawCaretShape(CaretDrawInfo info);
-		void drawCaretLine(const CaretDrawInfo &);
-		void drawCaretFrame(const CaretDrawInfo &);
-		void drawCaretBlock(const CaretDrawInfo &);
-		void drawCaretUnderbar(const CaretDrawInfo &);
+		//void drawCaretShape(CaretDrawInfo info);
+		//void drawCaretLine(const CaretDrawInfo &);
+		//void drawCaretFrame(const CaretDrawInfo &);
+		//void drawCaretBlock(const CaretDrawInfo &);
+		//void drawCaretUnderbar(const CaretDrawInfo &);
 
 	private slots:
 		void inserted(quint64 pos, quint64 len);

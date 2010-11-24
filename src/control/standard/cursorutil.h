@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "../color.h"
+
 namespace Standard {
 
 	struct HPos {
@@ -18,5 +20,19 @@ namespace Standard {
 	struct CursorSelection {
 		quint64 begin;
 		quint64 end;
+
+		bool selected(quint64 pos) const
+		{
+			return begin <= pos && pos < end;
+		}
+
+		ColorType color(quint64 pos) const
+		{
+			if (selected(pos)) {
+				return ColorType(Color::SelBackground, Color::SelText);
+			} else {
+				return ColorType(Color::Background, Color::Text);
+			}
+		}
 	};
 }
