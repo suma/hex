@@ -2,6 +2,7 @@
 #pragma once
 
 #include <QtGlobal>
+#include <QObject>
 #include <algorithm>
 #include <limits>
 #include "../document.h"
@@ -11,8 +12,10 @@
 
 namespace Standard {
 
-	class Cursor
+	class Cursor : public QObject
 	{
+		Q_OBJECT
+
 	private:
 		::Document *document_;
 
@@ -21,6 +24,7 @@ namespace Standard {
 		quint64 anchor_;
 
 		bool insert_;
+
 		bool highNibble_;	// for hexview
 	
 	public:
@@ -41,7 +45,10 @@ namespace Standard {
 
 		void setTop(quint64 top)
 		{
-			top_ = top;
+			if (top_ != top) {
+				top_ = top;
+				emit topChanged(top);
+			}
 		}
 
 		quint64 position() const
@@ -51,7 +58,10 @@ namespace Standard {
 
 		void setPosition(quint64 pos)
 		{
-			position_ = pos;
+			if (position_ != pos) {
+				position_ = pos;
+				emit positionChanged(pos);
+			}
 		}
 
 		quint64 anchor() const
@@ -61,7 +71,10 @@ namespace Standard {
 
 		void setAnchor(quint64 anchor)
 		{
-			anchor_ = anchor;
+			if (anchor_ != anchor) {
+				anchor_ = anchor;
+				emit anchorChanged(anchor);
+			}
 		}
 
 		bool nibble() const
@@ -86,12 +99,18 @@ namespace Standard {
 
 		void setInsert(bool insert)
 		{
-			insert_ = insert;
+			if (insert_ != insert) {
+				insert_ = insert;
+				emit insertChanged(insert);
+			}
 		}
 
 		void resetAnchor()
 		{
-			anchor_ = position_;
+			if (anchor_ != position_) {
+				anchor_ = position_;
+				emit anchorChanged(position_);
+			}
 		}
 
 		bool hasSelection()
@@ -101,7 +120,7 @@ namespace Standard {
 
 		void reverseInsert()
 		{
-			insert_ = !insert_;
+			setInsert(!insert_);
 		}
 
 		CursorSelection getSelection() const
@@ -139,10 +158,10 @@ namespace Standard {
 
 				// if top_ + vwCountLine < posLine then Pos is invisible
 				if (vwCountLine <= posLine && top_ <= posLine - vwCountLine) {
-					top_ = posLine - vwCountLine + 1;
+					setTop(posLine - vwCountLine + 1);
 				}
 			} else {
-				top_ = qMin(pos / view->config().getNum(), top_);
+				setTop(qMin(pos / view->config().getNum(), top_));
 			}
 
 			// Hold virtual position_ of caret
@@ -151,26 +170,26 @@ namespace Standard {
 				const uint diff = qAbs(vwOldPosLine - vwNewPosLine);
 				if (vwOldPosLine < vwNewPosLine) {
 					if (diff < top_) {
-						top_ -= diff;
+						setTop(top_ - diff);
 					} else {
-						top_ = 0;
+						setTop(0);
 					}
 				} else {
 					const quint64 maxTop = document_->length() / view->config().getNum() - vwCountLine + 1;
 					if (top_ < std::numeric_limits<quint64>::max() - diff && top_ + diff <= maxTop) {
-						top_ += diff;
+						setTop(top_ + diff);
 					} else {
-						top_ = maxTop;
+						setTop(maxTop);
 					}
 				}
 			}
 
-			position_ = pos;
-			anchor_ = sel ? anchor_ : position_;
+			setPosition(pos);
+			setAnchor(sel ? anchor_ : position_);
 		}
 
 
-		quint64 getRelativePosition(qint64 pos)
+		quint64 getRelativePosition(qint64 pos) const
 		{
 			const quint64 diff = static_cast<quint64>(qAbs(pos));
 			quint64 okPos = 0;
@@ -191,7 +210,11 @@ namespace Standard {
 			return okPos;
 		}
 
-
+	signals:
+		void topChanged(quint64);
+		void positionChanged(quint64);
+		void anchorChanged(quint64);
+		void insertChanged(bool);
 
 	};
 }

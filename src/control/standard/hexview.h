@@ -256,6 +256,11 @@ namespace Standard {
 			return config_;
 		}
 
+		Caret &caret()
+		{
+			return caret_;
+		}
+
 		Cursor &cursor() const
 		{
 			return *cursor_;

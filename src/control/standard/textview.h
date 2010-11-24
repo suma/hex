@@ -273,6 +273,11 @@ namespace Standard {
 			return caret_;
 		}
 
+		Cursor &cursor() const
+		{
+			return *cursor_;
+		}
+
 		void setCaretBlink(bool enable);
 
 

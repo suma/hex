@@ -37,7 +37,7 @@ namespace Standard {
 			return invisible_shape_;
 		}
 
-		CaretShape getCurrentShape() const
+		CaretShape currentShape() const
 		{
 			return shape(is_visible_);
 		}
