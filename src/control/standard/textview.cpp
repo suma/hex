@@ -312,13 +312,10 @@ void TextView::caretDrawEvent(QPainter *painter)
 	caret_drawer_->drawCaret(info);
 }
 
-void TextView::drawCaret(bool visible)
+void TextView::drawCaret()
 {
-	drawCaret(visible, cursor_->position());
-}
+	quint64 pos = cursor_->position();
 
-void TextView::drawCaret(bool visible, quint64 pos)
-{
 	// Check out of range
 	if (!(config_.top() + config_.byteHeight() < height())) {
 		return;
@@ -398,7 +395,7 @@ void TextView::setCaretBlink(bool enable)
 void TextView::timerEvent(QTimerEvent *ev)
 {
 	if (caret_.timerId() == ev->timerId()) {
-		drawCaret(caret_.visible());
+		drawCaret();
 		caret_.inverseVisible();
 	}
 }

@@ -94,7 +94,7 @@ int HexConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-HexView::HexView(QWidget *parent, ::Document *doc, Highlight *hi)
+HexView::HexView(QWidget *parent, ::Document *doc, Highlight *)
 	: View(parent, doc)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)
@@ -287,13 +287,10 @@ void HexView::caretDrawEvent(QPainter *painter)
 	caret_drawer_->drawCaret(info);
 }
 
-void HexView::drawCaret(bool visible)
+void HexView::drawCaret()
 {
-	drawCaret(visible, cursor_->position());
-}
+	quint64 pos = cursor_->position();
 
-void HexView::drawCaret(bool visible, quint64 pos)
-{
 	// Check out of range
 	if (!(config_.top() + config_.byteHeight() < height())) {
 		return;
@@ -389,7 +386,7 @@ void HexView::setCaretBlink(bool enable)
 void HexView::timerEvent(QTimerEvent *ev)
 {
 	if (caret_.timerId() == ev->timerId()) {
-		drawCaret(caret_.visible());
+		drawCaret();
 		caret_.inverseVisible();
 	}
 }
@@ -460,7 +457,6 @@ void HexView::insertChanged(bool)
 
 void HexView::selectionUpdate(quint64 begin, quint64 end)
 {
-	qDebug() << "selection update " << begin << end;
 	redrawSelection(begin, end);
 }
 

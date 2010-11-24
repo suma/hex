@@ -138,8 +138,8 @@ namespace Standard {
 
 		void redrawSelection(quint64 begin, quint64 end, bool fire = true)
 		{
+			emit selectionUpdate(begin, end);
 			if (fire) {
-				emit selectionUpdate(begin, end);
 				emit selectionUpdate(begin, end, false);
 			}
 		}
