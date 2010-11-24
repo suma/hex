@@ -4,11 +4,8 @@
 
 namespace Standard {
 
-
-
-CaretDrawer::CaretDrawer(TextView *view)
-	: view_(view)
-	, config_(view->config())
+CaretDrawer::CaretDrawer(const Caret &caret)
+	: caret_(caret)
 {
 }
 
@@ -20,16 +17,17 @@ CaretDrawer::~CaretDrawer()
 
 void CaretDrawer::drawCaret(QPainter *painter, int x, int y, bool visible, bool caret_middle)
 {
-	// TODO: painter.setFont(config_.font());
-
-	const CaretShape shape = view_->caret().shape(visible);
-
-	// Draw shape
-	drawCaretShape(CaretDrawInfo(*painter, shape, x, y, caret_middle));
+	CaretDrawInfo info(*painter, caret_.shape(visible), x, y, caret_middle);
+	drawCaretShape(info);
 }
 
+TextCaretDrawer::TextCaretDrawer(const Caret &caret, TextConfig &config)
+	: CaretDrawer(caret)
+	, config_(config)
+{
+}
 
-void CaretDrawer::drawCaretShape(CaretDrawInfo info)
+void TextCaretDrawer::drawCaretShape(CaretDrawInfo info)
 {
 	switch (info.shape) {
 	case CARET_LINE:
@@ -51,7 +49,7 @@ void CaretDrawer::drawCaretShape(CaretDrawInfo info)
 
 // FIXME:  caret width(for Multibyte Character)
 
-void CaretDrawer::drawCaretLine(const CaretDrawInfo &info)
+void TextCaretDrawer::drawCaretLine(const CaretDrawInfo &info)
 {
 	int x;
 	if (true) {//if (!info.caret_middle) {
@@ -63,7 +61,7 @@ void CaretDrawer::drawCaretLine(const CaretDrawInfo &info)
 	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
 }
 
-void CaretDrawer::drawCaretBlock(const CaretDrawInfo &info)
+void TextCaretDrawer::drawCaretBlock(const CaretDrawInfo &info)
 {
 	QBrush brush(config_.color(Color::CaretBackground));
 	if (info.caret_middle) {
@@ -75,7 +73,7 @@ void CaretDrawer::drawCaretBlock(const CaretDrawInfo &info)
 	}
 }
 
-void CaretDrawer::drawCaretFrame(const CaretDrawInfo &info)
+void TextCaretDrawer::drawCaretFrame(const CaretDrawInfo &info)
 {
 	int width = config_.byteWidth() - 1;
 	int x = config_.x(info.x);
@@ -84,7 +82,7 @@ void CaretDrawer::drawCaretFrame(const CaretDrawInfo &info)
 	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
 }
 
-void CaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
+void TextCaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
 {
 	int width = config_.byteWidth() - 1;
 	int x = config_.x(info.x);
@@ -95,8 +93,31 @@ void CaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
 
 
 
+HexCaretDrawer::HexCaretDrawer(const Caret &caret, HexConfig &config)
+	: CaretDrawer(caret)
+	, config_(config)
+{
+}
 
+void HexCaretDrawer::drawCaretShape(CaretDrawInfo info)
+{
+}
 
+void HexCaretDrawer::drawCaretLine(const CaretDrawInfo &info)
+{
+}
+
+void HexCaretDrawer::drawCaretBlock(const CaretDrawInfo &info)
+{
+}
+
+void HexCaretDrawer::drawCaretFrame(const CaretDrawInfo &info)
+{
+}
+
+void HexCaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
+{
+}
 
 
 

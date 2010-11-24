@@ -98,7 +98,7 @@ HexView::HexView(QWidget *parent, ::Document *doc, Highlight *hi)
 	: View(parent, doc)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)
-	, caret_drawer_(new CaretDrawer(NULL))
+	, caret_drawer_(new HexCaretDrawer(caret_, config_))
 	, keyboard_(new Keyboard(doc, this))
 {
 	// Enable keyboard input
