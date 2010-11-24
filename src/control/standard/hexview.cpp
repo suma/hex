@@ -278,6 +278,17 @@ inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int 
 
 void HexView::caretDrawEvent(QPainter *painter)
 {
+	painter->setFont(config_.font());
+
+	// Get caret coordinates
+	const quint64 pos = cursor_->position();
+	const int x = pos % config_.getNum();
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
+
+	const bool caret_middle = pos < document_->length();
+
+	CaretDrawInfo info(*painter, caret_.currentShape(), pos, x, y, caret_middle);
+	caret_drawer_->drawCaret(info);
 }
 
 void HexView::drawCaret(bool visible)
@@ -292,33 +303,11 @@ void HexView::drawCaret(bool visible, quint64 pos)
 		return;
 	}
 
-	// Redraw line
-	const quint64 line = cursor_->position() / config_.getNum();
-	if (cursor_->top() <= line && line - cursor_->top() < static_cast<uint>(config_.drawableLines(height()))) {
-		drawView(DRAW_LINE, line - cursor_->top());
-	}
-
-	// Shape
-	const CaretShape shape = caret_.shape(visible);
-	if (shape == CARET_NONE) {
-		return;
-	}
-
-	// Begin paint
-	QPainter painter;
-	painter.begin(&pix_);
-	painter.setFont(config_.font());
-
 	// Get caret coordinates
 	const int x = pos % config_.getNum();
 	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
-
-	// Draw shape
-	//drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
-
-	// Finish paint and update screen buffer
-	painter.end();
-	update(config_.x(x), y, config_.byteWidth(), config_.charHeight());
+	update(config_.x(x), y, width() - config_.x(x), config_.byteHeight());
+	return;
 }
 
 /*
