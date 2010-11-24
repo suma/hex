@@ -106,6 +106,12 @@ TextView::TextView(QWidget *parent, ::Document *doc, Highlight *hi)
 	connect(document_, SIGNAL(inserted(quint64, quint64)), this, SLOT(inserted(quint64, quint64)));
 	connect(document_, SIGNAL(removed(quint64, quint64)), this, SLOT(removed(quint64, quint64)));
 
+	// Add cursor event
+	QObject::connect(cursor_, SIGNAL(topChanged(quint64)), this, SLOT(topChanged(quint64)));
+	QObject::connect(cursor_, SIGNAL(positionChanged(quint64, quint64)), this, SLOT(positionChanged(quint64, quint64)));
+	QObject::connect(cursor_, SIGNAL(insertChanged(bool)), this, SLOT(insertChanged(bool)));
+	QObject::connect(cursor_, SIGNAL(selectionUpdate(quint64, quint64)), this, SLOT(selectionUpdate(quint64, quint64)));
+
 	// for Qt4.6?
 	//setEnabled(true);
 	//setMouseTracking(true);
@@ -330,7 +336,7 @@ void TextView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		qDebug("mosue press");
 
-		movePosition(posAt(ev->pos()), false, false);
+		cursor_->movePosition(this, posAt(ev->pos()), false, false);
 
 		// Start mouse capture
 		//grabMouse();
@@ -345,7 +351,7 @@ void TextView::mouseMoveEvent(QMouseEvent *ev)
 	if (height() < ev->pos().y()) {
 		return;
 	}
-	movePosition(posAt(ev->pos()), true, false);
+	cursor_->movePosition(this, posAt(ev->pos()), true, false);
 }
 
 void TextView::mouseReleaseEvent(QMouseEvent *)
@@ -415,10 +421,10 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
 	case Qt::Key_Home:
-		movePosition(0, keepAnchor, false);
+		cursor_->movePosition(this, 0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
-		movePosition(document_->length(), keepAnchor, false);
+		cursor_->movePosition(this, document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
 		moveRelativePosition(-1, keepAnchor, false);
@@ -445,7 +451,7 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 			removeData(pos, len);
 			moveRelativePosition(pos, false, false);
 			// TODO: drawView [pos. pos+len]
-			drawView();
+			//drawView();
 		} else if (0 < cursor_->position()) {
 			removeData(cursor_->position() - 1, 1);
 			moveRelativePosition(-1, false, false);
@@ -462,7 +468,7 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 			removeData(pos, len);
 			moveRelativePosition(0, false, false);
 			// TODO: drawView [pos. pos+len]
-			drawView();
+			//drawView();
 		} else if (cursor_->position() < document_->length()) {
 			removeData(cursor_->position(), 1);
 			moveRelativePosition(0, false, false);
@@ -489,42 +495,9 @@ QVariant TextView::inputMethodQuery(Qt::InputMethodQuery query) const
 {
 }
 
-void TextView::movePosition(quint64 pos, bool sel, bool holdViewPos)
-{
-	Q_ASSERT(pos <= document_->length());
-	
-	const quint64 oldTop = cursor_->top();
-	const quint64 oldPos = cursor_->position();
-	const quint64 oldPosAnchor = cursor_->anchor();
-	const bool oldSelection = cursor_->hasSelection();
-
-	// movePosition
-	cursor_->movePosition(this, pos, sel, holdViewPos);
-
-	// Redraw view
-	if (cursor_->top() == oldTop) {
-		if (!sel && oldSelection) {
-			// Clear selection
-			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
-		} else if (cursor_->position() != oldPos) {
-			// Draw/Redraw selection
-			const quint64 begin = qMin(qMin(cursor_->position(), cursor_->anchor()), oldPos);
-			const quint64 end   = qMax(qMax(cursor_->position(), cursor_->anchor()), oldPos);
-			redrawSelection(begin, end);
-		}
-		// TODO: Clear old caret only
-		drawView();
-	} else {
-		drawView();
-	}
-
-	drawCaret();
-}
-
-
 void TextView::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 {
-	movePosition(cursor_->getRelativePosition(pos), sel, holdViewPos);
+	cursor_->movePosition(this, cursor_->getRelativePosition(pos), sel, holdViewPos);
 }
 
 void TextView::redrawSelection(quint64 begin, quint64 end)
@@ -559,6 +532,30 @@ void TextView::removed(quint64 pos, quint64 len)
 	drawView();
 }
 
+
+void TextView::topChanged(quint64 top)
+{
+	drawView();
+}
+
+void TextView::positionChanged(quint64 old, quint64 pos)
+{
+	// FIXME: optimize update area
+	update(0, 0, width(), height());
+}
+
+void TextView::insertChanged(bool)
+{
+	// FIXME: optimize update area
+	// update curosr pos
+	update(0, 0, width(), height());
+}
+
+
+void TextView::selectionUpdate(quint64 begin, quint64 end)
+{
+	redrawSelection(begin, end);
+}
 
 
 }	// namespace

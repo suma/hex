@@ -49,6 +49,11 @@ Editor::Editor()
 	tview_->resize(tview_->config().width(), 270);
 	tview_->show();
 
+	Standard::Cursor &hc = hview_->cursor();
+	Standard::Cursor &tc = tview_->cursor();
+	hc.connectTo(&tc);
+	tc.connectTo(&hc);
+
 	////connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)), tview_, SLOT(drawView(DrawMode, int ,int)));
 	//connect(hview_, SIGNAL(viewDrawed(DrawMode, int, int)),
 	//	tview_, SLOT(drawView(DrawMode, int, int)));

@@ -105,8 +105,14 @@ HexView::HexView(QWidget *parent, ::Document *doc, Highlight *hi)
 	setFocusPolicy(Qt::WheelFocus);
 
 	// Add document event
-	connect(document_, SIGNAL(inserted(quint64, quint64)), this, SLOT(inserted(quint64, quint64)));
-	connect(document_, SIGNAL(removed(quint64, quint64)), this, SLOT(removed(quint64, quint64)));
+	QObject::connect(document_, SIGNAL(inserted(quint64, quint64)), this, SLOT(inserted(quint64, quint64)));
+	QObject::connect(document_, SIGNAL(removed(quint64, quint64)), this, SLOT(removed(quint64, quint64)));
+
+	// Add cursor event
+	QObject::connect(cursor_, SIGNAL(topChanged(quint64)), this, SLOT(topChanged(quint64)));
+	QObject::connect(cursor_, SIGNAL(positionChanged(quint64, quint64)), this, SLOT(positionChanged(quint64, quint64)));
+	QObject::connect(cursor_, SIGNAL(insertChanged(bool)), this, SLOT(insertChanged(bool)));
+	QObject::connect(cursor_, SIGNAL(selectionUpdate(quint64, quint64)), this, SLOT(selectionUpdate(quint64, quint64)));
 
 	//setMouseTracking(true);
 }
@@ -322,7 +328,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		//qDebug("mouse press");
 
 		cursor_->setNibble(true);
-		movePosition(posAt(ev->pos()), false, false);
+		cursor_->movePosition(this, posAt(ev->pos()), false, false);
 
 		// Start mouse capture
 		grabMouse();
@@ -336,7 +342,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	if (height() < ev->pos().y()) {
 		return;
 	}
-	movePosition(posAt(ev->pos()), true, false);
+	cursor_->movePosition(this, posAt(ev->pos()), true, false);
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *)
@@ -394,42 +400,9 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 	keyboard_->keyPressEvent(ev);
 }
 
-void HexView::movePosition(quint64 pos, bool sel, bool holdViewPos)
-{
-	Q_ASSERT(pos <= document_->length());
-	
-	const quint64 oldTop = cursor_->top();
-	const quint64 oldPos = cursor_->position();
-	const quint64 oldPosAnchor = cursor_->anchor();
-	const bool oldSelection = cursor_->hasSelection();
-
-	// movePosition
-	cursor_->movePosition(this, pos, sel, holdViewPos);
-
-	// Redraw view
-	if (cursor_->top() == oldTop) {
-		if (!sel && oldSelection) {
-			// Clear selection
-			redrawSelection(qMin(oldPos, oldPosAnchor), qMax(oldPos, oldPosAnchor));
-		} else if (cursor_->position() != oldPos) {
-			// Draw/Redraw selection
-			const quint64 begin = qMin(qMin(cursor_->position(), cursor_->anchor()), oldPos);
-			const quint64 end   = qMax(qMax(cursor_->position(), cursor_->anchor()), oldPos);
-			redrawSelection(begin, end);
-		}
-		// TODO: Clear old caret only
-		drawView();
-	} else {
-		drawView();
-	}
-
-	drawCaret();
-}
-
-
 void HexView::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 {
-	movePosition(cursor_->getRelativePosition(pos), sel, holdViewPos);
+	cursor_->movePosition(this, cursor_->getRelativePosition(pos), sel, holdViewPos);
 }
 
 void HexView::redrawSelection(quint64 begin, quint64 end)
@@ -460,6 +433,36 @@ void HexView::removed(quint64 pos, quint64 len)
 	drawView();
 }
 
+void HexView::topChanged(quint64 top)
+{
+	drawView();
+}
+
+void HexView::positionChanged(quint64 old, quint64 pos)
+{
+	// 1. pos changed(cursor only)
+	// 2. selectino redraw
+
+	// FIXME: optimize update area
+	if (false) {	// TODO: check cursor line
+		drawView();
+	} else {
+		update(0, 0, width(), height());
+	}
+}
+
+void HexView::insertChanged(bool)
+{
+	// FIXME: optimize update area
+	// update curosr pos
+	update(0, 0, width(), height());
+}
+
+void HexView::selectionUpdate(quint64 begin, quint64 end)
+{
+	qDebug() << "selection update " << begin << end;
+	redrawSelection(begin, end);
+}
 
 
 

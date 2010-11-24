@@ -29,11 +29,11 @@ void Keyboard::keyPressEvent(QKeyEvent *ev)
 	switch (ev->key()) {
 	case Qt::Key_Home:
 		cursor.setNibble(true);
-		view_->movePosition(0, keepAnchor, false);
+		view_->cursor().movePosition(view_, 0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
 		cursor.setNibble(true);
-		view_->movePosition(document_->length(), keepAnchor, false);
+		view_->cursor().movePosition(view_, document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
 		cursor.setNibble(true);

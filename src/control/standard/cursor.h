@@ -105,8 +105,10 @@ namespace Standard {
 		void setPosition(quint64 pos)
 		{
 			if (position_ != pos) {
+				quint64 old = position_;
 				position_ = pos;
 				emit positionChanged(pos);
+				emit positionChanged(old, pos);
 			}
 		}
 
@@ -133,7 +135,15 @@ namespace Standard {
 				emit anchorChanged(position_);
 			}
 		}
-	
+
+		void redrawSelection(quint64 begin, quint64 end, bool fire = true)
+		{
+			if (fire) {
+				emit selectionUpdate(begin, end);
+				emit selectionUpdate(begin, end, false);
+			}
+		}
+
 	public:
 
 		template <class V>
@@ -144,6 +154,7 @@ namespace Standard {
 			//   view->height()
 
 			Q_ASSERT(pos <= document_->length());
+			quint64 top = top_;
 			
 			// Compute virtual position_ of caret
 			int vwOldPosLine = 0;
@@ -160,10 +171,10 @@ namespace Standard {
 
 				// if top_ + vwCountLine < posLine then Pos is invisible
 				if (vwCountLine <= posLine && top_ <= posLine - vwCountLine) {
-					setTop(posLine - vwCountLine + 1);
+					top = (posLine - vwCountLine + 1);
 				}
 			} else {
-				setTop(qMin(pos / view->config().getNum(), top_));
+				top = (qMin(pos / view->config().getNum(), top_));
 			}
 
 			// Hold virtual position_ of caret
@@ -172,24 +183,53 @@ namespace Standard {
 				const uint diff = qAbs(vwOldPosLine - vwNewPosLine);
 				if (vwOldPosLine < vwNewPosLine) {
 					if (diff < top_) {
-						setTop(top_ - diff);
+						top = top_ - diff;
 					} else {
-						setTop(0);
+						top = 0;
 					}
 				} else {
 					const quint64 maxTop = document_->length() / view->config().getNum() - vwCountLine + 1;
 					if (top_ < std::numeric_limits<quint64>::max() - diff && top_ + diff <= maxTop) {
-						setTop(top_ + diff);
+						top = top_ + diff;
 					} else {
-						setTop(maxTop);
+						top = maxTop;
 					}
 				}
 			}
 
-			setPosition(pos);
-			setAnchor(sel ? anchor_ : position_);
+			if (top == top_) {
+				//if ((!sel && hasSelection()) || sel && !hasSelection()) {
+				if (!sel && hasSelection()) {
+					// Redraw position only
+					quint64 begin = qMin(qMin(position_, anchor_), pos);
+					quint64 end = qMax(qMax(position_, anchor_), pos);
+					setPosition(pos);
+					setAnchor(sel ? anchor_ : position_);
+					redrawSelection(begin, end);
+				} else if (position_ != pos) {
+					// Draw selection
+					quint64 begin = qMin(qMin(position_, anchor_), pos);
+					quint64 end   = qMax(qMax(position_, anchor_), pos);
+					setPosition(pos);
+					setAnchor(sel ? anchor_ : position_);
+					redrawSelection(begin, end);
+				}
+			} else {
+				// Redraw all
+				setPosition(pos);
+				setAnchor(sel ? anchor_ : position_);
+				setTop(top);
+			}
 		}
 
+		void connectTo(Cursor *cursor)
+		{
+			QObject::connect(this, SIGNAL(topChanged(quint64)), cursor,  SLOT(setTop(quint64)));
+			QObject::connect(this, SIGNAL(positionChanged(quint64)), cursor,  SLOT(setPosition(quint64)));
+			QObject::connect(this, SIGNAL(anchorChanged(quint64)), cursor,  SLOT(setAnchor(quint64)));
+			QObject::connect(this, SIGNAL(insertChanged(bool)), cursor,  SLOT(setInsert(bool)));
+			QObject::connect(this, SIGNAL(selectionUpdate(quint64, quint64, bool)), cursor,  SLOT(redrawSelection(quint64, quint64, bool)));
+		}
 
 		quint64 getRelativePosition(qint64 pos) const
 		{
@@ -215,8 +255,13 @@ namespace Standard {
 	signals:
 		void topChanged(quint64);
 		void positionChanged(quint64);
+		void positionChanged(quint64 old, quint64 pos);
 		void anchorChanged(quint64);
 		void insertChanged(bool);
+
+		// for view
+		void selectionUpdate(quint64, quint64);
+		void selectionUpdate(quint64, quint64, bool);
 
 	};
 }

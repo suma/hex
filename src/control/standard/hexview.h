@@ -282,7 +282,7 @@ namespace Standard {
 		void redrawSelection(quint64 begin, quint64 end);
 
 	public:
-		void movePosition(quint64 pos, bool sel, bool holdViewPos);
+		//void movePosition(quint64 pos, bool sel, bool holdViewPos);
 		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
 
 	public:
@@ -314,6 +314,12 @@ namespace Standard {
 	private slots:
 		void inserted(quint64 pos, quint64 len);
 		void removed(quint64 pos, quint64 len);
+
+		// cursor changed
+		void topChanged(quint64);
+		void positionChanged(quint64, quint64);
+		void insertChanged(bool);
+		void selectionUpdate(quint64, quint64);
 
 	private:
 		// Main components
