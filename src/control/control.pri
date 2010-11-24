@@ -15,12 +15,14 @@ HEADERS += \
     view.h \
     standard/addressview.h \
 	standard/caret.h \
+	standard/caretdrawer.h \
 	standard/cursor.h \
 	standard/cursorutil.h \
     standard/hexview.h \
     standard/keyboard.h \
 	standard/textdecodehelper.h \
-	standard/textview.h
+	standard/textview.h \
+	standard/view.h
 
 SOURCES += \
     control.cpp \
@@ -33,9 +35,11 @@ SOURCES += \
     view.cpp \
     standard/addressview.cpp \
 	standard/caret.cpp \
+	standard/caretdrawer.cpp \
     standard/hexview.cpp \
     standard/keyboard.cpp \
 	standard/textview.cpp \
-	standard/textdecodehelper.cpp
+	standard/textdecodehelper.cpp \
+	standard/view.cpp
 
 

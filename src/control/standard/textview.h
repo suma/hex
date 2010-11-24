@@ -4,7 +4,7 @@
 #include <QFont>
 #include <QFontMetrics>
 #include "../util/util.h"
-#include "../view.h"
+#include "view.h"
 #include "../highlight.h"
 #include "caret.h"
 #include "cursor.h"
@@ -12,6 +12,7 @@
 
 namespace Standard {
 	class TextDecodeHelper;
+	class CaretDrawer;
 
 	class TextConfig
 	{
@@ -254,7 +255,7 @@ namespace Standard {
 		}
 	};
 
-	class TextView : public ::View
+	class TextView : public View
 	{
 		Q_OBJECT
 
@@ -265,6 +266,11 @@ namespace Standard {
 		TextConfig &config()
 		{
 			return config_;
+		}
+
+		Caret &caret()
+		{
+			return caret_;
 		}
 
 		void setCaretBlink(bool enable);
@@ -321,15 +327,13 @@ namespace Standard {
 
 		quint64 posAt(const QPoint &pos) const;
 
+		void caretDrawEvent(QPainter *painter);
+
 	public:
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
+
 	private:
-		void drawCaretShape(CaretDrawInfo info);
-		void drawCaretLine(const CaretDrawInfo &);
-		void drawCaretFrame(const CaretDrawInfo &);
-		void drawCaretBlock(const CaretDrawInfo &);
-		void drawCaretUnderbar(const CaretDrawInfo &);
 
 		void changeData(quint64 pos, uchar character);
 		void insertData(quint64 pos, uchar character);
@@ -345,6 +349,8 @@ namespace Standard {
 		Cursor *cursor_;
 		TextDecodeHelper *decode_helper_;
 		Caret caret_;
+		CaretDrawer *caret_drawer_;
+		std::vector<uchar> buff_;
 	};
 
 }

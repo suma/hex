@@ -14,4 +14,14 @@ namespace Color {
 }
 
 
+struct ColorType {
+	int Background;
+	int Text;
+	ColorType(int bg_color = Color::Background, int text_color = Color::Text)
+	{
+		Background = bg_color;
+		Text = text_color;
+	}
+};
+
 #endif

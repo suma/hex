@@ -8,6 +8,7 @@
 #include "../document.h"
 #include "../highlight.h"
 #include "textdecodehelper.h"
+#include "caretdrawer.h"
 
 using namespace std;
 
@@ -92,10 +93,11 @@ int TextConfig::YToLine(int y) const
 // View
 
 TextView::TextView(QWidget *parent, ::Document *doc, Highlight *hi)
-	: ::View(parent, doc, hi)
+	: View(parent, doc)
 	, cursor_(new Cursor(doc))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))
 	, caret_(CARET_BLOCK, CARET_FRAME)
+	, caret_drawer_(new CaretDrawer(this))
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -299,6 +301,19 @@ inline void TextView::drawText(QPainter &painter, const QString &str, int x, int
 	painter.drawText(x, y, config_.textWidth(str), config_.charHeight(), Qt::AlignCenter, str);
 }
 
+void TextView::caretDrawEvent(QPainter *painter)
+{
+	painter->setFont(config_.font());
+
+	// Get caret coordinates
+	const quint64 pos = cursor_->position();
+	const int x = pos % config_.getNum();
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
+
+	const bool caret_middle = pos < document_->length();
+	caret_drawer_->drawCaret(painter, x, y, caret_.getVisible(), caret_middle);
+}
+
 void TextView::drawCaret(bool visible)
 {
 	drawCaret(visible, cursor_->position());
@@ -311,100 +326,17 @@ void TextView::drawCaret(bool visible, quint64 pos)
 		return;
 	}
 
-	// Redraw line
-	const quint64 line = cursor_->position() / config_.getNum();
-	if (cursor_->top() <= line && line - cursor_->top() < static_cast<uint>(config_.drawableLines(height()))) {
-		// 1行だけ再描画したい
-		drawView();
-	}
-
 	// Shape
 	const CaretShape shape = caret_.getShape(visible);
 	if (shape == CARET_NONE) {
 		return;
 	}
 
-	// Begin paint
-	QPainter painter;
-	painter.begin(&pix_);
-	painter.setFont(config_.font());
-
 	// Get caret coordinates
 	const int x = pos % config_.getNum();
 	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
-
-	// Draw shape
-	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
-
-	// Finish paint and update screen buffer
-	painter.end();
-	update(config_.x(x), y, config_.byteWidth(), config_.charHeight());
-}
-
-void TextView::drawCaretShape(CaretDrawInfo info)
-{
-	switch (info.shape) {
-	case CARET_LINE:
-		drawCaretLine(info);
-		break;
-	case CARET_BLOCK:
-		drawCaretBlock(info);
-		break;
-	case CARET_FRAME:
-		drawCaretFrame(info);
-		break;
-	case CARET_UNDERBAR:
-		drawCaretUnderbar(info);
-		break;
-	default:
-		;
-	}
-}
-
-void TextView::drawCaretLine(const CaretDrawInfo &info)
-{
-	int x;
-	//if (!info.caret_middle) {
-	if (true) {
-		x = config_.x(info.x);
-	} else {
-		x = config_.x(info.x) + config_.charWidth();
-	}
-	QBrush brush(config_.color(Color::CaretBackground));
-	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
-}
-
-void TextView::drawCaretBlock(const CaretDrawInfo &info)
-{
-	if (info.caret_middle) {
-		QBrush brush(config_.color(Color::CaretBackground));
-		info.painter.setBackground(brush);
-		info.painter.setPen(config_.color(Color::CaretText));
-		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-		// TODO: 本当はここで文字描画
-	} else {
-		// Draw block without data
-		QBrush brush(config_.color(Color::CaretBackground));
-		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-	}
-}
-
-void TextView::drawCaretFrame(const CaretDrawInfo &info)
-{
-	int width = config_.byteWidth() - 1;
-	int x = config_.x(info.x);
-
-	info.painter.setPen(config_.color(Color::CaretBackground));
-	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
-}
-
-void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
-{
-	int width = config_.byteWidth() - 1;
-	int x = config_.x(info.x);
-
-	QBrush brush(config_.color(Color::CaretBackground));
-	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
+	update(config_.x(x), y, width() - config_.x(x), config_.byteHeight());
+	return;
 }
 
 void TextView::mousePressEvent(QMouseEvent *ev)

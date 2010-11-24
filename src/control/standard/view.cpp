@@ -1,15 +1,13 @@
 
-#include <QtGui>
-#include <algorithm>
 #include "view.h"
-#include "document.h"
+#include "caretdrawer.h"
+#include "../document.h"
 
-using namespace std;
+namespace Standard {
 
-View::View(QWidget *parent, Document *doc, Highlight *hi)
+View::View(QWidget *parent, Document *doc)
 	: QWidget(parent)
 	, document_(doc)
-	, high_(hi)
 {
 }
 
@@ -22,7 +20,7 @@ void View::paintEvent(QPaintEvent*)
 	QPainter painter(this);
 	painter.drawPixmap(0, 0, pix_);
 
-	// TODO: draw caret
+	caretDrawEvent(&painter);
 }
 
 void View::resizeEvent(QResizeEvent *rs)
@@ -33,4 +31,6 @@ void View::resizeEvent(QResizeEvent *rs)
 	}
 }
 
+
+}	// namespace
 

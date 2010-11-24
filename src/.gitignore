@@ -3,3 +3,6 @@
 moc_*.cpp
 *.dylib
 *.gch
+*.cpp~
+*.h~
+*.swp

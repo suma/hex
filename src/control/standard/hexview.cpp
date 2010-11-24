@@ -5,6 +5,7 @@
 #include "../util/util.h"
 #include "../document.h"
 #include "../highlight.h"
+#include "caretdrawer.h"
 
 using namespace std;
 
@@ -95,9 +96,10 @@ int HexConfig::YToLine(int y) const
 // View
 
 HexView::HexView(QWidget *parent, ::Document *doc, Highlight *hi)
-	: ::View(parent, doc, hi)
+	: View(parent, doc)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)
+	, caret_drawer_(new CaretDrawer(NULL))
 	, keyboard_(new Keyboard(doc, this))
 {
 	// Enable keyboard input
@@ -272,6 +274,10 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int y)
 {
 	painter.drawText(x, y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
+}
+
+void HexView::caretDrawEvent(QPainter *painter)
+{
 }
 
 void HexView::drawCaret(bool visible)

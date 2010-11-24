@@ -3,13 +3,16 @@
 
 #include <QFont>
 #include <QFontMetrics>
-#include "../view.h"
+#include "view.h"
 #include "../highlight.h"
 #include "cursor.h"
 #include "caret.h"
 #include "keyboard.h"
 
 namespace Standard {
+
+	class CaretDrawer;
+
 	enum DrawMode {
 		DRAW_ALL = 0,
 		DRAW_LINE,
@@ -240,7 +243,7 @@ namespace Standard {
 		}
 	};
 
-	class HexView : public ::View
+	class HexView : public View
 	{
 		Q_OBJECT
 
@@ -318,6 +321,7 @@ namespace Standard {
 
 		static void byteToHex(uchar c, QString &h);
 		quint64 posAt(const QPoint &pos) const;
+		void caretDrawEvent(QPainter *painter);
 
 	public:
 		void drawCaret(bool visible = true);
@@ -338,7 +342,9 @@ namespace Standard {
 		HexConfig config_;
 		Cursor *cursor_;
 		Caret caret_;
+		CaretDrawer *caret_drawer_;
 		Keyboard *keyboard_;
+		std::vector<uchar> buff_;
 	};
 
 }
