@@ -231,25 +231,25 @@ namespace Standard {
 			QObject::connect(this, SIGNAL(selectionUpdate(quint64, quint64, bool)), cursor,  SLOT(redrawSelection(quint64, quint64, bool)));
 		}
 
-		quint64 getRelativePosition(qint64 pos) const
+		quint64 getRelativePosition(qint64 relative_pos) const
 		{
-			const quint64 diff = static_cast<quint64>(qAbs(pos));
-			quint64 okPos = 0;
-			if (pos < 0) {
+			const quint64 diff = static_cast<quint64>(qAbs(relative_pos));
+			quint64 pos = 0;
+			if (relative_pos < 0) {
 				if (position_ < diff) {
-					okPos = 0;
+					pos = 0;
 				} else {
-					okPos = position_ - diff;
+					pos = position_ - diff;
 				}
 			} else {
 				if (position_ < std::numeric_limits<quint64>::max() - diff && position_ + diff <= document_->length()) {
-					okPos = position_ + diff;
+					pos = position_ + diff;
 				} else {
-					okPos = document_->length();
+					pos = document_->length();
 				}
 			}
 			
-			return okPos;
+			return pos;
 		}
 
 	signals:
