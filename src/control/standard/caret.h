@@ -27,22 +27,22 @@ namespace Standard {
 			invisible_shape_ = shape;
 		}
 
-		CaretShape getVisibleShape() const
+		CaretShape visibleShape() const
 		{
 			return visible_shape_;
 		}
 
-		CaretShape getInvisibleShape() const
+		CaretShape invisibleShape() const
 		{
 			return invisible_shape_;
 		}
 
 		CaretShape getCurrentShape() const
 		{
-			return getShape(is_visible_);
+			return shape(is_visible_);
 		}
 
-		CaretShape getShape(bool visible) const
+		CaretShape shape(bool visible) const
 		{
 			if (visible) {
 				return visible_shape_;
@@ -56,12 +56,12 @@ namespace Standard {
 			timer_id_ = id;
 		}
 
-		int  getTimerId() const
+		int  timerId() const
 		{
 			return timer_id_;
 		}
 
-		bool getVisible() const
+		bool visible() const
 		{
 			return is_visible_;
 		}

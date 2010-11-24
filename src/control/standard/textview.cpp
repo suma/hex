@@ -311,7 +311,7 @@ void TextView::caretDrawEvent(QPainter *painter)
 	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
 
 	const bool caret_middle = pos < document_->length();
-	caret_drawer_->drawCaret(painter, x, y, caret_.getVisible(), caret_middle);
+	caret_drawer_->drawCaret(painter, x, y, caret_.visible(), caret_middle);
 }
 
 void TextView::drawCaret(bool visible)
@@ -327,7 +327,7 @@ void TextView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Shape
-	const CaretShape shape = caret_.getShape(visible);
+	const CaretShape shape = caret_.shape(visible);
 	if (shape == CARET_NONE) {
 		return;
 	}
@@ -392,12 +392,12 @@ void TextView::setCaretBlink(bool enable)
 		return;
 	}
 	if (enable) {
-		if (caret_.getTimerId() == 0) {
+		if (caret_.timerId() == 0) {
 			caret_.setTimerId(startTimer(config_.CaretBlinkTime));
 		}
 	} else {
-		if (caret_.getTimerId() != 0) {
-			killTimer(caret_.getTimerId());
+		if (caret_.timerId() != 0) {
+			killTimer(caret_.timerId());
 			caret_.setTimerId(0);
 		}
 	}
@@ -405,8 +405,8 @@ void TextView::setCaretBlink(bool enable)
 
 void TextView::timerEvent(QTimerEvent *ev)
 {
-	if (caret_.getTimerId() == ev->timerId()) {
-		drawCaret(caret_.getVisible());
+	if (caret_.timerId() == ev->timerId()) {
+		drawCaret(caret_.visible());
 		caret_.inverseVisible();
 	}
 }

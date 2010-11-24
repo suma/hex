@@ -299,7 +299,7 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	}
 
 	// Shape
-	const CaretShape shape = caret_.getShape(visible);
+	const CaretShape shape = caret_.shape(visible);
 	if (shape == CARET_NONE) {
 		return;
 	}
@@ -486,12 +486,12 @@ void HexView::setCaretBlink(bool enable)
 		return;
 	}
 	if (enable) {
-		if (caret_.getTimerId() == 0) {
+		if (caret_.timerId() == 0) {
 			caret_.setTimerId(startTimer(config_.CaretBlinkTime));
 		}
 	} else {
-		if (caret_.getTimerId() != 0) {
-			killTimer(caret_.getTimerId());
+		if (caret_.timerId() != 0) {
+			killTimer(caret_.timerId());
 			caret_.setTimerId(0);
 		}
 	}
@@ -499,8 +499,8 @@ void HexView::setCaretBlink(bool enable)
 
 void HexView::timerEvent(QTimerEvent *ev)
 {
-	if (caret_.getTimerId() == ev->timerId()) {
-		drawCaret(caret_.getVisible());
+	if (caret_.timerId() == ev->timerId()) {
+		drawCaret(caret_.visible());
 		caret_.inverseVisible();
 	}
 }

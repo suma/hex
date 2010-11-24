@@ -22,7 +22,7 @@ void CaretDrawer::drawCaret(QPainter *painter, int x, int y, bool visible, bool 
 {
 	// TODO: painter.setFont(config_.font());
 
-	const CaretShape shape = view_->caret().getShape(visible);
+	const CaretShape shape = view_->caret().shape(visible);
 
 	// Draw shape
 	drawCaretShape(CaretDrawInfo(*painter, shape, x, y, caret_middle));
