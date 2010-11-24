@@ -43,38 +43,14 @@ namespace Standard {
 			return top_;
 		}
 
-		void setTop(quint64 top)
-		{
-			if (top_ != top) {
-				top_ = top;
-				emit topChanged(top);
-			}
-		}
-
 		quint64 position() const
 		{
 			return position_;
 		}
 
-		void setPosition(quint64 pos)
-		{
-			if (position_ != pos) {
-				position_ = pos;
-				emit positionChanged(pos);
-			}
-		}
-
 		quint64 anchor() const
 		{
 			return anchor_;
-		}
-
-		void setAnchor(quint64 anchor)
-		{
-			if (anchor_ != anchor) {
-				anchor_ = anchor;
-				emit anchorChanged(anchor);
-			}
 		}
 
 		bool nibble() const
@@ -97,22 +73,6 @@ namespace Standard {
 			return insert_;
 		}
 
-		void setInsert(bool insert)
-		{
-			if (insert_ != insert) {
-				insert_ = insert;
-				emit insertChanged(insert);
-			}
-		}
-
-		void resetAnchor()
-		{
-			if (anchor_ != position_) {
-				anchor_ = position_;
-				emit anchorChanged(position_);
-			}
-		}
-
 		bool hasSelection()
 		{
 			return position_ != anchor_;
@@ -130,6 +90,48 @@ namespace Standard {
 				qMax(position_, anchor_)	// end
 			};
 			return c;
+		}
+		
+		
+	public slots:
+		void setTop(quint64 top)
+		{
+			if (top_ != top) {
+				top_ = top;
+				emit topChanged(top);
+			}
+		}
+
+		void setPosition(quint64 pos)
+		{
+			if (position_ != pos) {
+				position_ = pos;
+				emit positionChanged(pos);
+			}
+		}
+
+		void setAnchor(quint64 anchor)
+		{
+			if (anchor_ != anchor) {
+				anchor_ = anchor;
+				emit anchorChanged(anchor);
+			}
+		}
+
+		void setInsert(bool insert)
+		{
+			if (insert_ != insert) {
+				insert_ = insert;
+				emit insertChanged(insert);
+			}
+		}
+
+		void resetAnchor()
+		{
+			if (anchor_ != position_) {
+				anchor_ = position_;
+				emit anchorChanged(position_);
+			}
 		}
 	
 	public:
