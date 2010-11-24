@@ -544,22 +544,6 @@ void TextView::redrawSelection(quint64 begin, quint64 end)
 	drawView();
 }
 
-void TextView::changeData(quint64 pos, uchar character)
-{
-	document_->remove(pos, 1);
-	document_->insert(pos, &character, 1);
-	// TODO: implement Redraw Event
-	//drawView();
-}
-
-void TextView::insertData(quint64 pos, uchar character)
-{
-	document_->insert(pos, &character, 1);
-	// TODO: implement Redraw Event
-	//drawCaret();
-	//drawView();
-}
-
 void TextView::removeData(quint64 pos, quint64 len)
 {
 	document_->remove(pos, len);

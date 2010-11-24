@@ -339,9 +339,6 @@ namespace Standard {
 		void drawCaret(bool visible, quint64 pos);
 
 	private:
-
-		void changeData(quint64 pos, uchar character);
-		void insertData(quint64 pos, uchar character);
 		void removeData(quint64 pos, quint64 len);
 
 	private slots:
