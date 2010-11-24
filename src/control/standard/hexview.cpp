@@ -219,16 +219,6 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 //	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
 //}
 
-
-ColorType HexView::getColorType(const CursorSelection &c, quint64 pos)
-{
-	if (c.selected(pos)) {
-		return ColorType(Color::SelBackground, Color::SelText);
-	} else {
-		return ColorType(Color::Background, Color::Text);
-	}
-}
-
 void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, int x_end, uint size)
 {
 	HexConfig::XIterator xitr = config_.createXIterator();
@@ -241,7 +231,7 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 	for (uint index = 0; index < size; ++index) {
 		if (x_begin <= *xitr && *xitr < x_end) {
 			// Set color
-			ColorType color = getColorType(selection, docpos++);
+			ColorType color = selection.color(docpos++);
 			QBrush brush = QBrush(config_.color(color.Background));
 			painter.setBackground(brush);
 			painter.setPen(config_.color(color.Text));
@@ -309,88 +299,6 @@ void HexView::drawCaret(bool visible, quint64 pos)
 	update(config_.x(x), y, width() - config_.x(x), config_.byteHeight());
 	return;
 }
-
-/*
-void HexView::drawCaretShape(CaretDrawInfo info)
-{
-	switch (info.shape) {
-	case CARET_LINE:
-		drawCaretLine(info);
-		break;
-	case CARET_BLOCK:
-		drawCaretBlock(info);
-		break;
-	case CARET_FRAME:
-		drawCaretFrame(info);
-		break;
-	case CARET_UNDERBAR:
-		drawCaretUnderbar(info);
-		break;
-	default:
-		;
-	}
-}
-
-void HexView::drawCaretLine(const CaretDrawInfo &info)
-{
-	int x;
-	if (cursor_->nibble() || !info.caret_middle) {
-		x = config_.x(info.x);
-	} else {
-		x = config_.x(info.x) + config_.byteMargin().left() + config_.charWidth();
-	}
-	QBrush brush(config_.color(Color::CaretBackground));
-	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
-}
-
-void HexView::drawCaretBlock(const CaretDrawInfo &info)
-{
-	QBrush brush(config_.color(Color::CaretBackground));
-	ColorType color = getColorType(cursor_->getSelection(), info.pos);
-	
-	if (info.caret_middle) {
-		if (cursor_->nibble() || cursor_->hasSelection()) {
-			// Draw block byte
-			info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-		} else {
-			// Draw block lowwer nibble
-			info.painter.fillRect(config_.x(info.x) + config_.byteMargin().left() + config_.charWidth(), info.y, config_.charWidth() + config_.byteMargin().right(), config_.byteHeight(), brush);
-		}
-	} else {
-		// Draw block without data
-		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-	}
-}
-
-void HexView::drawCaretFrame(const CaretDrawInfo &info)
-{
-	int width, x;
-	if (cursor_->nibble() || !info.caret_middle) {
-		width = config_.byteWidth() - 1;
-		x = config_.x(info.x);
-	} else {
-		width = config_.charWidth() + config_.byteMargin().right() - 1;
-		x = config_.x(info.x) + config_.charWidth() + config_.byteMargin().left();
-	}
-	info.painter.setPen(config_.color(Color::CaretBackground));
-	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
-}
-
-void HexView::drawCaretUnderbar(const CaretDrawInfo &info)
-{
-	int width, x;
-	if (cursor_->nibble() || !info.caret_middle) {
-		width = config_.byteWidth() - 1;
-		x = config_.x(info.x);
-	} else {
-		width = config_.charWidth() + config_.byteMargin().right() - 1;
-		x = config_.x(info.x) + config_.byteMargin().left() + config_.charWidth();
-	}
-
-	QBrush brush(config_.color(Color::CaretBackground));
-	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
-}
-*/
 
 void HexView::byteToHex(uchar c, QString &h)
 {

@@ -183,15 +183,6 @@ void TextView::drawView()
 	update(0, y_top, draw_width, draw_height);
 }
 
-ColorType TextView::getColorType(const CursorSelection &c, quint64 pos)
-{
-	if (c.begin <= pos && pos < c.end) {
-		return ColorType(Color::SelBackground, Color::SelText);
-	} else {
-		return ColorType(Color::Background, Color::Text);
-	}
-}
-
 void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 {
 	TextConfig::XIterator xitr = config_.createXIterator();
@@ -216,7 +207,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			uint i = 0;
 			while (i < printableBytes && *xitr + i < config_.getNum()) {
 				// Set color
-				ColorType color = getColorType(selection, docpos);
+				ColorType color = selection.color(docpos);
 				QBrush brush = QBrush(config_.color(color.Background));
 				letterPainter.setBackground(brush);
 				letterPainter.setPen(config_.color(color.Text));
@@ -239,7 +230,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 				++yitr;
 
 				while (i < printableBytes) {
-					ColorType color = getColorType(selection, docpos);
+					ColorType color = selection.color(docpos);
 					QBrush brush = QBrush(config_.color(color.Background));
 					painter.setBackground(brush);
 					painter.setPen(config_.color(color.Text));
@@ -259,7 +250,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			index += printableBytes;
 		} else {
 			// Set color
-			ColorType color = getColorType(selection, docpos);
+			ColorType color = selection.color(docpos);
 			QBrush brush = QBrush(config_.color(color.Background));
 			painter.setBackground(brush);
 			painter.setPen(config_.color(color.Text));

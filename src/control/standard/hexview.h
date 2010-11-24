@@ -297,7 +297,6 @@ namespace Standard {
 
 	private:
 
-		ColorType getColorType(const CursorSelection &, quint64 pos);
 		void drawLines(QPainter &painter, quint64 top, int y, int x_begin, int x_end, uint size);
 
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
@@ -311,12 +310,6 @@ namespace Standard {
 	public:
 		void drawCaret(bool visible = true);
 		void drawCaret(bool visible, quint64 pos);
-	private:
-		//void drawCaretShape(CaretDrawInfo info);
-		//void drawCaretLine(const CaretDrawInfo &);
-		//void drawCaretFrame(const CaretDrawInfo &);
-		//void drawCaretBlock(const CaretDrawInfo &);
-		//void drawCaretUnderbar(const CaretDrawInfo &);
 
 	private slots:
 		void inserted(quint64 pos, quint64 len);

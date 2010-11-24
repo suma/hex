@@ -302,7 +302,6 @@ namespace Standard {
 
 	private:
 
-		ColorType getColorType(const CursorSelection &, quint64 pos);
 		void drawLines(QPainter &painter, quint64 top, int y, uint size);
 		void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
 		void drawText(QPainter &painter, const QString &str, int x, int y);
