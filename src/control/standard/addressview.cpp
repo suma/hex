@@ -137,7 +137,6 @@ void AddressView::drawView()
 			str[7 - j] = QChar(util::itohex(addr & 0xF));
 			addr >>= 4;
 		}
-		qDebug() << line << sel_pos;
 		// Change cursor color
 		if ((line / config_.num()) == sel_pos) {
 			painter.setPen(config_.color(Color::SelText));

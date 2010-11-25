@@ -198,20 +198,17 @@ namespace Standard {
 			}
 
 			if (top == top_) {
-				//if ((!sel && hasSelection()) || sel && !hasSelection()) {
-				if (!sel && hasSelection()) {
+				if (!sel && sel == hasSelection()) {
+					setPosition(pos);
+					setAnchor(pos);
+				} else {
 					// Redraw position only
 					quint64 begin = qMin(qMin(position_, anchor_), pos);
 					quint64 end = qMax(qMax(position_, anchor_), pos);
+					if (sel != hasSelection()) {
+						setAnchor(sel ? anchor_ : pos);
+					}
 					setPosition(pos);
-					setAnchor(sel ? anchor_ : position_);
-					redrawSelection(begin, end);
-				} else if (position_ != pos) {
-					// Draw selection
-					quint64 begin = qMin(qMin(position_, anchor_), pos);
-					quint64 end   = qMax(qMax(position_, anchor_), pos);
-					setPosition(pos);
-					setAnchor(sel ? anchor_ : position_);
 					redrawSelection(begin, end);
 				}
 			} else {
