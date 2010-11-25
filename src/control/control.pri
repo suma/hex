@@ -12,6 +12,7 @@ HEADERS += \
     qfragmentmap_p.h \
     standard.h \
     view.h \
+	util/util.h \
     standard/addressview.h \
 	standard/caret.h \
 	standard/caretdrawer.h \
@@ -31,6 +32,7 @@ SOURCES += \
     document_i.cpp \
     keyboardhandler.cpp \
     view.cpp \
+	util/util.cpp \
     standard/addressview.cpp \
 	standard/caret.cpp \
 	standard/caretdrawer.cpp \
