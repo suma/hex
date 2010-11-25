@@ -65,8 +65,6 @@ void Keyboard::keyPressEvent(QKeyEvent *ev)
 			const quint64 len = qMax(cursor.position(), cursor.anchor()) - pos;
 			removeData(pos, len);
 			view_->moveRelativePosition(pos, false, false);
-			// TODO: drawView [pos. pos+len]
-			//drawView();
 			cursor.setNibble(true);
 		} else if (0 < cursor.position()) {
 			removeData(cursor.position() - 1, 1);
@@ -84,8 +82,6 @@ void Keyboard::keyPressEvent(QKeyEvent *ev)
 			const quint64 len = qMax(cursor.position(), cursor.anchor()) - pos;
 			removeData(pos, len);
 			view_->moveRelativePosition(0, false, false);
-			// TODO: drawView [pos. pos+len]
-			//drawView();
 			cursor.setNibble(true);
 		} else if (cursor.position() < document_->length()) {
 			removeData(cursor.position(), 1);

@@ -12,7 +12,6 @@ namespace Standard {
 	class AddressView;
 }
 
-class Highlight;
 
 class Editor : public QWidget
 {
@@ -24,11 +23,11 @@ public:
 protected:
 
 	void resizeEvent(QResizeEvent*);
+	void paintEvent(QPaintEvent *ev);
 
 protected:
 	QLabel *label;
 	Document *doc_;
-	Highlight *high_;
 	Standard::HexView *hview_;
 	Standard::TextView *tview_;
 	Standard::AddressView *aview_;

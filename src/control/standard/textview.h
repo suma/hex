@@ -5,7 +5,6 @@
 #include <QFontMetrics>
 #include "../util/util.h"
 #include "view.h"
-#include "../highlight.h"
 #include "caret.h"
 #include "cursor.h"
 #include "hexview.h"
@@ -260,7 +259,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		TextView(QWidget *parent = NULL, ::Document *doc = NULL, Highlight *hi = NULL);
+		TextView(QWidget *parent = NULL, ::Document *doc = NULL);
 		~TextView();
 
 		TextConfig &config()

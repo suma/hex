@@ -6,7 +6,6 @@
 #include "textview.h"
 #include "../util/util.h"
 #include "../document.h"
-#include "../highlight.h"
 #include "textdecodehelper.h"
 #include "caretdrawer.h"
 
@@ -91,7 +90,7 @@ int TextConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-TextView::TextView(QWidget *parent, ::Document *doc, Highlight *hi)
+TextView::TextView(QWidget *parent, ::Document *doc)
 	: View(parent, doc)
 	, cursor_(new Cursor(doc))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))

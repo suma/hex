@@ -9,7 +9,7 @@ namespace util {
 		return N;
 	}
 
-	static char itohex(int i)
+	static char itohex(uint i)
 	{
 		// [0-9a-f]
 		Q_ASSERT(i <= 15);

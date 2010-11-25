@@ -4,7 +4,6 @@
 #include "hexview.h"
 #include "../util/util.h"
 #include "../document.h"
-#include "../highlight.h"
 #include "caretdrawer.h"
 
 using namespace std;
@@ -39,7 +38,6 @@ HexConfig::HexConfig()
 
 void HexConfig::update()
 {
-
 	// get charWidth
 	for (int i = 0; i < 16; i++) {
 		QChar ch(util::itohex(i));
@@ -94,7 +92,7 @@ int HexConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-HexView::HexView(QWidget *parent, ::Document *doc, Highlight *)
+HexView::HexView(QWidget *parent, ::Document *doc)
 	: View(parent, doc)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)

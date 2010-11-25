@@ -4,7 +4,6 @@
 #include <QFont>
 #include <QFontMetrics>
 #include "view.h"
-#include "../highlight.h"
 #include "cursor.h"
 #include "caret.h"
 #include "keyboard.h"
@@ -248,7 +247,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		HexView(QWidget *parent = NULL, ::Document *doc = NULL, Highlight *hi = NULL);
+		HexView(QWidget *parent = NULL, ::Document *doc = NULL);
 		~HexView();
 
 		HexConfig &config()
