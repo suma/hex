@@ -19,7 +19,7 @@ AddressConfig::AddressConfig()
 	// Coloring
 	colors_[Color::Background] = QColor(0xCC,0xFF,0xFF);
 	colors_[Color::Text] = QColor(0,0,0);
-	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
+	colors_[Color::SelBackground] = QColor(0xFF,0xA0,0xFF);
 	colors_[Color::SelText] = QColor(0,0,0);
 
 }
@@ -121,7 +121,6 @@ void AddressView::drawView()
 {
 	QPainter painter(this);
 	painter.setFont(config_.font());
-	painter.fillRect(rect(), config_.color(Color::Background));
 
 	const quint64 top = cursor_.top() * config_.num();
 	quint64 line = top;
@@ -129,12 +128,24 @@ void AddressView::drawView()
 	int count = config_.drawableLines(height());
 	int y = config_.top() + config_.byteMargin().top();
 
+	const quint64 sel_pos = cursor_.position() / config_.num();
+
 	QString str;
 	str.resize(8);
 	for (int i = 0; i < count; i++) {
 		for (quint32 j = 0, addr = (line & 0xFFFFFFFF); j < 8; j++) {
 			str[7 - j] = QChar(util::itohex(addr & 0xF));
 			addr >>= 4;
+		}
+		qDebug() << line << sel_pos;
+		// Change cursor color
+		if ((line / config_.num()) == sel_pos) {
+			painter.setPen(config_.color(Color::SelText));
+			painter.setBackground(QBrush(config_.color(Color::SelBackground)));
+			painter.fillRect(0, y, config_.fontMetrics().width(str), config_.byteHeight(), QBrush(config_.color(Color::SelBackground)));
+		} else {
+			painter.setPen(config_.color(Color::Text));
+			painter.setBackground(QBrush(config_.color(Color::Background)));
 		}
 		painter.drawText(0, y, config_.fontMetrics().width(str), config_.byteHeight(), Qt::AlignLeft, str);
 
