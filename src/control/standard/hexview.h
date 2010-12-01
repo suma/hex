@@ -1,12 +1,14 @@
-#ifndef STDHEXVIEW_H_INC
-#define STDHEXVIEW_H_INC
+
+#pragma once
 
 #include <QFont>
 #include <QFontMetrics>
-#include "view.h"
+#include "layeredwidget.h"
 #include "cursor.h"
 #include "caret.h"
 #include "keyboard.h"
+
+class Document;
 
 namespace Standard {
 
@@ -240,7 +242,7 @@ namespace Standard {
 		}
 	};
 
-	class HexView : public View
+	class HexView : public LayeredWidget
 	{
 		Q_OBJECT
 
@@ -270,7 +272,6 @@ namespace Standard {
 	private:
 
 	private:
-		void resizeEvent(QResizeEvent *);
 		void paintEvent(QPaintEvent*);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
@@ -317,6 +318,7 @@ namespace Standard {
 
 	private:
 		// Main components
+		::Document *document_;
 		HexConfig config_;
 		Cursor *cursor_;
 		Caret caret_;
@@ -326,4 +328,4 @@ namespace Standard {
 
 }
 
-#endif
+

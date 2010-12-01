@@ -1,13 +1,15 @@
-#ifndef STDTEXTVIEW_H_INC
-#define STDTEXTVIEW_H_INC
+
+#pragma once
 
 #include <QFont>
 #include <QFontMetrics>
 #include "../util/util.h"
-#include "view.h"
+#include "layeredwidget.h"
 #include "caret.h"
 #include "cursor.h"
 #include "hexview.h"
+
+class Document;
 
 namespace Standard {
 	class TextDecodeHelper;
@@ -253,7 +255,7 @@ namespace Standard {
 		}
 	};
 
-	class TextView : public View
+	class TextView : public LayeredWidget
 	{
 		Q_OBJECT
 
@@ -281,7 +283,6 @@ namespace Standard {
 
 
 	private:
-		void resizeEvent(QResizeEvent *);
 		void paintEvent(QPaintEvent*);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
@@ -329,6 +330,7 @@ namespace Standard {
 
 	private:
 		// Main components
+		::Document *document_;
 		TextConfig config_;
 		Cursor *cursor_;
 		TextDecodeHelper *decode_helper_;
@@ -338,4 +340,4 @@ namespace Standard {
 
 }
 
-#endif
+

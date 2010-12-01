@@ -93,7 +93,8 @@ int HexConfig::YToLine(int y) const
 // View
 
 HexView::HexView(QWidget *parent, ::Document *doc)
-	: View(parent, doc)
+	: LayeredWidget(parent)
+	, document_(doc)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 	, keyboard_(new Keyboard(doc, this))
@@ -117,15 +118,6 @@ HexView::HexView(QWidget *parent, ::Document *doc)
 HexView::~HexView()
 {
 	delete cursor_;
-}
-
-void HexView::resizeEvent(QResizeEvent *rs)
-{
-	QSize size(qMin(rs->size().width(), config_.maxWidth()), rs->size().height());
-	QResizeEvent resize(size, rs->oldSize());
-	View::resizeEvent(&resize);
-	pix_.fill(config_.color(Color::Background));
-	drawView();
 }
 
 void HexView::paintEvent(QPaintEvent*)

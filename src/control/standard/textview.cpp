@@ -91,7 +91,8 @@ int TextConfig::YToLine(int y) const
 // View
 
 TextView::TextView(QWidget *parent, ::Document *doc)
-	: View(parent, doc)
+	: LayeredWidget(parent)
+	, document_(doc)
 	, cursor_(new Cursor(doc))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))
 	, caret_(CARET_BLOCK, CARET_FRAME)
@@ -129,15 +130,6 @@ TextView::~TextView()
 {
 	delete decode_helper_;
 	delete cursor_;
-}
-
-void TextView::resizeEvent(QResizeEvent *rs)
-{
-	QSize size(qMin(rs->size().width(), config_.maxWidth()), rs->size().height());
-	QResizeEvent resize(size, rs->oldSize());
-	View::resizeEvent(&resize);
-	pix_.fill(config_.color(Color::Background));
-	drawView();
 }
 
 void TextView::paintEvent(QPaintEvent*)

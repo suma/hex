@@ -11,7 +11,6 @@ HEADERS += \
     keyboardhandler.h \
     qfragmentmap_p.h \
     standard.h \
-    view.h \
 	util/util.h \
     standard/addressview.h \
 	standard/caret.h \
@@ -22,8 +21,7 @@ HEADERS += \
     standard/keyboard.h \
     standard/layeredwidget.h \
 	standard/textdecodehelper.h \
-	standard/textview.h \
-	standard/view.h
+	standard/textview.h
 
 SOURCES += \
     control.cpp \
@@ -32,7 +30,6 @@ SOURCES += \
     document.cpp \
     document_i.cpp \
     keyboardhandler.cpp \
-    view.cpp \
 	util/util.cpp \
     standard/addressview.cpp \
 	standard/caret.cpp \
@@ -41,7 +38,6 @@ SOURCES += \
     standard/keyboard.cpp \
     standard/layeredwidget.cpp \
 	standard/textview.cpp \
-	standard/textdecodehelper.cpp \
-	standard/view.cpp
+	standard/textdecodehelper.cpp
 
 

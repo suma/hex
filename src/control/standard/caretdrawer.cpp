@@ -24,11 +24,8 @@ TextCaretDrawer::TextCaretDrawer(TextConfig &config, Cursor *cursor, ::Document 
 {
 }
 
-void TextCaretDrawer::paintEvent(QPaintEvent*)
+void TextCaretDrawer::paintEvent(QPaintEvent *event)
 {
-	QPainter painter(this);
-	painter.setFont(config_.font());
-
 	// Get caret coordinates
 	const quint64 pos = cursor_->position();
 	const int x = pos % config_.getNum();
@@ -36,6 +33,15 @@ void TextCaretDrawer::paintEvent(QPaintEvent*)
 
 	const bool caret_middle = pos < document_->length();
 
+	// FIXME
+	QRect update_area(config_.x(x), y, config_.charWidth(2), config_.byteHeight());
+
+	if (!event->region().contains(update_area)) {
+		return;
+	}
+
+	QPainter painter(this);
+	painter.setFont(config_.font());
 	CaretDrawInfo info(painter, caret_.currentShape(), pos, x, y, caret_middle);
 	drawCaret(info);
 }
@@ -114,10 +120,8 @@ HexCaretDrawer::HexCaretDrawer(HexConfig &config, Cursor *cursor, ::Document *do
 {
 }
 
-void HexCaretDrawer::paintEvent(QPaintEvent*)
+void HexCaretDrawer::paintEvent(QPaintEvent *event)
 {
-	QPainter painter(this);
-	painter.setFont(config_.font());
 
 	// Get caret coordinates
 	const quint64 pos = cursor_->position();
@@ -126,6 +130,16 @@ void HexCaretDrawer::paintEvent(QPaintEvent*)
 
 	const bool caret_middle = pos < document_->length();
 
+	// FIXME
+	QRect update_area(config_.x(x), y, config_.charWidth(2), config_.byteHeight());
+
+	if (!event->region().contains(update_area)) {
+		return;
+	}
+
+
+	QPainter painter(this);
+	painter.setFont(config_.font());
 	CaretDrawInfo info(painter, caret_.currentShape(), pos, x, y, caret_middle);
 	drawCaret(info);
 }
