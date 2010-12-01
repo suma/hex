@@ -163,11 +163,6 @@ void TextView::drawView()
 		return;
 	}
 
-	// Draw empty area(after end line)
-	QBrush brush(config_.color(Color::Background));
-	const int y_start = y_top + qMax(0, count_draw_line - 1) * config_.byteHeight();
-	painter.fillRect(0, y_start, width(), height(), brush);
-
 	// Copy from document
 	if (buff_.capacity() < size) {
 		buff_.resize(size);
@@ -180,8 +175,6 @@ void TextView::drawView()
 	// Update screen buffer
 	const int draw_width  = qMin(width(), config_.maxWidth());
 	const int draw_height = count_draw_line * config_.byteHeight();
-	painter.end();
-	update(0, y_top, draw_width, draw_height);
 }
 
 void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
@@ -274,12 +267,6 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			}
 		}
 	}
-
-	// Draw empty area(after end line)
-	if (0 < *xitr && *xitr < config_.getNum()) {
-		QBrush brush(config_.color(Color::Background));
-		painter.fillRect(xitr.textX(), yitr.screenY(), width(), config_.byteHeight(), brush);
-	}
 }
 
 inline void TextView::drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth)
@@ -290,22 +277,6 @@ inline void TextView::drawText(QPainter &painter, const QString &hex, int x, int
 inline void TextView::drawText(QPainter &painter, const QString &str, int x, int y)
 {
 	painter.drawText(x, y, config_.textWidth(str), config_.charHeight(), Qt::AlignCenter, str);
-}
-
-void TextView::drawCaret()
-{
-	quint64 pos = cursor_->position();
-
-	// Check out of range
-	if (!(config_.top() + config_.byteHeight() < height())) {
-		return;
-	}
-
-	// Get caret coordinates
-	const int x = pos % config_.getNum();
-	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
-	update(config_.x(x), y, width() - config_.x(x), config_.byteHeight());
-	return;
 }
 
 void TextView::mousePressEvent(QMouseEvent *ev)
@@ -380,7 +351,7 @@ void TextView::setCaretBlink(bool enable)
 void TextView::timerEvent(QTimerEvent *ev)
 {
 	if (caret_.timerId() == ev->timerId()) {
-		drawCaret();
+		//drawCaret();
 		caret_.inverseVisible();
 	}
 }
@@ -489,7 +460,8 @@ void TextView::redrawSelection(quint64 begin, quint64 end)
 	end   /= config_.getNum();
 
 	// FIXIME: redraw [beginLine, endLine]
-	drawView();
+	//drawView();
+	update();
 }
 
 void TextView::removeData(quint64 pos, quint64 len)
@@ -497,13 +469,15 @@ void TextView::removeData(quint64 pos, quint64 len)
 	document_->remove(pos, len);
 	// TODO: implement Redraw Event
 	//drawView();
+	update();
 }
 
 void TextView::inserted(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
 	//drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
-	drawView();
+	//drawView();
+	update();
 }
 
 
@@ -511,26 +485,29 @@ void TextView::removed(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
 	//drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
-	drawView();
+	update();
 }
 
 
 void TextView::topChanged(quint64 top)
 {
-	drawView();
+	//drawView();
+	update();
 }
 
 void TextView::positionChanged(quint64 old, quint64 pos)
 {
 	// FIXME: optimize update area
-	update(0, 0, width(), height());
+	//update(0, 0, width(), height());
+	update();
 }
 
 void TextView::insertChanged(bool)
 {
 	// FIXME: optimize update area
 	// update curosr pos
-	update(0, 0, width(), height());
+	//update(0, 0, width(), height());
+	update();
 }
 
 

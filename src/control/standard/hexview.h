@@ -303,8 +303,6 @@ namespace Standard {
 		static void byteToHex(uchar c, QString &h);
 		quint64 posAt(const QPoint &pos) const;
 
-	public:
-		void drawCaret();
 
 	private slots:
 		void inserted(quint64 pos, quint64 len);

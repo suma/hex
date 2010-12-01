@@ -312,9 +312,6 @@ namespace Standard {
 
 		void caretDrawEvent(QPainter *painter);
 
-	public:
-		void drawCaret();
-
 	private:
 		void removeData(quint64 pos, quint64 len);
 

@@ -154,7 +154,7 @@ void Keyboard::keyInputEvent(QChar ch)
 			cursor.setNibble(false);
 
 			// FIXME: redraw caret
-			view_->drawCaret();
+			//view_->drawCaret();
 		} else {
 			// TODO: ::Keyboard
 			//moveRelativePosition(1, ...);

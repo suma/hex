@@ -24,9 +24,9 @@ HexConfig::HexConfig()
 	, CaretBlinkTime(500)
 {
 	// Coloring
-	colors_[Color::Background] = QColor(0xEF,0xEF,0xEF);
+	colors_[Color::Background] = QColor(0xEF,0xEF,0xEF, 0);
 	colors_[Color::Text] = QColor(0,0,0);
-	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
+	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF, 180);
 	colors_[Color::SelText] = QColor(0,0,0);
 	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
 
@@ -135,16 +135,6 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	QPainter painter(this);
 	painter.setFont(config_.font());
 
-	if (!document_->length()) {
-		// TODO: draw Empty Background only
-		QBrush brush(config_.color(Color::Background));
-		painter.fillRect(0, 0, width(), height(), brush);
-		painter.end();
-		// Update screen buffer
-		update(0, 0, width(), height());
-		return;
-	}
-
 	Q_ASSERT(0 <= line_start);
 	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / config_.getNum() + 1);
 	Q_ASSERT(0 <= end);
@@ -186,14 +176,6 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 		return;
 	}
 
-	// Draw empty area(after end line)
-	if (mode == DRAW_ALL || mode == DRAW_AFTER) {
-		//qDebug("draw empty area DRAW_ALL or DRAW_AFTER");
-		QBrush brush(config_.color(Color::Background));
-		const int y_start = y_top + qMax(0, count_draw_line - 1) * config_.byteHeight();
-		painter.fillRect(0, y_start, width(), height(), brush);
-	}
-
 	// Copy from document
 	if (buff_.capacity() < size) {
 		buff_.resize(size);
@@ -207,8 +189,6 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	// Update screen buffer
 	const int draw_width  = qMin(width(), config_.maxWidth());
 	const int draw_height = count_draw_line * config_.byteHeight();
-	painter.end();
-	update(0, y_top, draw_width, draw_height);
 
 	//qDebug("HexView: emit viewDrawed(mode, line_start, end);");
 }
@@ -251,33 +231,11 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 			++yitr;
 		}
 	}
-
-	// Draw empty area(after end line)
-	if (0 < *xitr && *xitr < x_end && static_cast<uint>(*xitr) < config_.getNum()) {
-		QBrush brush(config_.color(Color::Background));
-		painter.fillRect(xitr.screenX(), *yitr, width(), config_.byteHeight(), brush);
-	}
 }
 
 inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int y)
 {
 	painter.drawText(x, y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
-}
-
-void HexView::drawCaret()
-{
-	quint64 pos = cursor_->position();
-
-	// Check out of range
-	if (!(config_.top() + config_.byteHeight() < height())) {
-		return;
-	}
-
-	// Get caret coordinates
-	const int x = pos % config_.getNum();
-	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
-	update(config_.x(x), y, width() - config_.x(x), config_.byteHeight());
-	return;
 }
 
 void HexView::byteToHex(uchar c, QString &h)
@@ -368,7 +326,7 @@ void HexView::setCaretBlink(bool enable)
 void HexView::timerEvent(QTimerEvent *ev)
 {
 	if (caret_.timerId() == ev->timerId()) {
-		drawCaret();
+		//drawCaret();
 		caret_.inverseVisible();
 	}
 }
@@ -394,14 +352,15 @@ void HexView::redrawSelection(quint64 begin, quint64 end)
 	const int endLine   = qMax(end, cursor_->top()) - cursor_->top();
 
 	//qDebug("redrawSelection %d, %d, Top:%llu", beginLine, endLine, Top);
-	drawView(DRAW_RANGE, beginLine, endLine + 1);
+//	drawView(DRAW_RANGE, beginLine, endLine + 1);
+	update();
 }
 
 void HexView::inserted(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
 	//drawViewAfter(pos);
-	drawView();
+	update();
 }
 
 
@@ -409,12 +368,13 @@ void HexView::removed(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
 	//drawViewAfter(pos);
-	drawView();
+	update();
 }
 
 void HexView::topChanged(quint64 top)
 {
-	drawView();
+	//drawView();
+	update();
 }
 
 void HexView::positionChanged(quint64 old, quint64 pos)
@@ -422,19 +382,21 @@ void HexView::positionChanged(quint64 old, quint64 pos)
 	// 1. pos changed(cursor only)
 	// 2. selectino redraw
 
+	update();
 	// FIXME: optimize update area
-	if (false) {	// TODO: check cursor line
-		drawView();
-	} else {
-		update(0, 0, width(), height());
-	}
+	//if (false) {	// TODO: check cursor line
+	//	drawView();
+	//} else {
+	//	update(0, 0, width(), height());
+	//}
 }
 
 void HexView::insertChanged(bool)
 {
 	// FIXME: optimize update area
 	// update curosr pos
-	update(0, 0, width(), height());
+	//update(0, 0, width(), height());
+	update();
 }
 
 void HexView::selectionUpdate(quint64 begin, quint64 end)
