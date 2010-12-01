@@ -26,7 +26,7 @@ TextConfig::TextConfig()
 	, CaretBlinkTime(500)
 {
 	// Coloring
-	colors_[Color::Background] = QColor(0xEF,0xDF,0xDF);
+	colors_[Color::Background] = QColor(0xEF,0xDF,0xDF, 0);
 	colors_[Color::Text] = QColor(0,0,0);
 	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
 	colors_[Color::SelText] = QColor(0,0,0);
@@ -194,6 +194,9 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
 			int epos = qMin(*xitr + printableBytes, (uint)config_.getNum() - 1);
+
+			// bad
+			//QPixmap pix = QPixmap::grabWidget(parentWidget()).copy(this->x() + config_.x(*xitr), this->y() + yitr.screenY(), config_.posWidth(*xitr, epos), config_.byteHeight());
 			QPixmap pix(QSize(config_.posWidth(*xitr, epos), config_.byteHeight()));
 
 			QPainter letterPainter(&pix);
