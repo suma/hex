@@ -20,6 +20,7 @@ HEADERS += \
 	standard/cursorutil.h \
     standard/hexview.h \
     standard/keyboard.h \
+    standard/layeredwidget.h \
 	standard/textdecodehelper.h \
 	standard/textview.h \
 	standard/view.h
@@ -38,6 +39,7 @@ SOURCES += \
 	standard/caretdrawer.cpp \
     standard/hexview.cpp \
     standard/keyboard.cpp \
+    standard/layeredwidget.cpp \
 	standard/textview.cpp \
 	standard/textdecodehelper.cpp \
 	standard/view.cpp

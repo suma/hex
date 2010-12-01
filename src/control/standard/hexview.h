@@ -10,8 +10,6 @@
 
 namespace Standard {
 
-	class CaretDrawer;
-
 	enum DrawMode {
 		DRAW_ALL = 0,
 		DRAW_LINE,
@@ -265,6 +263,7 @@ namespace Standard {
 			return *cursor_;
 		}
 
+		QWidget * createCaretWidget();
 		void setCaretBlink(bool enable);
 
 
@@ -272,6 +271,7 @@ namespace Standard {
 
 	private:
 		void resizeEvent(QResizeEvent *);
+		void paintEvent(QPaintEvent*);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
@@ -291,9 +291,6 @@ namespace Standard {
 	public:
 		//void drawViewAfter(quint64 pos);
 
-	signals:
-		void viewDrawed(DrawMode mode, int, int);
-
 	private:
 
 		void drawLines(QPainter &painter, quint64 top, int y, int x_begin, int x_end, uint size);
@@ -304,7 +301,6 @@ namespace Standard {
 
 		static void byteToHex(uchar c, QString &h);
 		quint64 posAt(const QPoint &pos) const;
-		void caretDrawEvent(QPainter *painter);
 
 	public:
 		void drawCaret();
@@ -324,7 +320,6 @@ namespace Standard {
 		HexConfig config_;
 		Cursor *cursor_;
 		Caret caret_;
-		CaretDrawer *caret_drawer_;
 		Keyboard *keyboard_;
 		std::vector<uchar> buff_;
 	};

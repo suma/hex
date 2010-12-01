@@ -26,6 +26,7 @@ Editor::Editor()
 
 	hview_ = new Standard::HexView(this, doc_);
 	hview_->setCaretBlink(true);
+	hview_->add(hview_->createCaretWidget());
 
 	
 	aview_ = new Standard::AddressView(this, doc_, hview_);
@@ -41,6 +42,7 @@ Editor::Editor()
 
 	tview_ = new Standard::TextView(this, doc_);
 	tview_->setCaretBlink(true);
+	tview_->add(tview_->createCaretWidget());
 	tview_->move(aview_->width() + hview_->config().width() + 20, 0);
 	tview_->resize(tview_->config().width(), 270);
 	tview_->show();

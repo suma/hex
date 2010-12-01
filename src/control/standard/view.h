@@ -1,14 +1,14 @@
 
 #pragma once
 
-#include <QWidget>
+#include "layeredwidget.h"
 #include "color.h"
 
 class Document;
 
 namespace Standard {
 
-	class View : public QWidget
+	class View : public LayeredWidget
 	{
 		Q_OBJECT
 
@@ -21,12 +21,6 @@ namespace Standard {
 		View(QWidget *parent = NULL, Document *doc = NULL);
 		virtual ~View();
 
-	private:
-		void paintEvent(QPaintEvent*);
-
-	protected:
-		void resizeEvent(QResizeEvent*);
-		virtual void caretDrawEvent(QPainter *) = 0;
 	};
 
 

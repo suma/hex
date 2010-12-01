@@ -4,6 +4,7 @@
 
 #include <limits>
 #include <vector>
+#include <list>
 #include <deque>
 #include <algorithm>
 #include <iterator>

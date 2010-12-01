@@ -5,6 +5,8 @@
 #include <QPainter>
 #include "caret.h"
 
+class Document;
+
 namespace Standard {
 
 	class Caret;
@@ -43,12 +45,16 @@ namespace Standard {
 		virtual void drawCaret(CaretDrawInfo info) = 0;
 	};
 
-	class TextCaretDrawer : public CaretDrawer
+	class TextCaretDrawer : public CaretDrawer, public QWidget
 	{
 	private:
 		TextConfig &config_;
+		Cursor *cursor_;
+		::Document *document_;
+		Caret caret_;
 	public:
-		TextCaretDrawer(TextConfig &config);
+		TextCaretDrawer(TextConfig &config, Cursor *cursor, ::Document *document);
+		void paintEvent(QPaintEvent*);
 		void drawCaret(CaretDrawInfo info);
 
 	private:
@@ -59,13 +65,16 @@ namespace Standard {
 
 	};
 
-	class HexCaretDrawer : public CaretDrawer
+	class HexCaretDrawer : public CaretDrawer, public QWidget
 	{
 	private:
 		HexConfig &config_;
 		Cursor *cursor_;
+		::Document *document_;
+		Caret caret_;
 	public:
-		HexCaretDrawer(HexConfig &config, Cursor *cursor);
+		HexCaretDrawer(HexConfig &config, Cursor *cursor, ::Document *document);
+		void paintEvent(QPaintEvent*);
 		void drawCaret(CaretDrawInfo info);
 	private:
 		void drawCaretLine(const CaretDrawInfo &info);

@@ -11,7 +11,6 @@
 
 namespace Standard {
 	class TextDecodeHelper;
-	class CaretDrawer;
 
 	class TextConfig
 	{
@@ -278,10 +277,12 @@ namespace Standard {
 		}
 
 		void setCaretBlink(bool enable);
+		QWidget *createCaretWidget();
 
 
 	private:
 		void resizeEvent(QResizeEvent *);
+		void paintEvent(QPaintEvent*);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
@@ -332,7 +333,6 @@ namespace Standard {
 		Cursor *cursor_;
 		TextDecodeHelper *decode_helper_;
 		Caret caret_;
-		CaretDrawer *caret_drawer_;
 		std::vector<uchar> buff_;
 	};
 

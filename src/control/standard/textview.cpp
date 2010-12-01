@@ -95,7 +95,6 @@ TextView::TextView(QWidget *parent, ::Document *doc)
 	, cursor_(new Cursor(doc))
 	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))
 	, caret_(CARET_BLOCK, CARET_FRAME)
-	, caret_drawer_(new TextCaretDrawer(config_))
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -141,11 +140,16 @@ void TextView::resizeEvent(QResizeEvent *rs)
 	drawView();
 }
 
+void TextView::paintEvent(QPaintEvent*)
+{
+	// FIXME: refactoring
+	drawView();
+}
+
 void TextView::drawView()
 {
 	// FIXME: refactoring refresh event
-	QPainter painter;
-	painter.begin(&pix_);
+	QPainter painter(this);
 	painter.setFont(config_.font());
 
 	// TODO: draw Empty Background only
@@ -296,21 +300,6 @@ inline void TextView::drawText(QPainter &painter, const QString &str, int x, int
 	painter.drawText(x, y, config_.textWidth(str), config_.charHeight(), Qt::AlignCenter, str);
 }
 
-void TextView::caretDrawEvent(QPainter *painter)
-{
-	painter->setFont(config_.font());
-
-	// Get caret coordinates
-	const quint64 pos = cursor_->position();
-	const int x = pos % config_.getNum();
-	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
-
-	const bool caret_middle = pos < document_->length();
-
-	CaretDrawInfo info(*painter, caret_.currentShape(), pos, x, y, caret_middle);
-	caret_drawer_->drawCaret(info);
-}
-
 void TextView::drawCaret()
 {
 	quint64 pos = cursor_->position();
@@ -371,6 +360,11 @@ quint64 TextView::posAt(const QPoint &pos) const
 	}
 
 	return qMin((cursor_->top() + y) * config_.getNum() + x, document_->length());
+}
+
+QWidget * TextView::createCaretWidget()
+{
+	return new TextCaretDrawer(config_, cursor_, document_);
 }
 
 // Enable caret blink

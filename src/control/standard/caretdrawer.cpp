@@ -2,6 +2,7 @@
 #include "textview.h"
 #include "caretdrawer.h"
 #include "cursor.h"
+#include "../document.h"
 
 namespace Standard {
 
@@ -15,9 +16,28 @@ CaretDrawer::~CaretDrawer()
 }
 
 
-TextCaretDrawer::TextCaretDrawer(TextConfig &config)
+TextCaretDrawer::TextCaretDrawer(TextConfig &config, Cursor *cursor, ::Document *document)
 	: config_(config)
+	, cursor_(cursor)
+	, document_(document)
+	, caret_(CARET_BLOCK, CARET_FRAME)
 {
+}
+
+void TextCaretDrawer::paintEvent(QPaintEvent*)
+{
+	QPainter painter(this);
+	painter.setFont(config_.font());
+
+	// Get caret coordinates
+	const quint64 pos = cursor_->position();
+	const int x = pos % config_.getNum();
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
+
+	const bool caret_middle = pos < document_->length();
+
+	CaretDrawInfo info(painter, caret_.currentShape(), pos, x, y, caret_middle);
+	drawCaret(info);
 }
 
 void TextCaretDrawer::drawCaret(CaretDrawInfo info)
@@ -86,10 +106,28 @@ void TextCaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
 
 
 
-HexCaretDrawer::HexCaretDrawer(HexConfig &config, Cursor *cursor)
+HexCaretDrawer::HexCaretDrawer(HexConfig &config, Cursor *cursor, ::Document *document)
 	: config_(config)
 	, cursor_(cursor)
+	, document_(document)
+	, caret_(CARET_BLOCK, CARET_FRAME)
 {
+}
+
+void HexCaretDrawer::paintEvent(QPaintEvent*)
+{
+	QPainter painter(this);
+	painter.setFont(config_.font());
+
+	// Get caret coordinates
+	const quint64 pos = cursor_->position();
+	const int x = pos % config_.getNum();
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
+
+	const bool caret_middle = pos < document_->length();
+
+	CaretDrawInfo info(painter, caret_.currentShape(), pos, x, y, caret_middle);
+	drawCaret(info);
 }
 
 void HexCaretDrawer::drawCaret(CaretDrawInfo info)

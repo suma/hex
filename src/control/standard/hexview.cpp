@@ -96,7 +96,6 @@ HexView::HexView(QWidget *parent, ::Document *doc)
 	: View(parent, doc)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)
-	, caret_drawer_(new HexCaretDrawer(config_, cursor_))
 	, keyboard_(new Keyboard(doc, this))
 {
 	// Enable keyboard input
@@ -129,14 +128,19 @@ void HexView::resizeEvent(QResizeEvent *rs)
 	drawView();
 }
 
+void HexView::paintEvent(QPaintEvent*)
+{
+	// FIXME: refactoring
+	drawView();
+}
+
 void HexView::drawView(DrawMode mode, int line_start, int end)
 {
 	//qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
 	//qDebug(" pos:%llu, anchor:%llu", cursor_->position(), cursor_->anchor());
 
 	// FIXME: refactoring refresh event
-	QPainter painter;
-	painter.begin(&pix_);
+	QPainter painter(this);
 	painter.setFont(config_.font());
 
 	if (!document_->length()) {
@@ -215,7 +219,6 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 	update(0, y_top, draw_width, draw_height);
 
 	//qDebug("HexView: emit viewDrawed(mode, line_start, end);");
-	emit viewDrawed(mode, line_start, end);
 }
 
 //inline void HexView::drawViewAfter(quint64 pos)
@@ -267,22 +270,6 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 inline void HexView::drawText(QPainter &painter, const QString &hex, int x, int y)
 {
 	painter.drawText(x, y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
-}
-
-
-void HexView::caretDrawEvent(QPainter *painter)
-{
-	painter->setFont(config_.font());
-
-	// Get caret coordinates
-	const quint64 pos = cursor_->position();
-	const int x = pos % config_.getNum();
-	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
-
-	const bool caret_middle = pos < document_->length();
-
-	CaretDrawInfo info(*painter, caret_.currentShape(), pos, x, y, caret_middle);
-	caret_drawer_->drawCaret(info);
 }
 
 void HexView::drawCaret()
@@ -361,6 +348,11 @@ quint64 HexView::posAt(const QPoint &pos) const
 	}
 
 	return qMin((cursor_->top() + y) * config_.getNum() + x, document_->length());
+}
+
+QWidget * HexView::createCaretWidget()
+{
+	return new HexCaretDrawer(config_, cursor_, document_);
 }
 
 // Enable caret blink
