@@ -28,7 +28,7 @@ TextConfig::TextConfig()
 	// Coloring
 	colors_[Color::Background] = QColor(0xEF,0xDF,0xDF, 0);
 	colors_[Color::Text] = QColor(0,0,0);
-	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
+	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF, 170);
 	colors_[Color::SelText] = QColor(0,0,0);
 	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
 
@@ -193,28 +193,21 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
-			int epos = qMin(*xitr + printableBytes, (uint)config_.getNum() - 1);
-
-			// bad
-			//QPixmap pix = QPixmap::grabWidget(parentWidget()).copy(this->x() + config_.x(*xitr), this->y() + yitr.screenY(), config_.posWidth(*xitr, epos), config_.byteHeight());
-			QPixmap pix(QSize(config_.posWidth(*xitr, epos), config_.byteHeight()));
-
-			QPainter letterPainter(&pix);
-			letterPainter.setFont(config_.font());
 			uint i = 0;
 			while (i < printableBytes && *xitr + i < config_.getNum()) {
 				// Set color
 				ColorType color = selection.color(docpos);
 				QBrush brush = QBrush(config_.color(color.Background));
-				letterPainter.setBackground(brush);
-				letterPainter.setPen(config_.color(color.Text));
+				painter.setBackground(brush);
+				painter.setPen(config_.color(color.Text));
 
 				// Draw background/text
-				letterPainter.fillRect(pix.rect(), brush);
-				drawText(letterPainter, text, 0, 0);
-
-				// Copy letterPainter to painter
-				painter.drawPixmap(config_.x(*xitr + i), yitr.screenY(), pix, config_.x_(i), 0, config_.posWidth(*xitr + i), pix.height());
+				QRect rect(config_.x(*xitr + i), yitr.screenY(), config_.posWidth(*xitr + i), config_.byteHeight());
+				painter.setClipRegion(rect);
+				painter.setClipping(true);
+				painter.fillRect(rect, brush);
+				drawText(painter, text, config_.x(*xitr), yitr.screenY());
+				painter.setClipping(false);
 
 				++i;
 				++docpos;
@@ -236,7 +229,6 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 
 					// Draw background
 					painter.fillRect(xitr.textX(), yitr.screenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
-
 					drawText(painter, text, xitr.textX(), yitr.screenY(), 1);
 
 					++i;
