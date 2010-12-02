@@ -17,12 +17,13 @@ void LayeredWidget::add(QWidget *widget)
 {
 	Q_ASSERT(widget != NULL);
 
-	if (layers_.lastIndexOf(widget) > 0) {
+	if (layers_.lastIndexOf(widget) != -1) {
 		return;
 	}
 
 	widget->setParent(this);
 	widget->move(0, 0);
+	layers_.append(widget);
 }
 
 void LayeredWidget::remove(QWidget *widget)
@@ -54,10 +55,10 @@ void LayeredWidget::childEvent(QChildEvent *event)
 	}
 }
 
-void LayeredWidget::resizeEvent(QResizeEvent *)
+void LayeredWidget::resizeEvent(QResizeEvent *event)
 {
 	for (int i = 0; i < layers_.size(); i++) {
-		layers_[i]->resize(width(), height());
+		layers_[i]->resize(event->size().width(), event->size().height());
 	}
 }
 
