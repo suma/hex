@@ -9,7 +9,7 @@ class Document;
 namespace Standard {
 
 	class HexView;
-	class HexConfig;
+	class TextView;
 	class Cursor;
 
 	class AddressConfig : public QObject
@@ -24,6 +24,14 @@ namespace Standard {
 		QFontMetrics fontMetrics_;
 		QColor colors_[Color::ColorCount];
 
+		// FIXME: separete 3 attributes 
+		//  line
+		//  column(depends hex, text)
+		//  hex/text height
+
+		bool column_visible_;
+		bool line_visible_;
+
 	public:
 		AddressConfig();
 		~AddressConfig();
@@ -35,9 +43,21 @@ namespace Standard {
 		const QFontMetrics &fontMetrics() const;
 		QColor color(size_t index) const;
 
+		int charWidth(int num = 1) const
+		{
+			return fontMetrics_.width(QChar('A')) * num;
+		}
+
 		int drawableLines(int height) const;
 		int top() const;
 		int byteHeight() const;
+
+		int columnHeight() const;
+
+		bool columnVisible() const;
+		bool lineVisible() const;
+		void setColumnVisible(bool);
+		void setLineVisible(bool);
 
 	public slots:
 		void setFont(QFont font);
@@ -56,15 +76,34 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		AddressView(QWidget *parent, ::Document *doc, HexView *view);
+		AddressView(QWidget *parent, ::Document *doc);
 		~AddressView();
 
+		AddressConfig &config()
+		{
+			return config_;
+		}
 
+		void connect(Cursor *cursor);
 		void paintEvent(QPaintEvent*);
-		void drawView();
+		void drawColumn();
+		void drawLine();
 
-	private:
+		void setHexView(HexView *hex);
+		void setTextView(TextView *text);
+		HexView *hexView() const;
+		TextView *textView() const;
 
+	protected:
+
+		void childEvent(QChildEvent *);
+		void resizeEvent(QResizeEvent*);
+
+		// x
+		int hexPos() const;
+		int textPos() const;
+		// y
+		int y() const;
 	
 	private slots:
 		void topChanged(quint64);
@@ -73,9 +112,11 @@ namespace Standard {
 	protected:
 		AddressConfig config_;
 		::Document *document_;
-		HexView *view_;
-		const Cursor &cursor_;
+		Cursor *cursor_;
+		HexView *hex_;
+		TextView *text_;
 
+		bool column_visible_;
 		bool line_visible_;
 	
 	};

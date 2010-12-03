@@ -22,36 +22,39 @@ Editor::Editor()
 	doc_->insert(30, &h, 1);
 	doc_->insert(50, &h, 1);
 #endif
+	
+	aview_ = new Standard::AddressView(this, doc_);
+	aview_->move(0, 0);
+	aview_->resize(width(), height());
+	aview_->show();
 
-
-	hview_ = new Standard::HexView(this, doc_);
+	hview_ = new Standard::HexView(aview_, doc_);
 	hview_->setCaretBlink(true);
 	hview_->add(hview_->createCaretWidget());
 
-	
-	aview_ = new Standard::AddressView(this, doc_, hview_);
-	aview_->move(0, 0);
-	aview_->resize(100, 270);
-	aview_->show();
 
-	resize(900,400);
-	hview_->move(aview_->width(), 0);
-	hview_->resize(hview_->config().width(), 270);
+	//hview_->move(aview_->width(), 0);
+	//hview_->resize(hview_->config().width(), 270);
 	qDebug("%d ", hview_->config().width());
 	hview_->show();
 
-	tview_ = new Standard::TextView(this, doc_);
+	tview_ = new Standard::TextView(aview_, doc_);
 	tview_->setCaretBlink(true);
 	tview_->add(tview_->createCaretWidget());
-	tview_->move(aview_->width() + hview_->config().width() + 20, 0);
-	tview_->resize(tview_->config().width(), 270);
+	//tview_->move(aview_->width() + hview_->config().width() + 20, 0);
+	//tview_->resize(tview_->config().width(), 270);
 	tview_->show();
-
 	Standard::Cursor &hc = hview_->cursor();
 	Standard::Cursor &tc = tview_->cursor();
+
 	hc.connectTo(&tc);
 	tc.connectTo(&hc);
 
+	aview_->connect(&hc);	// hex cursor and addressview
+	aview_->setHexView(hview_);
+	aview_->setTextView(tview_);
+
+	resize(900,400);
 
 	// window transparency
 	//setWindowOpacity(0.8);
@@ -66,13 +69,7 @@ void Editor::paintEvent(QPaintEvent *ev)
 void Editor::resizeEvent(QResizeEvent *resize)
 {
 	if (aview_) {
-		aview_->resize(aview_->width(), height());
-	}
-	if (hview_) {
-		hview_->resize(hview_->width(), height());
-	}
-	if (tview_) {
-		tview_->resize(tview_->config().width(), height());
+		aview_->resize(width(), height());
 	}
 }
 

@@ -15,6 +15,8 @@ AddressConfig::AddressConfig()
 	, byteMargin_(3, 0, 2, 0)
 	, font_("Monaco", 17)
 	, fontMetrics_(font_)
+	, column_visible_(true)
+	, line_visible_(true)
 {
 	// Coloring
 	colors_[Color::Background] = QColor(0xCC,0xFF,0xFF);
@@ -69,6 +71,31 @@ int AddressConfig::byteHeight() const
 	return byteMargin_.top() + fontMetrics_.height() + byteMargin_.bottom();
 }
 
+int AddressConfig::columnHeight() const
+{
+	return fontMetrics_.height();
+}
+
+bool AddressConfig::columnVisible() const
+{
+	return column_visible_;
+}
+
+bool AddressConfig::lineVisible() const
+{
+	return line_visible_;
+}
+
+void AddressConfig::setColumnVisible(bool visible)
+{
+	column_visible_ = visible;
+}
+
+void AddressConfig::setLineVisible(bool visible)
+{
+	line_visible_ = visible;
+}
+
 void AddressConfig::setFont(QFont font)
 {
 	if (font_ != font) {
@@ -87,48 +114,95 @@ void AddressConfig::setNum(int num)
 
 int AddressConfig::drawableLines(int height) const
 {
-	const int y = top() + byteMargin_.top();
+	const int y = top() + byteMargin_.top() + (columnVisible() ? columnHeight() : 0);
 	return (height - y + byteHeight()) / byteHeight();
 }
 
 
-AddressView::AddressView(QWidget *parent, ::Document *doc, HexView *view)
+AddressView::AddressView(QWidget *parent, ::Document *doc)
 	: QWidget(parent)
 	, document_(doc)
-	, view_(view)
-	, cursor_(view->cursor())
+	, cursor_(new Cursor(doc))
+	, hex_(NULL)
+	, text_(NULL)
+	, column_visible_(true)
+	, line_visible_(true)
 {
 	// connect slot
-	QObject::connect(&cursor_, SIGNAL(topChanged(quint64)), this, SLOT(topChanged(quint64)));
-	QObject::connect(&cursor_, SIGNAL(positionChanged(quint64, quint64)), this, SLOT(positionChanged(quint64, quint64)));
-
-
+	QObject::connect(cursor_, SIGNAL(topChanged(quint64)), this, SLOT(topChanged(quint64)));
+	QObject::connect(cursor_, SIGNAL(positionChanged(quint64, quint64)), this, SLOT(positionChanged(quint64, quint64)));
 }
 
 AddressView::~AddressView()
 {
 }
 
-void AddressView::paintEvent(QPaintEvent *ev)
+void AddressView::connect(Cursor *cursor)
 {
-	// needs to be updated
-	//ev->rect();
-	drawView();
-
+	cursor->connectTo(cursor_);
 }
 
-void AddressView::drawView()
+void AddressView::setHexView(HexView *hex)
+{
+	if (hex != hex_) {
+		hex_ = hex;
+		update();
+	}
+}
+
+void AddressView::setTextView(TextView *text)
+{
+	if (text != text_) {
+		text_ = text;
+		update();
+	}
+}
+
+HexView *AddressView::hexView() const
+{
+	return hex_;
+}
+
+TextView *AddressView::textView() const
+{
+	return text_;
+}
+
+void AddressView::paintEvent(QPaintEvent *event)
+{
+	// FIXME: check update region
+
+	// needs to be updated
+	if (config_.columnVisible()) {
+		drawColumn();
+	}
+
+	if (config_.lineVisible()) {
+		drawLine();
+	}
+}
+
+void AddressView::drawColumn()
+{
+	QPainter painter(this);
+	painter.setFont(config_.font());
+}
+
+void AddressView::drawLine()
 {
 	QPainter painter(this);
 	painter.setFont(config_.font());
 
-	const quint64 top = cursor_.top() * config_.num();
+	const quint64 top = cursor_->top() * config_.num();
 	quint64 line = top;
 
 	int count = config_.drawableLines(height());
 	int y = config_.top() + config_.byteMargin().top();
+	if (config_.lineVisible()) {
+		y += config_.columnHeight();
+	}
 
-	const quint64 sel_pos = cursor_.position() / config_.num();
+	const quint64 sel_pos = cursor_->position() / config_.num();
 
 	QString str;
 	str.resize(8);
@@ -155,12 +229,43 @@ void AddressView::drawView()
 
 void AddressView::topChanged(quint64)
 {
-	repaint();
+	update();
 }
 
 void AddressView::positionChanged(quint64, quint64)
 {
-	repaint();
+	update();
+}
+
+void AddressView::childEvent(QChildEvent *)
+{
+}
+
+void AddressView::resizeEvent(QResizeEvent *)
+{
+	if (hex_ != NULL) {
+		hex_->move(hexPos(), y());
+		hex_->resize(hex_->config().width(), height());
+	}
+	if (text_ != NULL) {
+		text_->move(textPos(), y());
+		text_->resize(text_->config().width(), height());
+	}
+}
+
+int AddressView::hexPos() const
+{
+	return config_.lineVisible() ? config_.charWidth(8) : 0;
+}
+
+int AddressView::textPos() const
+{
+	return hexPos() + (hex_ == NULL ? 0 : hex_->config().width());
+}
+
+int AddressView::y() const
+{
+	return config_.columnVisible() ? config_.columnHeight() : 0;
 }
 
 
