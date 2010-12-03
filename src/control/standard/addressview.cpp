@@ -186,6 +186,40 @@ void AddressView::drawColumn()
 {
 	QPainter painter(this);
 	painter.setFont(config_.font());
+
+	if (hex_ == NULL && text_ == NULL) {
+		return;
+	}
+
+	const int hx = hexPos();
+	const int tx = textPos();
+	const int sel_pos = static_cast<int>(cursor_->position() % config_.num());
+	
+	// draw hex column
+	if (hex_ != NULL) {
+		HexConfig &hc = hex_->config();
+		HexConfig::XIterator hi = hc.createXIterator();
+		for (int i = 0; i < config_.num(); i++, ++hi) {
+			if (i == sel_pos) {
+				painter.setPen(config_.color(Color::SelText));
+				painter.setBackground(QBrush(config_.color(Color::SelBackground)));
+			} else {
+				painter.setPen(config_.color(Color::Text));
+				painter.setBackground(QBrush(config_.color(Color::Background)));
+			}
+			QString str("+");
+			str += QChar(util::itohex(i));
+
+			// draw column background
+			if (i == sel_pos) {
+				painter.fillRect(hx + hi.screenX(), 0, hc.byteWidth(), hc.byteHeight(), QBrush(config_.color(Color::SelBackground)));
+			}
+			// draw text
+			painter.drawText(hx + hi.textX(), 0, hc.fontMetrics().width(str), config_.byteHeight(), Qt::AlignLeft, str);
+		}
+	}
+	
+	// TODO: draw text column
 }
 
 void AddressView::drawLine()
