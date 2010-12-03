@@ -243,13 +243,14 @@ void AddressView::childEvent(QChildEvent *)
 
 void AddressView::resizeEvent(QResizeEvent *)
 {
+	const int h = height() - (config_.columnVisible() ? config_.columnHeight() : 0);
 	if (hex_ != NULL) {
 		hex_->move(hexPos(), y());
-		hex_->resize(hex_->config().width(), height());
+		hex_->resize(hex_->config().width(), h);
 	}
 	if (text_ != NULL) {
 		text_->move(textPos(), y());
-		text_->resize(text_->config().width(), height());
+		text_->resize(text_->config().width(), h);
 	}
 }
 
