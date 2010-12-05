@@ -2,7 +2,6 @@
 #pragma once
 
 #include <QWidget>
-#include <QLabel>
 
 class Document;
 
@@ -26,7 +25,6 @@ protected:
 	void paintEvent(QPaintEvent *ev);
 
 protected:
-	QLabel *label;
 	Document *doc_;
 	Standard::HexView *hview_;
 	Standard::TextView *tview_;

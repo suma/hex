@@ -13,10 +13,15 @@ INCLUDEPATH += . \
 
 
 # Input
-HEADERS += editor.h
+HEADERS += editor.h \
+	mainform.h \
+	ui_main.h
+
 SOURCES += editor.cpp \
+	mainform.cpp \
 	main.cpp
 
+FORMS = main.ui
 
 
 unix {
