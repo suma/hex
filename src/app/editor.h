@@ -2,6 +2,7 @@
 #pragma once
 
 #include <QWidget>
+#include "control/standard.h"
 
 class Document;
 
@@ -17,17 +18,19 @@ class Editor : public QWidget
 	Q_OBJECT
 
 public:
-	Editor();
+	Editor(QWidget *parent = NULL);
+	Editor(QWidget *parent, Document *document);
+	Document *document();
 
 protected:
+
+	void initView();
 
 	void resizeEvent(QResizeEvent*);
 	void paintEvent(QPaintEvent *ev);
 
 protected:
-	Document *doc_;
-	Standard::HexView *hview_;
-	Standard::TextView *tview_;
+	Document *document_;
 	Standard::AddressView *aview_;
 
 };
