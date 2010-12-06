@@ -36,48 +36,46 @@ Editor::Editor(QWidget *parent, Document *document)
 
 void Editor::initView()
 {
-	Standard::HexView *hview_;
-	Standard::TextView *tview_;
+	// create address view
+	view_ = new Standard::AddressView(this, document_);
+	view_->move(0, 0);
+	view_->resize(width(), height());
+	view_->show();
 
+	Standard::HexView *hex = new Standard::HexView(view_, document_);
+	hex->setCaretBlink(true);
+	hex->add(hex->createCaretWidget());
+	hex->show();
 
-	aview_ = new Standard::AddressView(this, document_);
-	aview_->move(0, 0);
-	aview_->resize(width(), height());
-	aview_->show();
+	Standard::TextView *text = new Standard::TextView(view_, document_);
+	text->setCaretBlink(true);
+	text->add(text->createCaretWidget());
+	text->show();
 
-	hview_ = new Standard::HexView(aview_, document_);
-	hview_->setCaretBlink(true);
-	hview_->add(hview_->createCaretWidget());
-
-	hview_->show();
-
-	tview_ = new Standard::TextView(aview_, document_);
-	tview_->setCaretBlink(true);
-	tview_->add(tview_->createCaretWidget());
-	tview_->show();
-	Standard::Cursor &hc = hview_->cursor();
-	Standard::Cursor &tc = tview_->cursor();
-
+	// sync cursor
+	Standard::Cursor &hc = hex->cursor();
+	Standard::Cursor &tc = text->cursor();
 	hc.connectTo(&tc);
 	tc.connectTo(&hc);
 
-	aview_->connect(&hc);	// hex cursor and addressview
-	aview_->setHexView(hview_);
-	aview_->setTextView(tview_);
+	// sync cursor to address view
+	view_->connect(&hc);
+
+	view_->setHexView(hex);
+	view_->setTextView(text);
 
 	//setWindowOpacity(0.8);
 }
 
 void Editor::paintEvent(QPaintEvent *ev)
 {
+	// FIXME: set background
 	QPainter painter(this);
 	painter.fillRect(rect(), QBrush(QColor(200,200,255), Qt::CrossPattern));
 }
 
 void Editor::resizeEvent(QResizeEvent *resize)
 {
-	if (aview_) {
-		aview_->resize(width(), height());
-	}
+	view_->resize(width(), height());
 }
 

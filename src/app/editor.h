@@ -31,7 +31,7 @@ protected:
 
 protected:
 	Document *document_;
-	Standard::AddressView *aview_;
+	Standard::AddressView *view_;
 
 };
 
