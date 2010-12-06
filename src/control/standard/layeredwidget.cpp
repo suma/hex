@@ -46,12 +46,13 @@ void LayeredWidget::childEvent(QChildEvent *event)
 		return;
 	}
 
+	QWidget *widget = dynamic_cast<QWidget*>(child);
 	if (event->type() == QEvent::ChildAdded) {
 		// add
-		add(reinterpret_cast<QWidget*>(child));
+		add(widget);
 	} else if (event->type() == QEvent::ChildRemoved) {
 		// removed
-		remove(reinterpret_cast<QWidget*>(child));
+		remove(widget);
 	}
 }
 
