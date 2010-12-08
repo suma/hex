@@ -11,6 +11,7 @@ namespace Standard {
 	class HexView;
 	class TextView;
 	class Cursor;
+	class LayeredWidget;
 
 	class AddressConfig : public QObject
 	{
@@ -91,8 +92,15 @@ namespace Standard {
 
 		void setHexView(HexView *hex);
 		void setTextView(TextView *text);
+
+		void addHexUnder(QWidget*);
+		void addTextUnder(QWidget*);
+
 		HexView *hexView() const;
 		TextView *textView() const;
+
+		//LayeredWidget *hexLayer() const;
+		//LayeredWidget *textLayer() const;
 
 	protected:
 
@@ -115,6 +123,8 @@ namespace Standard {
 		Cursor *cursor_;
 		HexView *hex_;
 		TextView *text_;
+		LayeredWidget *hex_layer_;
+		LayeredWidget *text_layer_;
 
 		bool column_visible_;
 		bool line_visible_;

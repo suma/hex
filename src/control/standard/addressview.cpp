@@ -1,6 +1,7 @@
 
 #include <QtGui>
 #include "addressview.h"
+#include "layeredwidget.h"
 #include "hexview.h"
 #include "textview.h"
 #include "cursor.h"
@@ -125,6 +126,8 @@ AddressView::AddressView(QWidget *parent, ::Document *doc)
 	, cursor_(new Cursor(doc))
 	, hex_(NULL)
 	, text_(NULL)
+	, hex_layer_(new LayeredWidget(parent))
+	, text_layer_(new LayeredWidget(parent))
 	, column_visible_(true)
 	, line_visible_(true)
 {
@@ -146,6 +149,7 @@ void AddressView::setHexView(HexView *hex)
 {
 	if (hex != hex_) {
 		hex_ = hex;
+		hex_layer_->add(hex);
 		update();
 	}
 }
@@ -154,7 +158,24 @@ void AddressView::setTextView(TextView *text)
 {
 	if (text != text_) {
 		text_ = text;
+		text_layer_->add(text);
 		update();
+	}
+}
+
+void AddressView::addHexUnder(QWidget *widget)
+{
+	hex_layer_->add(widget);
+	if (hex_ != NULL) {
+		widget->stackUnder(hex_);
+	}
+}
+
+void AddressView::addTextUnder(QWidget *widget)
+{
+	text_layer_->add(widget);
+	if (text_ != NULL) {
+		widget->stackUnder(text_);
 	}
 }
 
@@ -279,12 +300,12 @@ void AddressView::resizeEvent(QResizeEvent *)
 {
 	const int h = height() - (config_.columnVisible() ? config_.columnHeight() : 0);
 	if (hex_ != NULL) {
-		hex_->move(hexPos(), y());
-		hex_->resize(hex_->config().width(), h);
+		hex_layer_->move(hexPos(), y());
+		hex_layer_->resize(hex_->config().width(), h);
 	}
 	if (text_ != NULL) {
-		text_->move(textPos(), y());
-		text_->resize(text_->config().width(), h);
+		text_layer_->move(textPos(), y());
+		text_layer_->resize(text_->config().width(), h);
 	}
 }
 
