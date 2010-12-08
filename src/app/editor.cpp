@@ -49,12 +49,10 @@ void Editor::initView()
 
 	Standard::HexView *hex = new Standard::HexView(view_, document_);
 	hex->setCaretBlink(true);
-	//hex->add(hex->createCaretWidget());
 	hex->show();
 
 	Standard::TextView *text = new Standard::TextView(view_, document_);
 	text->setCaretBlink(true);
-	//text->add(text->createCaretWidget());
 	text->show();
 
 	// sync cursor
@@ -67,9 +65,9 @@ void Editor::initView()
 	view_->connect(&hc);
 
 	view_->setHexView(hex);
-	view_->addHexUnder(hex->createCaretWidget());
+	view_->addHex(hex->createCaretWidget());
 	view_->setTextView(text);
-	view_->addTextUnder(text->createCaretWidget());
+	view_->addText(text->createCaretWidget());
 
 	//setWindowOpacity(0.8);
 }

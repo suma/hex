@@ -163,11 +163,25 @@ void AddressView::setTextView(TextView *text)
 	}
 }
 
+void AddressView::addHex(QWidget *widget)
+{
+	if (hex_) {
+		hex_->add(widget);
+	}
+}
+
 void AddressView::addHexUnder(QWidget *widget)
 {
 	hex_layer_->add(widget);
 	if (hex_ != NULL) {
 		widget->stackUnder(hex_);
+	}
+}
+
+void AddressView::addText(QWidget *widget)
+{
+	if (text_) {
+		text_->add(widget);
 	}
 }
 
