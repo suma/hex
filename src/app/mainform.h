@@ -6,6 +6,9 @@
 #include "ui_main.h"
 
 
+class Editor;
+class Document;
+
 class MainForm : public QMainWindow
 {
 	Q_OBJECT
@@ -21,6 +24,12 @@ protected slots:
 	void save();
 	void saveAs();
 
+protected:
+
+	Editor *currentEditor() const;
+
+	bool openFile(QString);
+	void saveFile(QString, Document *);
 
 protected:
 	Ui::MainWindow ui;

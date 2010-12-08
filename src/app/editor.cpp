@@ -34,6 +34,11 @@ Editor::Editor(QWidget *parent, Document *document)
 	initView();
 }
 
+Document *Editor::document() const
+{
+	return document_;
+}
+
 void Editor::initView()
 {
 	// create address view

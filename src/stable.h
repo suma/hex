@@ -25,4 +25,8 @@
 #include <QUndoCommand>
 #include <QUndoStack>
 
+#include <QFileDialog>
+#include <QFileInfo>
+
+
 #endif

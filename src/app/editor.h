@@ -20,7 +20,7 @@ class Editor : public QWidget
 public:
 	Editor(QWidget *parent = NULL);
 	Editor(QWidget *parent, Document *document);
-	Document *document();
+	Document *document() const;
 
 protected:
 
