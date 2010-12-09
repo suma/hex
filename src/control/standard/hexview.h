@@ -12,6 +12,8 @@ class Document;
 
 namespace Standard {
 
+	class CaretDrawer;
+
 	enum DrawMode {
 		DRAW_ALL = 0,
 		DRAW_LINE,
@@ -35,10 +37,6 @@ namespace Standard {
 		std::vector<int> x_begin;	// pos of value
 		std::vector<int> x_end;		// pos of end
 		std::vector<int> x_area;
-
-	public:
-		bool EnableCaret;
-		int CaretBlinkTime;
 	
 	public:
 		HexConfig();
@@ -265,18 +263,13 @@ namespace Standard {
 			return *cursor_;
 		}
 
-		QWidget * createCaretWidget();
-		void setCaretBlink(bool enable);
-
-
-	private:
+		CaretDrawer * createCaretWidget();
 
 	private:
 		void paintEvent(QPaintEvent*);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
-		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
 
 		void redrawSelection(quint64 begin, quint64 end);

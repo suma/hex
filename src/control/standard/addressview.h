@@ -93,9 +93,9 @@ namespace Standard {
 		void setHexView(HexView *hex);
 		void setTextView(TextView *text);
 
-		void addHex(QWidget*);
+		void addHex(QWidget*, bool onfocus = true);
 		void addHexUnder(QWidget*);
-		void addText(QWidget*);
+		void addText(QWidget*, bool onfocus = true);
 		void addTextUnder(QWidget*);
 
 		HexView *hexView() const;
@@ -108,6 +108,8 @@ namespace Standard {
 
 		void childEvent(QChildEvent *);
 		void resizeEvent(QResizeEvent*);
+		void focusInEvent(QFocusEvent*);
+		void focusOutEvent(QFocusEvent*);
 
 		// x
 		int hexPos() const;
@@ -123,6 +125,7 @@ namespace Standard {
 		AddressConfig config_;
 		::Document *document_;
 		Cursor *cursor_;
+		QWidget *last_focus_;
 		HexView *hex_;
 		TextView *text_;
 		LayeredWidget *hex_layer_;

@@ -13,6 +13,7 @@ class Document;
 
 namespace Standard {
 	class TextDecodeHelper;
+	class CaretDrawer;
 
 	class TextConfig
 	{
@@ -28,11 +29,6 @@ namespace Standard {
 		std::vector<int> x_begin;	// pos of value
 		std::vector<int> x_end;		// pos of end
 		std::vector<int> x_area;
-
-	public:
-
-		bool EnableCaret;
-		int CaretBlinkTime;
 	
 	public:
 		TextConfig();
@@ -278,16 +274,13 @@ namespace Standard {
 			return *cursor_;
 		}
 
-		void setCaretBlink(bool enable);
-		QWidget *createCaretWidget();
-
+		CaretDrawer *createCaretWidget();
 
 	private:
 		void paintEvent(QPaintEvent*);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
-		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
 
 		void inputMethodEvent(QInputMethodEvent *);

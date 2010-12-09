@@ -19,9 +19,6 @@ HexConfig::HexConfig()
 	, font_("Monaco", 17)
 	, charWidth_(0)
 	, fontMetrics_(font_)
-
-	, EnableCaret(true)
-	, CaretBlinkTime(500)
 {
 	// Coloring
 	colors_[Color::Background] = QColor(0xEF,0xEF,0xEF, 0);
@@ -300,35 +297,9 @@ quint64 HexView::posAt(const QPoint &pos) const
 	return qMin((cursor_->top() + y) * config_.getNum() + x, document_->length());
 }
 
-QWidget * HexView::createCaretWidget()
+CaretDrawer * HexView::createCaretWidget()
 {
 	return new HexCaretDrawer(config_, cursor_, document_);
-}
-
-// Enable caret blink
-void HexView::setCaretBlink(bool enable)
-{
-	if (!config_.EnableCaret || !config_.CaretBlinkTime) {
-		return;
-	}
-	if (enable) {
-		if (caret_.timerId() == 0) {
-			caret_.setTimerId(startTimer(config_.CaretBlinkTime));
-		}
-	} else {
-		if (caret_.timerId() != 0) {
-			killTimer(caret_.timerId());
-			caret_.setTimerId(0);
-		}
-	}
-}
-
-void HexView::timerEvent(QTimerEvent *ev)
-{
-	if (caret_.timerId() == ev->timerId()) {
-		//drawCaret();
-		caret_.inverseVisible();
-	}
 }
 
 void HexView::keyPressEvent(QKeyEvent *ev)

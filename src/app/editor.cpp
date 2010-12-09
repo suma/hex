@@ -3,6 +3,7 @@
 #include "editor.h"
 #include "control/standard.h"
 #include "control/document.h"
+#include "control/standard/caretdrawer.h"
 
 Editor::Editor(QWidget *parent)
 	: QWidget(parent)
@@ -23,7 +24,7 @@ Editor::Editor(QWidget *parent)
 	document_->insert(30, &h, 1);
 	document_->insert(50, &h, 1);
 #endif
-	
+
 	initView();
 }
 
@@ -41,6 +42,8 @@ Document *Editor::document() const
 
 void Editor::initView()
 {
+	setFocusPolicy(Qt::StrongFocus);
+
 	// create address view
 	view_ = new Standard::AddressView(this, document_);
 	view_->move(0, 0);
@@ -48,11 +51,9 @@ void Editor::initView()
 	view_->show();
 
 	Standard::HexView *hex = new Standard::HexView(view_, document_);
-	hex->setCaretBlink(true);
 	hex->show();
 
 	Standard::TextView *text = new Standard::TextView(view_, document_);
-	text->setCaretBlink(true);
 	text->show();
 
 	// sync cursor
@@ -64,11 +65,21 @@ void Editor::initView()
 	// sync cursor to address view
 	view_->connect(&hc);
 
-	view_->setHexView(hex);
-	view_->addHex(hex->createCaretWidget());
-	view_->setTextView(text);
-	view_->addText(text->createCaretWidget());
 
+	// set hex/text
+	view_->setHexView(hex);
+	view_->setTextView(text);
+
+	// Caret
+	Standard::CaretDrawer *hex_caret = hex->createCaretWidget();
+	Standard::CaretDrawer *text_caret = text->createCaretWidget();
+	hex_caret->setCaretBlink(true);
+	text_caret->setCaretBlink(true);
+
+	view_->addHex(static_cast<QWidget*>(hex_caret));
+	view_->addText(static_cast<QWidget*>(text_caret));
+
+	hex->setFocus(Qt::OtherFocusReason);
 	//setWindowOpacity(0.8);
 }
 
@@ -83,4 +94,14 @@ void Editor::resizeEvent(QResizeEvent *resize)
 {
 	view_->resize(width(), height());
 }
+
+void Editor::focusInEvent(QFocusEvent *)
+{
+	view_->setFocus(Qt::OtherFocusReason);
+}
+
+
+
+
+
 

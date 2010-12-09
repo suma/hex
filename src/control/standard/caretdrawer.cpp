@@ -6,8 +6,11 @@
 
 namespace Standard {
 
-CaretDrawer::CaretDrawer()
+CaretDrawer::CaretDrawer(QWidget *parent)
+	: QWidget(parent)
+	, caret_(CARET_BLOCK, CARET_FRAME)
 {
+	setFocusPolicy(Qt::NoFocus);
 }
 
 
@@ -15,17 +18,50 @@ CaretDrawer::~CaretDrawer()
 {
 }
 
+void CaretDrawer::setCaretBlink(bool enable)
+{
+	if (!caret_.enable() || !caret_.blinkTime()) {
+		return;
+	}
+	const int timer = caret_.timerId();
+	if (enable) {
+		if (timer == 0) {
+			caret_.setTimerId(startTimer(caret_.blinkTime()));
+		}
+	} else {
+		if (timer != 0) {
+			killTimer(timer);
+			caret_.setTimerId(0);
+		}
+	}
+}
+
+void CaretDrawer::timerEvent(QTimerEvent *event)
+{
+	qDebug() << "caret timer event " <<  objectName();
+	if (caret_.timerId() == event->timerId()) {
+		caret_.inverseVisible();
+		update();
+	}
+}
 
 TextCaretDrawer::TextCaretDrawer(TextConfig &config, Cursor *cursor, ::Document *document)
 	: config_(config)
 	, cursor_(cursor)
 	, document_(document)
-	, caret_(CARET_BLOCK, CARET_FRAME)
+{
+}
+
+TextCaretDrawer::~TextCaretDrawer()
 {
 }
 
 void TextCaretDrawer::paintEvent(QPaintEvent *event)
 {
+	if (!caret_.enable() || !caret_.visible()) {
+		return;
+	}
+
 	// Get caret coordinates
 	const quint64 pos = cursor_->position();
 	const int x = pos % config_.getNum();
@@ -116,12 +152,18 @@ HexCaretDrawer::HexCaretDrawer(HexConfig &config, Cursor *cursor, ::Document *do
 	: config_(config)
 	, cursor_(cursor)
 	, document_(document)
-	, caret_(CARET_BLOCK, CARET_FRAME)
+{
+}
+
+HexCaretDrawer::~HexCaretDrawer()
 {
 }
 
 void HexCaretDrawer::paintEvent(QPaintEvent *event)
 {
+	if (!caret_.enable() || !caret_.visible()) {
+		return;
+	}
 
 	// Get caret coordinates
 	const quint64 pos = cursor_->position();

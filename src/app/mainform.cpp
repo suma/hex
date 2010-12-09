@@ -12,8 +12,10 @@ MainForm::MainForm()
 {
 	ui.setupUi(this);
 
+	// test
 	Editor *editor = new Editor();
 	ui.tabWidget->addTab(editor, QString("test"));
+	editor->setFocus(Qt::ActiveWindowFocusReason);
 
 	//connect(ui.actionNew_N, SIGNAL(activated()), this, SLOT(newDocument()));
 	connect(ui.actionOpen_O, SIGNAL(activated()), this, SLOT(open()));
@@ -43,6 +45,12 @@ void MainForm::open()
 		while (it != files.end()) {
 			openFile(*it);
 			++it;
+		}
+
+		// enable tab
+		const int index = ui.tabWidget->count() - 1;
+		if (index >= 0) {
+			ui.tabWidget->setTabEnabled(index, true);
 		}
 	}
 }

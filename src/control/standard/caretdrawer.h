@@ -36,24 +36,35 @@ namespace Standard {
 		}
 	};
 
-	class CaretDrawer
+	class CaretDrawer : public QWidget
 	{
+		Q_OBJECT
+
 	public:
-		CaretDrawer();
+		CaretDrawer(QWidget *parent = NULL);
 		virtual ~CaretDrawer();
 		
 		virtual void drawCaret(CaretDrawInfo info) = 0;
+
+		void setCaretBlink(bool enable);
+
+	protected:
+		void timerEvent(QTimerEvent *);
+
+	protected:
+		Caret caret_;
 	};
 
-	class TextCaretDrawer : public CaretDrawer, public QWidget
+	class TextCaretDrawer : public CaretDrawer
 	{
+		Q_OBJECT
 	private:
 		TextConfig &config_;
 		Cursor *cursor_;
 		::Document *document_;
-		Caret caret_;
 	public:
 		TextCaretDrawer(TextConfig &config, Cursor *cursor, ::Document *document);
+		~TextCaretDrawer();
 		void paintEvent(QPaintEvent*);
 		void drawCaret(CaretDrawInfo info);
 
@@ -65,15 +76,16 @@ namespace Standard {
 
 	};
 
-	class HexCaretDrawer : public CaretDrawer, public QWidget
+	class HexCaretDrawer : public CaretDrawer
 	{
+		Q_OBJECT
 	private:
 		HexConfig &config_;
 		Cursor *cursor_;
 		::Document *document_;
-		Caret caret_;
 	public:
 		HexCaretDrawer(HexConfig &config, Cursor *cursor, ::Document *document);
+		~HexCaretDrawer();
 		void paintEvent(QPaintEvent*);
 		void drawCaret(CaretDrawInfo info);
 	private:

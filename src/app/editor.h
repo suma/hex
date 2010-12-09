@@ -28,6 +28,7 @@ protected:
 
 	void resizeEvent(QResizeEvent*);
 	void paintEvent(QPaintEvent *ev);
+	void focusInEvent(QFocusEvent*);
 
 protected:
 	Document *document_;

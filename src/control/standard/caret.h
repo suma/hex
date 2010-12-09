@@ -11,6 +11,8 @@ namespace Standard {
 		CaretShape visible_shape_;
 		CaretShape invisible_shape_;
 		int timer_id_;
+		int blink_time_;
+		bool enable_;
 		bool is_visible_;
 
 	public:
@@ -51,14 +53,34 @@ namespace Standard {
 			}
 		}
 
+		int timerId() const
+		{
+			return timer_id_;
+		}
+
 		void setTimerId(int id)
 		{
 			timer_id_ = id;
 		}
 
-		int  timerId() const
+		int blinkTime() const
 		{
-			return timer_id_;
+			return blink_time_;
+		}
+
+		void setBlinkTime(int milisec)
+		{
+			blink_time_ = milisec;
+		}
+
+		bool enable() const
+		{
+			return enable_;
+		}
+
+		void setEnable(bool t)
+		{
+			enable_ = t;
 		}
 
 		bool visible() const

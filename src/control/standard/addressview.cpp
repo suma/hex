@@ -124,6 +124,7 @@ AddressView::AddressView(QWidget *parent, ::Document *doc)
 	: QWidget(parent)
 	, document_(doc)
 	, cursor_(new Cursor(doc))
+	, last_focus_(NULL)
 	, hex_(NULL)
 	, text_(NULL)
 	, hex_layer_(new LayeredWidget(parent))
@@ -163,7 +164,7 @@ void AddressView::setTextView(TextView *text)
 	}
 }
 
-void AddressView::addHex(QWidget *widget)
+void AddressView::addHex(QWidget *widget, bool onfocus)
 {
 	if (hex_) {
 		hex_->add(widget);
@@ -178,7 +179,7 @@ void AddressView::addHexUnder(QWidget *widget)
 	}
 }
 
-void AddressView::addText(QWidget *widget)
+void AddressView::addText(QWidget *widget, bool onfocus)
 {
 	if (text_) {
 		text_->add(widget);
@@ -215,6 +216,18 @@ void AddressView::paintEvent(QPaintEvent *event)
 	if (config_.lineVisible()) {
 		drawLine();
 	}
+}
+
+void AddressView::focusInEvent(QFocusEvent *)
+{
+	if (last_focus_ != NULL) {
+		last_focus_->setFocus(Qt::OtherFocusReason);
+	}
+}
+
+void AddressView::focusOutEvent(QFocusEvent *)
+{
+	last_focus_ = focusWidget();
 }
 
 void AddressView::drawColumn()
