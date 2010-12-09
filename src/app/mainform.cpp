@@ -16,6 +16,7 @@ MainForm::MainForm()
 	Editor *editor = new Editor();
 	ui.tabWidget->addTab(editor, QString("test"));
 	ui.tabWidget->setDocumentMode(true);
+	ui.tabWidget->setUsesScrollButtons(true);
 	editor->setFocus(Qt::ActiveWindowFocusReason);
 
 	//connect(ui.actionNew_N, SIGNAL(activated()), this, SLOT(newDocument()));
