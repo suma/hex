@@ -73,14 +73,17 @@ void Editor::initView()
 	// Caret
 	Standard::CaretDrawer *hex_caret = hex->createCaretWidget();
 	Standard::CaretDrawer *text_caret = text->createCaretWidget();
-	hex_caret->setCaretBlink(true);
-	text_caret->setCaretBlink(true);
+
 
 	view_->addHex(static_cast<QWidget*>(hex_caret));
 	view_->addText(static_cast<QWidget*>(text_caret));
 
+	connect(hex, SIGNAL(focusIn()), hex_caret, SLOT(enable()));
+	connect(hex, SIGNAL(focusOut()), hex_caret, SLOT(disable()));
+	connect(text, SIGNAL(focusIn()), text_caret, SLOT(enable()));
+	connect(text, SIGNAL(focusOut()), text_caret, SLOT(disable()));
+
 	hex->setFocus(Qt::OtherFocusReason);
-	//setWindowOpacity(0.8);
 }
 
 void Editor::paintEvent(QPaintEvent *ev)

@@ -90,7 +90,7 @@ int HexConfig::YToLine(int y) const
 // View
 
 HexView::HexView(QWidget *parent, ::Document *doc)
-	: LayeredWidget(parent)
+	: View(parent)
 	, document_(doc)
 	, cursor_(new Cursor(doc))
 	, caret_(CARET_BLOCK, CARET_FRAME)

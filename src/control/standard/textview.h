@@ -4,7 +4,7 @@
 #include <QFont>
 #include <QFontMetrics>
 #include "../util/util.h"
-#include "layeredwidget.h"
+#include "view.h"
 #include "caret.h"
 #include "cursor.h"
 #include "hexview.h"
@@ -251,7 +251,7 @@ namespace Standard {
 		}
 	};
 
-	class TextView : public LayeredWidget
+	class TextView : public View
 	{
 		Q_OBJECT
 

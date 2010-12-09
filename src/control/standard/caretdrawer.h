@@ -47,6 +47,9 @@ namespace Standard {
 		virtual void drawCaret(CaretDrawInfo info) = 0;
 
 		void setCaretBlink(bool enable);
+	public slots:
+		void enable();
+		void disable();
 
 	protected:
 		void timerEvent(QTimerEvent *);

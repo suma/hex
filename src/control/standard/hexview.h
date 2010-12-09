@@ -3,7 +3,7 @@
 
 #include <QFont>
 #include <QFontMetrics>
-#include "layeredwidget.h"
+#include "view.h"
 #include "cursor.h"
 #include "caret.h"
 #include "keyboard.h"
@@ -240,7 +240,7 @@ namespace Standard {
 		}
 	};
 
-	class HexView : public LayeredWidget
+	class HexView : public View
 	{
 		Q_OBJECT
 

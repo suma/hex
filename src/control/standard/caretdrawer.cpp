@@ -18,6 +18,21 @@ CaretDrawer::~CaretDrawer()
 {
 }
 
+void CaretDrawer::enable()
+{
+	setCaretBlink(true);
+	caret_.setEnable();
+}
+
+void CaretDrawer::disable()
+{
+	setCaretBlink(false);
+	if (!caret_.visible()) {
+		caret_.setVisible(true);
+		update();
+	}
+}
+
 void CaretDrawer::setCaretBlink(bool enable)
 {
 	if (!caret_.enable() || !caret_.blinkTime()) {
@@ -38,7 +53,6 @@ void CaretDrawer::setCaretBlink(bool enable)
 
 void CaretDrawer::timerEvent(QTimerEvent *event)
 {
-	qDebug() << "caret timer event " <<  objectName();
 	if (caret_.timerId() == event->timerId()) {
 		caret_.inverseVisible();
 		update();

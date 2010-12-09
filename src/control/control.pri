@@ -21,7 +21,8 @@ HEADERS += \
     standard/keyboard.h \
     standard/layeredwidget.h \
 	standard/textdecodehelper.h \
-	standard/textview.h
+	standard/textview.h \
+	standard/view.h
 
 SOURCES += \
     control.cpp \
@@ -38,6 +39,8 @@ SOURCES += \
     standard/keyboard.cpp \
     standard/layeredwidget.cpp \
 	standard/textview.cpp \
-	standard/textdecodehelper.cpp
+	standard/textdecodehelper.cpp \
+	standard/view.cpp
+
 
 

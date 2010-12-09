@@ -97,6 +97,20 @@ namespace Standard {
 		{
 			is_visible_ = !is_visible_;
 		}
+	
+	public slots:
+
+		void setEnable()
+		{
+			setEnable(true);
+		}
+
+		void setDisable()
+		{
+			setEnable(false);
+		}
+
+
 	};
 
 
