@@ -125,39 +125,51 @@ void Keyboard::keyInputEvent(QChar ch)
 	// match view
 	Cursor &cursor = view_->cursor();
 
-	//if (cursor.insert()) {
-	if (false) {
+	if (cursor.insert()) {
 		// Inserte mode
-		quint64 pos = qMin(cursor.position(), cursor.anchor());
+		const CursorSelection selection = cursor.getSelection();
+		const quint64 pos = selection.begin;
 
 		// Replace data if selected
 		if (cursor.hasSelection()) {
-			// Off redrawing temporary for redrawing on insertion
-			removeData(pos, qMax(cursor.position(), cursor.anchor()) - pos);
+			// TODO: lazy redrawing for insertion
+			removeData(pos, selection.end - pos);
 
 			cursor.setPosition(pos);
 			cursor.resetAnchor();
 		}
 
-		insertData(pos, nibble << 4);
-		cursor.setNibble(false);
+		if (cursor.nibble()) {
+			// insert
+			insertData(pos, nibble << 4);
+			cursor.setNibble(false);
+		} else {
+			if (pos + 1 > document_->length()) {
+				return;
+			}
+			// replace
+			uchar currentCharacter;
+			document_->get(pos, &currentCharacter, 1);
+			uchar c = nibble | (currentCharacter & 0xf0);
+			cursor.inverseNibble();
 
-		// TODO: ::Keyboard
-		// moveRelativePosition(1, ..);
+			view_->moveRelativePosition(1, false, false);
+			changeData(cursor.position() - 1, 1, &c, 1);
+		}
 	} else {
 		// Ovewrite mode
+		if (cursor.position() + 1 > document_->length()) {
+			// no buffer
+			return;
+		}
+
 		uchar currentCharacter;
 		document_->get(cursor.position(), &currentCharacter, 1);
 		if (cursor.nibble()) {
 			uchar c = (nibble << 4) | (currentCharacter & 0x0f);
 			changeData(cursor.position(), 1, &c, 1);
 			cursor.setNibble(false);
-
-			// FIXME: redraw caret
-			//view_->drawCaret();
 		} else {
-			// TODO: ::Keyboard
-			//moveRelativePosition(1, ...);
 			uchar c = nibble | (currentCharacter & 0xf0);
 			cursor.inverseNibble();
 

@@ -50,7 +50,7 @@ void MainForm::open()
 		// enable tab
 		const int index = ui.tabWidget->count() - 1;
 		if (index >= 0) {
-			ui.tabWidget->setTabEnabled(index, true);
+			ui.tabWidget->setCurrentIndex(index);
 		}
 	}
 }

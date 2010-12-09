@@ -54,7 +54,9 @@ public:
 			buffer_size_ = (uint)Document::DEFAULT_BUFFER_SIZE;
 		}
 		
-		remap(0);
+		if (length() > 0) {
+			remap(0);
+		}
 	}
 
 	virtual ~FileOriginal()
