@@ -105,7 +105,7 @@ void AddressConfig::setFont(QFont font)
 	}
 }
 
-void AddressConfig::setNum(int num)
+void AddressConfig::setNum(uint num)
 {
 	if (num_ != num) {
 		num_ = num;
@@ -135,6 +135,8 @@ AddressView::AddressView(QWidget *parent, ::Document *doc)
 	// connect slot
 	QObject::connect(cursor_, SIGNAL(topChanged(quint64)), this, SLOT(topChanged(quint64)));
 	QObject::connect(cursor_, SIGNAL(positionChanged(quint64, quint64)), this, SLOT(positionChanged(quint64, quint64)));
+
+	last_focus_ = hex_layer_;
 }
 
 AddressView::~AddressView()
@@ -149,7 +151,11 @@ void AddressView::connect(Cursor *cursor)
 void AddressView::setHexView(HexView *hex)
 {
 	if (hex != hex_) {
+		if (hex_ != NULL) {
+			hex_->removeEventFilter(this);
+		}
 		hex_ = hex;
+		hex_->installEventFilter(this);
 		hex_layer_->add(hex);
 		update();
 	}
@@ -158,13 +164,17 @@ void AddressView::setHexView(HexView *hex)
 void AddressView::setTextView(TextView *text)
 {
 	if (text != text_) {
+		if (text_ != NULL) {
+			text_->removeEventFilter(this);
+		}
 		text_ = text;
+		text_->installEventFilter(this);
 		text_layer_->add(text);
 		update();
 	}
 }
 
-void AddressView::addHex(QWidget *widget, bool onfocus)
+void AddressView::addHex(QWidget *widget)
 {
 	if (hex_) {
 		hex_->add(widget);
@@ -179,7 +189,7 @@ void AddressView::addHexUnder(QWidget *widget)
 	}
 }
 
-void AddressView::addText(QWidget *widget, bool onfocus)
+void AddressView::addText(QWidget *widget)
 {
 	if (text_) {
 		text_->add(widget);
@@ -204,7 +214,7 @@ TextView *AddressView::textView() const
 	return text_;
 }
 
-void AddressView::paintEvent(QPaintEvent *event)
+void AddressView::paintEvent(QPaintEvent *)
 {
 	// FIXME: check update region
 
@@ -225,9 +235,21 @@ void AddressView::focusInEvent(QFocusEvent *)
 	}
 }
 
-void AddressView::focusOutEvent(QFocusEvent *)
+bool AddressView::eventFilter(QObject *obj, QEvent *event)
 {
-	last_focus_ = focusWidget();
+	QWidget *widget = NULL;
+	if (!obj->isWidgetType()) {
+		goto standard_processing;
+	}
+
+	// Classfy which view(hex/text) focused in
+	widget = dynamic_cast<QWidget*>(obj);
+	if (event->type() == QEvent::FocusIn) {
+		last_focus_ = widget;
+	}
+
+standard_processing:
+	return QObject::eventFilter(obj, event);
 }
 
 void AddressView::drawColumn()
@@ -239,15 +261,15 @@ void AddressView::drawColumn()
 		return;
 	}
 
+	const int Num = static_cast<int>(config_.num());
 	const int hx = hexPos();
-	const int tx = textPos();
 	const int sel_pos = static_cast<int>(cursor_->position() % config_.num());
 	
 	// draw hex column
 	if (hex_ != NULL) {
 		HexConfig &hc = hex_->config();
 		HexConfig::XIterator hi = hc.createXIterator();
-		for (int i = 0; i < config_.num(); i++, ++hi) {
+		for (int i = 0; i < Num; i++, ++hi) {
 			if (i == sel_pos) {
 				painter.setPen(config_.color(Color::SelText));
 				painter.setBackground(QBrush(config_.color(Color::SelBackground)));
@@ -268,6 +290,7 @@ void AddressView::drawColumn()
 	}
 	
 	// TODO: draw text column
+	//const int tx = textPos();
 }
 
 void AddressView::drawLine()

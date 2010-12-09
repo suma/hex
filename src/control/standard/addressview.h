@@ -62,7 +62,7 @@ namespace Standard {
 
 	public slots:
 		void setFont(QFont font);
-		void setNum(int num);
+		void setNum(uint num);
 		//void setStyle();	// FIXME
 
 	signals:
@@ -93,9 +93,9 @@ namespace Standard {
 		void setHexView(HexView *hex);
 		void setTextView(TextView *text);
 
-		void addHex(QWidget*, bool onfocus = true);
+		void addHex(QWidget*);
 		void addHexUnder(QWidget*);
-		void addText(QWidget*, bool onfocus = true);
+		void addText(QWidget*);
 		void addTextUnder(QWidget*);
 
 		HexView *hexView() const;
@@ -109,7 +109,8 @@ namespace Standard {
 		void childEvent(QChildEvent *);
 		void resizeEvent(QResizeEvent*);
 		void focusInEvent(QFocusEvent*);
-		void focusOutEvent(QFocusEvent*);
+
+		bool eventFilter(QObject *obj, QEvent *event);
 
 		// x
 		int hexPos() const;
