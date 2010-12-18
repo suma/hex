@@ -3,14 +3,14 @@
 
 #include "qfragmentmap_p.h"
 
-class DocumentData : public QFragment<3>
+class DocumentData : public QFragment<1>
 {
 public:
 	inline void initialize() {}
 	inline void invalidate() const {}
 	inline void free() {}
 	quint64 bufferPosition;
-	uint type;
+	quint8 type;
 };
 
 
@@ -26,7 +26,7 @@ public:
 	DocumentImpl();
 	~DocumentImpl();
 
-	uint insert_data(ulint pos, ulint bufPos, uint length, quint8 type);
+	uint insert_data(ulint pos, ulint bufPos, ulint length, quint8 type);
 	uint remove_data(ulint pos, ulint length);
 	bool split(ulint pos);
 	bool unite(uint f);

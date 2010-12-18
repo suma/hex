@@ -1,13 +1,19 @@
-#ifndef STDHEXVIEW_H_INC
-#define STDHEXVIEW_H_INC
+
+#pragma once
 
 #include <QFont>
 #include <QFontMetrics>
-#include "../view.h"
-#include "../highlight.h"
-#include "scursor.h"
+#include "view.h"
+#include "cursor.h"
+#include "caret.h"
+#include "keyboard.h"
+
+class Document;
 
 namespace Standard {
+
+	class CaretDrawer;
+
 	enum DrawMode {
 		DRAW_ALL = 0,
 		DRAW_LINE,
@@ -17,178 +23,300 @@ namespace Standard {
 
 	class HexConfig
 	{
-	public:
-		enum {
-			Num = 16,
-		};
-		QRect Margin;
-		QRect ByteMargin;
-		QFont Font;
-		QColor Colors[Color::ColorCount];
+	private:
+		uint num_;
+		QRect margin_;
+		QRect byteMargin_;
+		QFont font_;
+		int charWidth_;
 
-		bool EnableCaret;
-		int CaretBlinkTime;
+		QColor colors_[Color::ColorCount];
 
-	protected:
-		QFontMetrics FontMetrics;
-		int x_begin[Num];	// pos of value
-		int x_end[Num];		// pos of end
-		int x_area[Num];
+	private:
+		QFontMetrics fontMetrics_;
+		std::vector<int> x_begin;	// pos of value
+		std::vector<int> x_end;		// pos of end
+		std::vector<int> x_area;
 	
 	public:
 		HexConfig();
 
-		inline void updateFont()
+		uint getNum() const
 		{
-			FontMetrics = QFontMetrics(Font);
+			return num_;
 		}
-		inline int charWidth(int num = 1) const
+		uint getNumV() const
 		{
-			return FontMetrics.width(QChar('A')) * num;
+			return num_ + 1;
 		}
-		inline int charHeight() const
+
+		QColor color(size_t index) const
 		{
-			return FontMetrics.height();
+			Q_ASSERT(index < Color::ColorCount);
+			return colors_[index];
 		}
-		inline int byteWidth() const
+
+		void setColor(size_t index, QColor color)
 		{
-			return ByteMargin.left() + charWidth(2) + ByteMargin.right();
+			Q_ASSERT(index < Color::ColorCount);
+			colors_[index] = color;
 		}
-		inline int byteHeight() const
+
+		const QFont &font() const
 		{
-			return ByteMargin.top() + FontMetrics.height() + ByteMargin.bottom();
+			return font_;
 		}
-		inline const QRect &byteMargin() const
+
+		void updateFont()
 		{
-			return ByteMargin;
+			fontMetrics_ = QFontMetrics(font_);
 		}
-		inline const QFontMetrics &fontMetrics() const
+		int charWidth(int num = 1) const
 		{
-			return FontMetrics;
+			return charWidth_ * num;
 		}
-		inline int top() const
+		int charHeight() const
 		{
-			return Margin.top();
+			return fontMetrics_.height();
 		}
-		inline int maxWidth() const
+		int byteWidth() const
 		{
-			return X(Num - 1) + Margin.right();
+			return byteMargin_.left() + charWidth(2) + byteMargin_.right();
 		}
-		inline int x(int i) const
+		int byteHeight() const
 		{
-			Q_ASSERT(0 <= i && i < Num);
+			return byteMargin_.top() + fontMetrics_.height() + byteMargin_.bottom();
+		}
+		const QRect &margin() const
+		{
+			return margin_;
+		}
+		const QRect &byteMargin() const
+		{
+			return byteMargin_;
+		}
+		const QFontMetrics &fontMetrics() const
+		{
+			return fontMetrics_;
+		}
+		int top() const
+		{
+			return margin_.top();
+		}
+		int maxWidth() const
+		{
+			return X(num_ - 1) + margin_.right();
+		}
+		int x(size_t i) const
+		{
+			Q_ASSERT(i < num_);
 			return x_begin[i];
 		}
-		inline int X(int i) const
+		int X(size_t i) const
 		{
-			Q_ASSERT(0 <= i && i < Num);
+			Q_ASSERT(i < num_);
 			return x_end[i];
 		}
-		inline int caretWidth() const
+		int caretWidth() const
 		{
 			return 3;
-			//return ByteMargin.left() + charWidth();
+			//return byteMargin_.left() + charWidth();
 		}
-		inline int caretHeight() const
+		int caretHeight() const
 		{
 			return byteHeight();
 		}
-		inline int width()
+		int width()
 		{
-			return byteWidth() * Num + Margin.left() + Margin.right();
+			return byteWidth() * num_ + margin_.left() + margin_.right();
 		}
 		int drawableLines(int height) const;
-		int XToPos(int x) const;	// -1, 0..15, 16 => 18 patterns
+		int XToPos(int x) const;	// -1, 0..N => N + 1 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void update();
+
+		class XIterator
+		{
+		private:
+			const HexConfig &conf;
+			int pos_;
+			bool next_flag_;
+		public:
+			XIterator(const HexConfig &conf, int pos)
+				: conf(conf)
+				, pos_(pos)
+				, next_flag_(false)
+			{
+			}
+
+		public:
+			XIterator operator++()
+			{
+				return *this += 1;
+			}
+
+			XIterator &operator+=(uint i)
+			{
+				const int old = pos_;
+				pos_ = (pos_ + i) % conf.getNum();
+				setNext(pos_ < old);
+				return *this;
+			}
+
+			void operator++(int)
+			{
+				*this += 1;
+			}
+
+			int operator*() const
+			{
+				return pos_;
+			}
+
+			int screenX() const
+			{
+				return conf.x(pos_);
+			}
+
+			int textX() const
+			{
+				return conf.x(pos_) + conf.byteMargin().left();
+			}
+
+			bool isNext() const
+			{
+				return next_flag_;
+			}
+
+			void setNext(bool t)
+			{
+				next_flag_ = t;
+			}
+		};
+
+		class YIterator
+		{
+		private:
+			const HexConfig &conf;
+			int pos_;
+		public:
+			YIterator(const HexConfig &conf, int pos)
+				: conf(conf)
+				, pos_(pos)
+			{
+			}
+
+		public:
+			YIterator operator++()
+			{
+				pos_ += conf.byteHeight();
+				return *this;
+			}
+
+			void operator++(int)
+			{
+				pos_ += conf.byteHeight();
+			}
+
+			int operator*() const
+			{
+				return pos_;
+			}
+
+			int screenY() const
+			{
+				return pos_ + conf.byteMargin_.top();
+			}
+		};
+
+		XIterator createXIterator() const
+		{
+			return XIterator(*this, 0);
+		}
+
+		YIterator createYIterator(int pos) const
+		{
+			return YIterator(*this, pos);
+		}
 	};
 
-	class HexView : public ::View
+	class HexView : public View
 	{
 		Q_OBJECT
 
 	public:
-		HexView(QWidget *parent = NULL, Document *doc = NULL, Highlight *hi = NULL);
+		HexView(QWidget *parent = NULL, ::Document *doc = NULL);
+		~HexView();
 
-		HexConfig & getConfig() { return config_; }
-		Cursor & getCursor() { return *cursor_; }
-		void setCaretBlink(bool enable);
-
-
-	protected:
-		class CaretDrawInfo
+		HexConfig &config()
 		{
-			public:
-				QPainter &painter;
-				CaretShape shape;
-				QString hex;
-				quint64 pos;
-				bool caret_middle;
-				int x;
-				int y;
-			public:
-				CaretDrawInfo(QPainter &p, CaretShape shape, quint64 pos, int x, int y, bool caret_middle)
-					: painter(p)
-				{
-					this->pos = pos;
-					this->shape = shape;
-					this->x = x;
-					this->y = y;
-					this->caret_middle = caret_middle;
-				}
-		};
+			return config_;
+		}
 
-	protected:
-		void resizeEvent(QResizeEvent *);
+		Caret &caret()
+		{
+			return caret_;
+		}
+
+		Cursor &cursor() const
+		{
+			return *cursor_;
+		}
+
+		CaretDrawer * createCaretWidget();
+
+	private:
+		void paintEvent(QPaintEvent*);
 		void mousePressEvent(QMouseEvent*);
 		void mouseMoveEvent(QMouseEvent*);
 		void mouseReleaseEvent(QMouseEvent*);
-		void timerEvent(QTimerEvent *);
 		void keyPressEvent(QKeyEvent *);
 
+		void redrawSelection(quint64 begin, quint64 end);
+
+	public:
+		//void movePosition(quint64 pos, bool sel, bool holdViewPos);
+		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
 
 	public:
 		// TODO change signal
 		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
 
 	public:
-		void drawViewAfter(quint64 pos);
+		//void drawViewAfter(quint64 pos);
 
-	signals:
-		void viewDrawed(DrawMode mode, int, int);
+	private:
 
-	protected:
-		void drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin = 0, int x_end = HexConfig::Num);	// x: [)
+		void drawLines(QPainter &painter, quint64 top, int y, int x_begin, int x_end, uint size);
+
 		void drawText(QPainter &painter, const QString &hex, int x, int y);
 
+	private:
 
-		void isSelected(bool &selected, quint64 &sb, quint64 &se, quint64 top, int yCount, uint size);
-		bool isSelected(quint64 pos);
-	protected:
+		static void byteToHex(uchar c, QString &h);
+		quint64 posAt(const QPoint &pos) const;
 
-		void byteToHex(uchar c, QString &h);
-		quint64 posAt(const QPoint &pos);
 
-	public:
-		void drawCaret(bool visible = true);
-		void drawCaret(bool visible, quint64 pos);
-	protected:
-		void drawCaretShape(CaretDrawInfo info);
-		void drawCaretLine(const CaretDrawInfo &);
-		void drawCaretFrame(const CaretDrawInfo &);
-		void drawCaretBlock(const CaretDrawInfo &);
-		void drawCaretUnderbar(const CaretDrawInfo &);
+	private slots:
+		void inserted(quint64 pos, quint64 len);
+		void removed(quint64 pos, quint64 len);
 
-		void changeData(quint64 pos, uchar character, bool highNibble = false);
-		void insertData(quint64 pos, uchar character);
-		void removeData(quint64 pos, quint64 len);
+		// cursor changed
+		void topChanged(quint64);
+		void positionChanged(quint64, quint64);
+		void insertChanged(bool);
+		void selectionUpdate(quint64, quint64);
 
-	protected:
+	private:
 		// Main components
+		::Document *document_;
 		HexConfig config_;
 		Cursor *cursor_;
+		Caret caret_;
+		Keyboard *keyboard_;
+		std::vector<uchar> buff_;
 	};
 
 }
 
-#endif
+

@@ -1,11 +1,13 @@
 
 #include <QtGui>
+#include <QInputContextFactory>
 #include <algorithm>
 #include <vector>
 #include "textview.h"
-#include "scursor.h"
+#include "../util/util.h"
 #include "../document.h"
-#include "../highlight.h"
+#include "textdecodehelper.h"
+#include "caretdrawer.h"
 
 using namespace std;
 
@@ -14,63 +16,64 @@ namespace Standard {
 ////////////////////////////////////////
 // Config
 TextConfig::TextConfig()
-	: Margin(2, 2, 3, 3)
-	, ByteMargin(0, 0, 0, 0)
-	, Font("Monaco", 17)
-	, EnableCaret(true)
-	, CaretBlinkTime(500)
-	, FontMetrics(Font)
+	: num_(16)
+	, margin_(2, 2, 3, 3)
+	, byteMargin_(0, 0, 0, 0)
+	, font_("Monaco", 17)
+	, fontMetrics_(font_)
 {
 	// Coloring
-	Colors[Color::Background] = QColor(0xEF,0xEF,0xEF);
-	Colors[Color::Text] = QColor(0,0,0);
-	Colors[Color::SelBackground] = QColor(0xA0,0xA0,0xFF);
-	Colors[Color::SelText] = QColor(0,0,0);
-	Colors[Color::CaretBackground] = QColor(0xFF, 0, 0);
-	Colors[Color::CaretText] = QColor(0xFF,0xFF,0xFF);
+	colors_[Color::Background] = QColor(0xEF,0xDF,0xDF, 0);
+	colors_[Color::Text] = QColor(0,0,0);
+	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF, 170);
+	colors_[Color::SelText] = QColor(0,0,0);
+	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
 
 	// Font
-	Font.setFixedPitch(true);
+	font_.setFixedPitch(true);
 
 	update();
 }
 
 void TextConfig::update()
 {
-	// TODO: set ByteMargin value(left=charWidth/2, right=charWidth/2)
+	x_begin.clear();
+	x_end.clear();
+	x_area.clear();
 
 	// Pos
-	x_begin[0] = Margin.left() + ByteMargin.left();
-	for (int i = 1; i < Num; i++) {
-		x_begin[i] = x_begin[i-1] + byteWidth();
+	x_begin.push_back(0);
+	for (size_t i = 1; i < num_; i++) {
+		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
 	// Pos of end
-	for (int i = 0; i < Num; i++) {
-		x_end[i] = x_begin[i] + charWidth(1) + ByteMargin.right();
+	for (size_t i = 0; i < x_begin.size(); i++) {
+		x_end.push_back(x_begin[i] + charWidth(1));
 	}
+	x_end.back() += byteWidth();
 
 	// Area
-	x_area[0] = Margin.left() + ByteMargin.left();
-	for (int i = 1; i < Num; i++) {
-		x_area[i] = x_area[i-1] + byteWidth();
+	x_area.push_back(0);
+	for (size_t i = 1; i < num_; i++) {
+		x_area.push_back(x_area.back() + byteWidth());
 	}
-	x_area[Num] = x_area[Num-1] + byteWidth();
+	x_area.back() += byteWidth();
 }
 
 int TextConfig::drawableLines(int height) const
 {
-	const int y = top() + byteMargin().top();
+	const int y = top() + byteMargin_.top();
 	return (height - y + byteHeight()) / byteHeight();
 }
 
 int TextConfig::XToPos(int x) const
 {
-	if (x < Margin.left()) {
+	if (x < margin_.left()) {
 		return -1;
 	}
 
-	return (int)distance(x_area, lower_bound(x_area, x_area + Num + 1, x)) - 1;
+	return (int)distance(x_area.begin(), lower_bound(x_area.begin(), x_area.end(), x)) - 1;
 }
 
 int TextConfig::YToLine(int y) const
@@ -84,90 +87,77 @@ int TextConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-TextView::TextView(QWidget *parent, Document *doc, Highlight *hi, Cursor *cursor)
-	: ::View(parent, doc, hi)
-	, cursor_(cursor)
+TextView::TextView(QWidget *parent, ::Document *doc)
+	: View(parent)
+	, document_(doc)
+	, cursor_(new Cursor(doc))
+	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))
+	, caret_(CARET_BLOCK, CARET_FRAME)
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
+
+
+	// Add document event
+	connect(document_, SIGNAL(inserted(quint64, quint64)), this, SLOT(inserted(quint64, quint64)));
+	connect(document_, SIGNAL(removed(quint64, quint64)), this, SLOT(removed(quint64, quint64)));
+
+	// Add cursor event
+	QObject::connect(cursor_, SIGNAL(topChanged(quint64)), this, SLOT(topChanged(quint64)));
+	QObject::connect(cursor_, SIGNAL(positionChanged(quint64, quint64)), this, SLOT(positionChanged(quint64, quint64)));
+	QObject::connect(cursor_, SIGNAL(insertChanged(bool)), this, SLOT(insertChanged(bool)));
+	QObject::connect(cursor_, SIGNAL(selectionUpdate(quint64, quint64)), this, SLOT(selectionUpdate(quint64, quint64)));
+
+	// for Qt4.6?
+	//setEnabled(true);
+	//setMouseTracking(true);
+	
+	// Input Method
+	setAttribute(Qt::WA_InputMethodEnabled);
+#ifdef Q_WS_MAC
+	setInputContext(QInputContextFactory::create(QString("mac"), this));
+#endif
+
+#ifdef Q_WS_WIN
+	setInputContext(QInputContextFactory::create(QString("win"), this));
+#endif
 }
 
-void TextView::resizeEvent(QResizeEvent *rs)
+TextView::~TextView()
 {
-	QSize size(qMin(rs->size().width(), config_.maxWidth()), rs->size().height());
-	QResizeEvent resize(size, rs->oldSize());
-	View::resizeEvent(&resize);
-	pix_.fill(config_.Colors[Color::Background]);
+	delete decode_helper_;
+	delete cursor_;
+}
+
+void TextView::paintEvent(QPaintEvent*)
+{
+	// FIXME: refactoring
 	drawView();
 }
 
-void TextView::drawView(DrawMode mode, int line_start, int end)
+void TextView::drawView()
 {
-	//qDebug("refresh event mode:%d line:%d end:%d", mode, line_start, end);
-	//qDebug(" pos:%llu, anchor:%llu", cursor_->Position, cursor_->PositionAnchor);
-
 	// FIXME: refactoring refresh event
-	QPainter painter;
-	painter.begin(&pix_);
-	painter.setFont(config_.Font);
+	QPainter painter(this);
+	painter.setFont(config_.font());
 
-	if (!document_->length()) {
-		// TODO: draw Empty Background only
-		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(0, 0, width(), height(), brush);
-		painter.end();
-		// Update screen buffer
-		update(0, 0, width(), height());
-		return;
-	}
+	// TODO: draw Empty Background only
 
-	Q_ASSERT(0 <= line_start);
-	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / TextConfig::Num + 1);
-	Q_ASSERT(0 <= end);
-	Q_ASSERT(static_cast<uint>(end) <= document_->length() / TextConfig::Num + 1);
+	//Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.getNum() + 1);
 
 	// Get draw range
 	int y_top = config_.top();
-	int y = config_.top() + config_.byteMargin().top();
-	int count_draw_line, max_y;
-
-	// Get minumum drawing area
-	switch (mode) {
-	case DRAW_ALL:
-		count_draw_line = config_.drawableLines(height());
-		break;
-	case DRAW_LINE:
-		y_top += config_.byteHeight() * line_start;
-		y     += config_.byteHeight() * line_start;
-		count_draw_line = 1;
-		break;
-	case DRAW_AFTER:
-		y_top += config_.byteHeight() * line_start;
-		y     += config_.byteHeight() * line_start;
-		max_y = qMax(y + config_.byteHeight(), height());
-		count_draw_line = config_.drawableLines(max_y - y);
-		break;
-	case DRAW_RANGE:
-		y_top += config_.byteHeight() * line_start;
-		y     += config_.byteHeight() * line_start;
-		max_y = qMin(y + config_.byteHeight() * end, height());
-		count_draw_line = config_.drawableLines(max_y - y);
-		break;
-	}
+	int count_draw_line = config_.drawableLines(height());
 
 	// Get top position of view
-	const quint64 top = (cursor_->Top + line_start) * TextConfig::Num;
-	const uint size = qMin(document_->length() - top, (quint64)TextConfig::Num * count_draw_line);
+	const quint64 top = cursor_->top() * config_.getNum();
+	const uint size = qMin(document_->length() - top, (quint64)config_.getNum() * count_draw_line);
+
+	qDebug("refresh event line:%llu end:%d", cursor_->top(), count_draw_line);
+	//qDebug(" pos:%llu, anchor:%llu", cursor_->position(), cursor_->anchor());
+
 	if (size == 0) {
 		return;
-	}
-
-	// Draw empty area(after end line)
-	if (mode == DRAW_ALL || mode == DRAW_AFTER) {
-		//qDebug("draw empty area DRAW_ALL or DRAW_AFTER");
-		QBrush brush(config_.Colors[Color::Background]);
-		const int y_start = y_top + qMax(0, count_draw_line - 1) * config_.byteHeight();
-		painter.fillRect(0, y_start, width(), height(), brush);
 	}
 
 	// Copy from document
@@ -176,292 +166,132 @@ void TextView::drawView(DrawMode mode, int line_start, int end)
 	}
 	document_->get(top, &buff_[0], size);
 
-	// Get selectead area
-	bool selected = false;
-	quint64 sel_begin = 0, sel_end = 0;
-	isSelected(selected, sel_begin, sel_end, top, count_draw_line, size);
-
-	// TODO: Adding cache class for color highligh data
-	::DrawInfo di(y, top, sel_begin, sel_end, size, selected);
-	getDrawColors(di, dcolors_);
-
 	// Draw lines
-	//qDebug("x:%d", (width() - config_.Margin.left()) / config_.byteWidth());
-	const int x_count_max = (width() - config_.Margin.left()) / config_.byteWidth() + 1;
-	drawLines(painter, dcolors_, y_top, 0, x_count_max);
+	drawLines(painter, top, y_top, size);
 
 	// Update screen buffer
 	const int draw_width  = qMin(width(), config_.maxWidth());
 	const int draw_height = count_draw_line * config_.byteHeight();
-	painter.end();
-	update(0, y_top, draw_width, draw_height);
 }
 
-inline void TextView::drawViewAfter(quint64 pos)
+void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 {
-	drawView(DRAW_AFTER, pos / TextConfig::Num - cursor_-> Top);
-}
+	TextConfig::XIterator xitr = config_.createXIterator();
+	TextConfig::YIterator yitr = config_.createYIterator(y);
+	const CursorSelection selection = cursor_->getSelection();
+	
+	// Draw loop
+	for (uint index = 0; index < size; ) {
+		// 印字可能な文字を描画
+		uint printableBytes = decode_helper_->getPrintableBytes(index);
+		if (printableBytes > 0) {
+			// get data
+			uchar *b = &buff_[index];
+			QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
+			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
-inline void TextView::isSelected(bool &selected, quint64 &sel_begin, quint64 &sel_end, quint64 top, int count_draw_line, uint size)
-{
-	if (!cursor_->hasSelection()) {
-		return;
-	}
+			uint i = 0;
+			while (i < printableBytes && *xitr + i < config_.getNum()) {
+				// Set color
+				ColorType color = selection.color(docpos);
+				QBrush brush = QBrush(config_.color(color.Background));
+				painter.setBackground(brush);
+				painter.setPen(config_.color(color.Text));
 
-	sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
-	sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
+				// Draw background/text
+				QRect rect(config_.x(*xitr + i), yitr.screenY(), config_.posWidth(*xitr + i), config_.byteHeight());
+				painter.setClipRegion(rect);
+				painter.setClipping(true);
+				painter.fillRect(rect, brush);
+				drawText(painter, text, config_.x(*xitr), yitr.screenY());
+				painter.setClipping(false);
 
-	if (top <= sel_end && sel_begin <= qMax(top + (TextConfig::Num * count_draw_line), top + size)) {
-		selected = true;
-	} else {
-		selected = false;
-	}
-}
+				++i;
+				++docpos;
+			}
 
-inline bool TextView::isSelected(quint64 pos)
-{
-	const quint64 sel_begin = qMin(cursor_->Position, cursor_->PositionAnchor);
-	const quint64 sel_end   = qMax(cursor_->Position, cursor_->PositionAnchor);
-	return sel_begin <= pos && pos <  sel_end;
-}
+			xitr += i;
+			// 次の行
+			if (xitr.isNext()) {
+				xitr.setNext(false);
+				++yitr;
 
-void TextView::drawLines(QPainter &painter, DCIList &dcolors, int y, int x_begin, int x_end)
-{
-	int index_data = 0, x = 0;
-	bool reset_color = true;
-	QBrush brush;
-	QString hex;
-	hex.resize(2);
+				while (i < printableBytes) {
+					ColorType color = selection.color(docpos);
+					QBrush brush = QBrush(config_.color(color.Background));
+					painter.setBackground(brush);
+					painter.setPen(config_.color(color.Text));
 
-	for (DCIList::iterator itr_color = dcolors.begin(); itr_color != dcolors.end(); ) {
-		// Setup/Update color settings
-		if (reset_color) {
-			// Create brush for background
-			brush = QBrush(config_.Colors[itr_color->BackgroundColor]);
-			// Set color
-			painter.setBackground(brush);
-			painter.setPen(config_.Colors[itr_color->TextColor]);
-			reset_color = false;
-		}
+					QString text = QString(QChar('_'));
 
-		// Skip
-		if (x < x_begin || x_end <= x) {
-			goto COUNTUP;
-		}
+					// Draw background
+					painter.fillRect(xitr.textX(), yitr.screenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
+					drawText(painter, text, xitr.textX(), yitr.screenY(), 1);
 
-		// Draw background
-		painter.fillRect(config_.x(x), y, config_.byteWidth(), config_.byteHeight(), brush);
-
-		// Draw text
-		byteToHex(buff_[index_data], hex);
-		drawText(painter, hex, config_.x(x) + config_.ByteMargin.left(), y + config_.ByteMargin.top());
-
-COUNTUP:// Count up
-		index_data++;
-		x = (x + 1) % TextConfig::Num;
-
-		// Iterate color
-		Q_ASSERT(0 <= itr_color->Length);
-		if (--itr_color->Length <= 0) {
-			// Move next color
-			++itr_color;
-			// Change color
-			reset_color = true;
-		}
-
-		// Move next line
-		if (x == 0) {
-			y += config_.byteHeight();
-		}
-	}
-
-	// Draw empty area(after end line)
-	if (0 < x && x < x_end && x < TextConfig::Num) {
-		//qDebug("empty: %d", x);
-		QBrush brush(config_.Colors[Color::Background]);
-		painter.fillRect(config_.x(x), y, width(), config_.byteHeight(), brush);
-	}
-}
-
-inline void TextView::drawText(QPainter &painter, const QString &hex, int x, int y)
-{
-	painter.drawText(x, y, config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, hex);
-}
-
-void TextView::drawCaret(bool visible)
-{
-	drawCaret(visible, cursor_->Position);
-}
-
-void TextView::drawCaret(bool visible, quint64 pos)
-{
-	// Check out of range
-	if (!(config_.top() + config_.byteHeight() < height())) {
-		return;
-	}
-
-	// Redraw line
-	const quint64 line = cursor_->Position / TextConfig::Num;
-	if (cursor_->Top <= line && line - cursor_->Top < static_cast<unsigned int>(config_.drawableLines(height()))) {
-		drawView(DRAW_LINE, line - cursor_->Top);
-	}
-
-	// Shape
-	const CaretShape shape = visible ? cursor_->CaretVisibleShape : cursor_->CaretInvisibleShape;
-	if (shape == CARET_NONE) {
-		return;
-	}
-
-	// Begin paint
-	QPainter painter;
-	painter.begin(&pix_);
-	painter.setFont(config_.Font);
-
-	// Get caret coordinates
-	const int x = pos % TextConfig::Num;
-	const int y = config_.top() + config_.byteHeight() * (pos / TextConfig::Num - cursor_->Top);
-
-	// Draw shape
-	drawCaretShape(CaretDrawInfo(painter, shape, pos, x, y, pos < document_->length()));
-
-	// Finish paint and update screen buffer
-	painter.end();
-	update(config_.x(x), y, config_.byteWidth(), config_.charHeight());
-}
-
-void TextView::drawCaretShape(CaretDrawInfo info)
-{
-	if (info.caret_middle) {
-		// Copy from document
-		uchar data;
-		document_->get(info.pos, &data, 1);
-
-		info.hex.resize(2);
-		byteToHex(data, info.hex);
-	}
-
-	switch (info.shape) {
-	case CARET_LINE:
-		drawCaretLine(info);
-		break;
-	case CARET_BLOCK:
-		drawCaretBlock(info);
-		break;
-	case CARET_FRAME:
-		drawCaretFrame(info);
-		break;
-	case CARET_UNDERBAR:
-		drawCaretUnderbar(info);
-		break;
-	default:
-		;
-	}
-}
-
-void TextView::drawCaretLine(const CaretDrawInfo &info)
-{
-	int x;
-	if (cursor_->HighNibble || !info.caret_middle) {
-		x = config_.x(info.x);
-	} else {
-		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
-	}
-	QBrush brush(config_.Colors[Color::CaretBackground]);
-	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
-}
-
-void TextView::drawCaretBlock(const CaretDrawInfo &info)
-{
-	if (info.caret_middle) {
-		if (cursor_->HighNibble || cursor_->hasSelection()) {
-			// Draw block byte
-			QBrush brush(config_.Colors[Color::CaretBackground]);
-			info.painter.setBackground(brush);
-			info.painter.setPen(config_.Colors[Color::CaretText]);
-			info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
-			info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignCenter, info.hex);
+					++i;
+					++docpos;
+					++xitr;
+				}
+			}
+			index += printableBytes;
 		} else {
-			// Draw block lowwer nibble
-			QBrush brush(config_.Colors[Color::CaretBackground]);
-			info.painter.setBackground(brush);
-			info.painter.setPen(config_.Colors[Color::CaretText]);
-			info.painter.fillRect(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y, config_.charWidth() + config_.ByteMargin.right(), config_.byteHeight(), brush);
-			QString low(info.hex[1]);
-			info.painter.drawText(config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth(), info.y + config_.ByteMargin.top(), config_.charWidth(2), config_.charHeight(), Qt::AlignLeft, low);
+			// Set color
+			ColorType color = selection.color(docpos);
+			QBrush brush = QBrush(config_.color(color.Background));
+			painter.setBackground(brush);
+			painter.setPen(config_.color(color.Text));
+
+			// 印字不可なのでドットを描画
+			QString text = QString(QChar('.'));
+
+			// Draw
+			painter.fillRect(xitr.textX(), yitr.screenY(), config_.posWidth(*xitr), config_.byteHeight(), brush);
+			drawText(painter, text, xitr.textX(), yitr.screenY(), 1);
+
+			++index;
+			++xitr;
+			++docpos;
+
+			// 描画座標を次の行にする
+			if (xitr.isNext()) {
+				xitr.setNext(false);
+				++yitr;
+			}
 		}
-	} else {
-		// Draw block without data
-		QBrush brush(config_.Colors[Color::CaretBackground]);
-		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 	}
 }
 
-void TextView::drawCaretFrame(const CaretDrawInfo &info)
+inline void TextView::drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth)
 {
-	int width, x;
-	if (cursor_->HighNibble || !info.caret_middle) {
-		width = config_.byteWidth() - 1;
-		x = config_.x(info.x);
-	} else {
-		width = config_.charWidth() + config_.ByteMargin.right() - 1;
-		x = config_.x(info.x) + config_.charWidth() + config_.ByteMargin.left();
-	}
-	info.painter.setPen(config_.Colors[Color::CaretBackground]);
-	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
+	painter.drawText(x, y, config_.charWidth(charwidth), config_.charHeight(), Qt::AlignCenter, hex);
 }
 
-void TextView::drawCaretUnderbar(const CaretDrawInfo &info)
+inline void TextView::drawText(QPainter &painter, const QString &str, int x, int y)
 {
-	int width, x;
-	if (cursor_->HighNibble || !info.caret_middle) {
-		width = config_.byteWidth() - 1;
-		x = config_.x(info.x);
-	} else {
-		width = config_.charWidth() + config_.ByteMargin.right() - 1;
-		x = config_.x(info.x) + config_.ByteMargin.left() + config_.charWidth();
-	}
-
-	QBrush brush(config_.Colors[Color::CaretBackground]);
-	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
-}
-
-void TextView::byteToHex(uchar c, QString &h)
-{
-	const uchar H = (c >> 4) & 0xF;
-	if (H <= 9) {
-		h[0] = QChar('0' + H);
-	} else {
-		h[0] = QChar('A' + H - 10);
-	}
-	const uchar L = c & 0xF;
-	if (L <= 9) {
-		h[1] = QChar('0' + L);
-	} else {
-		h[1] = QChar('A' + L - 10);
-	}
+	painter.drawText(x, y, config_.textWidth(str), config_.charHeight(), Qt::AlignCenter, str);
 }
 
 void TextView::mousePressEvent(QMouseEvent *ev)
 {
 	if (ev->button() == Qt::LeftButton) {
+		qDebug("mosue press");
 
-		cursor_->HighNibble = true;
-		cursor_->movePosition(posAt(ev->pos()), false, false);
+		cursor_->movePosition(this, posAt(ev->pos()), false, false);
 
 		// Start mouse capture
-		grabMouse();
+		//grabMouse();
 	}
 }
 
 void TextView::mouseMoveEvent(QMouseEvent *ev)
 {
-	if (ev->button() == Qt::LeftButton) {
-		// FIXME: move up/down automatically
-		if (height() < ev->pos().y()) {
-			return;
-		}
-		cursor_->movePosition(posAt(ev->pos()), true, false);
+	//qDebug("mouse move :%d", ev->button());
+	//qDebug("mosue move");
+	// FIXME: move up/down automatically
+	if (height() < ev->pos().y()) {
+		return;
 	}
+	cursor_->movePosition(this, posAt(ev->pos()), true, false);
 }
 
 void TextView::mouseReleaseEvent(QMouseEvent *)
@@ -469,10 +299,10 @@ void TextView::mouseReleaseEvent(QMouseEvent *)
 	//qDebug("mouse release");
 
 	// End mouse capture
-	releaseMouse();
+	//releaseMouse();
 }
 
-quint64 TextView::posAt(const QPoint &pos)
+quint64 TextView::posAt(const QPoint &pos) const
 {
 	int x = config_.XToPos(pos.x());
 	int y = config_.YToLine(pos.y());
@@ -484,34 +314,12 @@ quint64 TextView::posAt(const QPoint &pos)
 		x = y = 0;
 	}
 
-	return qMin((cursor_->Top + y) * TextConfig::Num + x, document_->length());
+	return qMin((cursor_->top() + y) * config_.getNum() + x, document_->length());
 }
 
-// Enable caret blink
-void TextView::setCaretBlink(bool enable)
+CaretDrawer * TextView::createCaretWidget()
 {
-	if (!config_.EnableCaret || !config_.CaretBlinkTime) {
-		return;
-	}
-	if (enable) {
-		if (cursor_->CaretTimerId == 0) {
-			cursor_->CaretTimerId = startTimer(config_.CaretBlinkTime);
-		}
-	} else {
-		if (cursor_->CaretTimerId != 0) {
-			killTimer(cursor_->CaretTimerId);
-			cursor_->CaretTimerId = 0;
-		}
-	}
-}
-
-void TextView::timerEvent(QTimerEvent *ev)
-{
-	if (cursor_->CaretTimerId == ev->timerId()) {
-		// Caret blink
-		drawCaret(cursor_->HexCaretVisible);
-		cursor_->turnHexCaretVisible();
-	}
+	return new TextCaretDrawer(config_, cursor_, document_);
 }
 
 void TextView::keyPressEvent(QKeyEvent *ev)
@@ -532,50 +340,40 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
 	case Qt::Key_Home:
-		cursor_->HighNibble = true;
-		cursor_->movePosition(0, keepAnchor, false);
+		cursor_->movePosition(this, 0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
-		cursor_->HighNibble = true;
-		cursor_->movePosition(document_->length(), keepAnchor, false);
+		cursor_->movePosition(this, document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
-		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(-1, keepAnchor, false);
+		moveRelativePosition(-1, keepAnchor, false);
 		break;
 	case Qt::Key_Right:
-		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(1, keepAnchor, false);
+		moveRelativePosition(1, keepAnchor, false);
 		break;
 	case Qt::Key_Up:
-		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(-16, keepAnchor, false);
+		moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_Down:
-		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(16, keepAnchor, false);
+		moveRelativePosition((qint64)config_.getNum(), keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
-		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(-16 * 15, keepAnchor, true);
+		moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
-		cursor_->HighNibble = true;
-		cursor_->moveRelativePosition(16 * 15, keepAnchor, true);
+		moveRelativePosition((qint64)config_.getNum() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
 		if (cursor_->hasSelection()) {
-			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
-			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
+			const quint64 pos = qMin(cursor_->position(), cursor_->anchor());
+			const quint64 len = qMax(cursor_->position(), cursor_->anchor()) - pos;
 			removeData(pos, len);
-			cursor_->moveRelativePosition(pos, false, false);
+			moveRelativePosition(pos, false, false);
 			// TODO: drawView [pos. pos+len]
-			drawView();
-			cursor_->HighNibble = true;
-		} else if (0 < cursor_->Position) {
-			removeData(cursor_->Position - 1, 1);
-			cursor_->moveRelativePosition(-1, false, false);
-			cursor_->HighNibble = true;
+			//drawView();
+		} else if (0 < cursor_->position()) {
+			removeData(cursor_->position() - 1, 1);
+			moveRelativePosition(-1, false, false);
 		}
 		break;
 	case Qt::Key_Insert:
@@ -584,17 +382,15 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Delete:
 		if (cursor_->hasSelection()) {
-			const quint64 pos = qMin(cursor_->Position, cursor_->PositionAnchor);
-			const quint64 len = qMax(cursor_->Position, cursor_->PositionAnchor) - pos;
+			const quint64 pos = qMin(cursor_->position(), cursor_->anchor());
+			const quint64 len = qMax(cursor_->position(), cursor_->anchor()) - pos;
 			removeData(pos, len);
-			cursor_->moveRelativePosition(0, false, false);
+			moveRelativePosition(0, false, false);
 			// TODO: drawView [pos. pos+len]
-			drawView();
-			cursor_->HighNibble = true;
-		} else if (cursor_->Position < document_->length()) {
-			removeData(cursor_->Position, 1);
-			cursor_->moveRelativePosition(0, false, false);
-			cursor_->HighNibble = true;
+			//drawView();
+		} else if (cursor_->position() < document_->length()) {
+			removeData(cursor_->position(), 1);
+			moveRelativePosition(0, false, false);
 		}
 		break;
 	default:
@@ -608,34 +404,83 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 	}
 }
 
-void TextView::changeData(quint64 pos, uchar character, bool highNibble)
+void TextView::inputMethodEvent(QInputMethodEvent *ev)
 {
-	document_->remove(pos, 1);
-	document_->insert(pos, &character, 1);
-	cursor_->HighNibble = !highNibble;
-	// TODO: implement Redraw Event
-	//drawView(DRAW_LINE, pos / TextConfig::Num - cursor_->Top);
-	drawView();
+	qDebug() << "input method" << ev->commitString();
+	qDebug() << "input method" << ev->preeditString();
 }
 
-void TextView::insertData(quint64 pos, uchar character)
+QVariant TextView::inputMethodQuery(Qt::InputMethodQuery query) const
 {
-	document_->insert(pos, &character, 1);
-	// TODO: implement Redraw Event
-	//drawViewAfter(pos);
-	//drawCaret();
-	drawView();
+}
+
+void TextView::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
+{
+	cursor_->movePosition(this, cursor_->getRelativePosition(pos), sel, holdViewPos);
+}
+
+void TextView::redrawSelection(quint64 begin, quint64 end)
+{
+	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
+	begin /= config_.getNum();
+	end   /= config_.getNum();
+
+	// FIXIME: redraw [beginLine, endLine]
+	//drawView();
+	update();
 }
 
 void TextView::removeData(quint64 pos, quint64 len)
 {
 	document_->remove(pos, len);
 	// TODO: implement Redraw Event
-	//drawViewAfter(pos);
-	drawView();
+	//drawView();
+	update();
+}
+
+void TextView::inserted(quint64 pos, quint64 len)
+{
+	// TODO: lazy redraw
+	//drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+	//drawView();
+	update();
 }
 
 
+void TextView::removed(quint64 pos, quint64 len)
+{
+	// TODO: lazy redraw
+	//drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+	update();
+}
+
+
+void TextView::topChanged(quint64 top)
+{
+	//drawView();
+	update();
+}
+
+void TextView::positionChanged(quint64 old, quint64 pos)
+{
+	// FIXME: optimize update area
+	//update(0, 0, width(), height());
+	update();
+}
+
+void TextView::insertChanged(bool)
+{
+	// FIXME: optimize update area
+	// update curosr pos
+	//update(0, 0, width(), height());
+	update();
+}
+
+
+void TextView::selectionUpdate(quint64 begin, quint64 end)
+{
+	redrawSelection(begin, end);
+}
 
 
 }	// namespace

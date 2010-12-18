@@ -1,37 +1,189 @@
-#ifndef DOCUMENT_H_INC
-#define DOCUMENT_H_INC
 
+#pragma once
+
+#include <QObject>
 #include <QString>
 #include <vector>
+#include "document_i.h"
 
 class DocumentImpl;
 class QFile;
+class QUndoStack;
+
+class DocumentFragment
+{
+private:
+	quint8 type_;
+	quint64 position_;
+	quint64 length_;
+public:
+	DocumentFragment(quint8 type, quint64 pos, quint64 len)
+		: type_(type)
+		, position_(pos)
+		, length_(len)
+	{
+	}
+
+	quint8 type() const
+	{
+		return type_;
+	}
+
+	quint64 position() const
+	{
+		return position_;
+	}
+
+	quint64 length() const
+	{
+		return length_;
+	}
+};
 
 
-class Document
+class DocumentOriginal
 {
 public:
+	virtual quint64 length() const = 0;
+	virtual void get(quint64 pos, uchar *buf, quint64 len) const = 0;
+};
+
+
+class Document : public QObject
+{
+	Q_OBJECT
+	Q_DISABLE_COPY(Document)
+
+public:
+	typedef std::vector<uchar> Buffer;
+	typedef std::vector<DocumentFragment> FragmentList;
+
+	enum {
+		DOCTYPE_BUFFER = 0,
+		DOCTYPE_ORIGINAL = 1,
+	};
+
+	class WriteCallback
+	{
+	public:
+		virtual bool writeCallback(quint64 completed);
+		virtual void writeCompleted();
+	};
+
+public:
+	// 空で作成
 	Document();
-	Document(const QString &str, bool writemode);
-	Document(const Document &doc, bool writemode);
+	// ファイルから開く
+	Document(QFile *file);
+	Document(QFile *file, uint buffer_size);
+
+	static Document *reopenKeepUndo(Document *doc, size_t max_buffer);
+	// static Document * openFile(QFile*file);
+	// static Document * create();
+
 	virtual ~Document();
 
+
+	//-- immutable methods
+
+	// 
 	quint64 length() const;
 
-	void get(quint64 pos, uchar *buf, uint len);
+	// copy 
+	void get(quint64 pos, uchar *buf, uint len) const;
+	FragmentList get(quint64 pos = 0, quint64 len = 0) const;
+
+	// copy DocumentFragment from piece table
+	template <class T>
+	T get(quint64 pos, quint64 len, T result) const
+	{
+		Q_ASSERT(pos <= length());
+		Q_ASSERT(len <= length());
+		Q_ASSERT(pos <= length() - len);
+
+		uint x = impl_->documents_.findNode(pos);
+
+		Q_ASSERT(x != 0);
+		const quint64 diff = pos - impl_->documents_.position(x);
+		if (diff) {
+			const quint64 fragmentSize = impl_->documents_.size(x) - diff;
+			DocumentData *X = impl_->documents_.fragment(x);
+			if (fragmentSize < len) {
+				*result =  DocumentFragment(X->type, X->bufferPosition + diff, fragmentSize);
+				
+				++result;
+				len -= fragmentSize;
+				x = impl_->documents_.next(x);
+			} else {
+				*result = DocumentFragment(X->type, X->bufferPosition + diff, len);
+				return result;
+			}
+		}
+
+		Q_ASSERT(x != 0);
+		while (0 < len) {
+			const quint64 fragmentSize = impl_->documents_.size(x);
+			const uint copy_size = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
+			const DocumentData *X = impl_->documents_.fragment(x);
+			*result = DocumentFragment(X->type, X->bufferPosition, copy_size);
+			++result;
+
+			len -= copy_size;
+			x = impl_->documents_.next(x);
+		}
+
+		return result;
+	}
+
+	// save
+	bool overwritable() const;
+	bool write(WriteCallback *callback);
+	// saveas
+	bool write(QFile *out, WriteCallback *callback);
+	bool write(quint64 pos, quint64 len, QFile *out, WriteCallback *callback);
+
+	//-- mutable methods
 	void insert(quint64 pos, const uchar *buf, uint len);
+	// file method
+	//  save, saveAs, ....
+	// 
+	//
+
+	QFile *file() const;
+	QUndoStack *undoStack() const;
+	Buffer &buffer();
+
+public slots:
+	//-- mutable methods
+	void insert(quint64 pos, DocumentFragment fragment);
 	void remove(quint64 pos, quint64 len);
 
+signals:
+	void inserted(quint64 pos, quint64 len);
+	void removed(quint64 pos, quint64 len);
+
+public:
+	const static size_t DEFAULT_BUFFER_SIZE;
+
 private:
-	void copy(uint type, quint64 pos, quint64 len, uchar *buf);
+	// ドキュメントの実体をバッファへコピーする
+	void copy(quint8 type, quint64 pos, quint64 len, uchar *buf) const;
+
+	// Fragment Copy iterator
+	class FragmentCopier;
+
+	// Document Buffer Writer
+	class BufferWriter;
 
 
 protected:
 	DocumentImpl *impl_;
+	DocumentOriginal *original_;
 	QFile *file_;
-	std::vector<uchar> buffer_;
+	QUndoStack *undo_stack_;
+	Buffer buffer_;
 
 };
 
 
-#endif
+

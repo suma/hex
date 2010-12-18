@@ -1,5 +1,5 @@
-#ifndef COLOR_H_INC
-#define COLOR_H_INC
+
+#pragma once
 
 namespace Color {
 	enum color {
@@ -8,10 +8,19 @@ namespace Color {
 		SelBackground,	// hilighted
 		SelText,
 		CaretBackground,
-		CaretText,
 		ColorCount,
 	};
 }
 
 
-#endif
+struct ColorType {
+	int Background;
+	int Text;
+	ColorType(int bg_color = Color::Background, int text_color = Color::Text)
+	{
+		Background = bg_color;
+		Text = text_color;
+	}
+};
+
+
