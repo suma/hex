@@ -10,7 +10,7 @@ public:
 	inline void invalidate() const {}
 	inline void free() {}
 	quint64 bufferPosition;
-	uint type;
+	quint8 type;
 };
 
 

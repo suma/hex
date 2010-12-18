@@ -10,28 +10,21 @@ class DocumentImpl;
 class QFile;
 class QUndoStack;
 
-class DocumentOriginal
-{
-public:
-	virtual quint64 length() const = 0;
-	virtual void get(quint64 pos, uchar *buf, quint64 len) const = 0;
-};
-
 class DocumentFragment
 {
 private:
-	uint type_;
+	quint8 type_;
 	quint64 position_;
 	quint64 length_;
 public:
-	DocumentFragment(uint type, quint64 pos, quint64 len)
+	DocumentFragment(quint8 type, quint64 pos, quint64 len)
 		: type_(type)
 		, position_(pos)
 		, length_(len)
 	{
 	}
 
-	uint type() const
+	quint8 type() const
 	{
 		return type_;
 	}
@@ -47,28 +40,44 @@ public:
 	}
 };
 
+
+class DocumentOriginal
+{
+public:
+	virtual quint64 length() const = 0;
+	virtual void get(quint64 pos, uchar *buf, quint64 len) const = 0;
+};
+
+
 class Document : public QObject
 {
 	Q_OBJECT
+	Q_DISABLE_COPY(Document)
 
 public:
 	typedef std::vector<uchar> Buffer;
+	typedef std::vector<DocumentFragment> FragmentList;
 
 	enum {
 		DOCTYPE_BUFFER = 0,
 		DOCTYPE_ORIGINAL = 1,
 	};
 
+	class WriteCallback
+	{
+	public:
+		virtual bool writeCallback(quint64 completed);
+		virtual void writeCompleted();
+	};
 
+public:
 	// 空で作成
 	Document();
 	// ファイルから開く
 	Document(QFile *file);
 	Document(QFile *file, uint buffer_size);
-	// 既存のドキュメントをコピー
-	Document(const Document &doc, bool writemode);
 
-	// TODO: static
+	static Document *reopenKeepUndo(Document *doc, size_t max_buffer);
 	// static Document * openFile(QFile*file);
 	// static Document * create();
 
@@ -80,10 +89,11 @@ public:
 	// 
 	quint64 length() const;
 
-	// バッファにコピーする
+	// copy 
 	void get(quint64 pos, uchar *buf, uint len) const;
+	FragmentList get(quint64 pos = 0, quint64 len = 0) const;
 
-	// イテレータの先へDocumentFragmentをコピーする
+	// copy DocumentFragment from piece table
 	template <class T>
 	T get(quint64 pos, quint64 len, T result) const
 	{
@@ -125,6 +135,12 @@ public:
 		return result;
 	}
 
+	// save
+	bool overwritable() const;
+	bool write(WriteCallback *callback);
+	// saveas
+	bool write(QFile *out, WriteCallback *callback);
+	bool write(quint64 pos, quint64 len, QFile *out, WriteCallback *callback);
 
 	//-- mutable methods
 	void insert(quint64 pos, const uchar *buf, uint len);
@@ -133,6 +149,7 @@ public:
 	// 
 	//
 
+	QFile *file() const;
 	QUndoStack *undoStack() const;
 	Buffer &buffer();
 
@@ -146,14 +163,17 @@ signals:
 	void removed(quint64 pos, quint64 len);
 
 public:
-	const static int DEFAULT_BUFFER_SIZE;
+	const static size_t DEFAULT_BUFFER_SIZE;
 
 private:
 	// ドキュメントの実体をバッファへコピーする
-	void copy(uint type, quint64 pos, quint64 len, uchar *buf) const;
+	void copy(quint8 type, quint64 pos, quint64 len, uchar *buf) const;
 
 	// Fragment Copy iterator
 	class FragmentCopier;
+
+	// Document Buffer Writer
+	class BufferWriter;
 
 
 protected:

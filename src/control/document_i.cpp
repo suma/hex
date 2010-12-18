@@ -49,6 +49,8 @@ DocumentImpl::~DocumentImpl()
 
 uint DocumentImpl::insert_data(ulint pos, ulint bufPos, ulint len, quint8 type)
 {
+	Q_ASSERT(len != 0);
+
     split(pos);
     uint x = documents_.insert_single(pos, len);
     DocumentData *X = documents_.fragment(x);
@@ -66,6 +68,8 @@ uint DocumentImpl::insert_data(ulint pos, ulint bufPos, ulint len, quint8 type)
 
 uint DocumentImpl::remove_data(ulint pos, ulint len)
 {
+	Q_ASSERT(len != 0);
+
 	//qDebug("remove_data pos:%llu len:%llu", pos, len);
     split(pos);
     split(pos+len);

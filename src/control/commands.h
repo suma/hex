@@ -31,7 +31,7 @@ private:
 	Document *document_;
 	quint64 position_;
 	quint64 length_;
-	std::vector<DocumentFragment> fragments_;
+	Document::FragmentList fragments_;
 };
 
 

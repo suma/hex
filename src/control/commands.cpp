@@ -12,6 +12,7 @@ InsertCommand::InsertCommand(Document *doc, quint64 pos, const uchar *data, uint
 	, fragment_(Document::DOCTYPE_BUFFER, doc->buffer().size(), static_cast<quint64>(length))
 
 {
+	Q_ASSERT(length != 0);
 	Document::Buffer &buffer = doc->buffer();
 	buffer.insert(buffer.end(), data, data + length);
 }
@@ -32,25 +33,27 @@ DeleteCommand::DeleteCommand(Document *doc, quint64 pos, quint64 len, QUndoComma
 	, document_(doc)
 	, position_(pos)
 	, length_(len)
+	, fragments_(doc->get(pos, len))
 {
+	Q_ASSERT(len != 0);
 }
 
 void DeleteCommand::undo()
 {
-	std::vector<DocumentFragment>::iterator it = fragments_.begin();
 	quint64 index = position_;
-	while (it != fragments_.end()) {
-		document_->insert(index, *it);
-		index += it->length();
+	Document::FragmentList::const_iterator it = fragments_.begin(), end = fragments_.end();
+	while (it != end) {
+		if (it->length() != 0) {
+			document_->insert(index, *it);
+			index += it->length();
+		}
 		++it;
 	}
-	fragments_.clear();
 }
 
 void DeleteCommand::redo()
 {
 	// delete
-	document_->get(position_, length_, std::back_inserter(fragments_));
 	document_->remove(position_, length_);
 }
 
@@ -60,6 +63,8 @@ ReplaceCommand::ReplaceCommand(Document *doc, quint64 pos, quint64 len, const uc
 	, delete_(doc, pos, len, parent)
 	, insert_(doc, pos, data, insert_length, parent)
 {
+	Q_ASSERT(len != 0);
+	Q_ASSERT(insert_length != 0);
 }
 
 

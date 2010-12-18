@@ -8,6 +8,7 @@ HEADERS += \
     cursor.h \
     document.h \
     document_i.h \
+	filemapreader.h \
     keyboardhandler.h \
     qfragmentmap_p.h \
     standard.h \
@@ -30,6 +31,7 @@ SOURCES += \
     cursor.cpp \
     document.cpp \
     document_i.cpp \
+	filemapreader.cpp \
     keyboardhandler.cpp \
 	util/util.cpp \
     standard/addressview.cpp \
