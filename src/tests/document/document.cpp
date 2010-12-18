@@ -267,9 +267,6 @@ void TestDocument::testOverwritable2()
 	for (int insert_pos = doc->length() / 2; insert_size > 0; ) {
 		// assert: pos + len <= doc->lenght
 		const int size = qMin(qMin(1024, qrand()), insert_size);
-		if (size == 0) {
-			continue;
-		}
 		// fix insert_pos
 		while (insert_pos + size > doc->length()) {
 			insert_pos -= qMin(insert_pos, qrand());
@@ -497,9 +494,6 @@ void TestDocument::testDocumentSave()
 		for (int insert_pos = doc->length() / 2; insert_size > 0; ) {
 			// assert: pos + len <= doc->lenght
 			const int size = qMin(qMin(1024, qrand()), insert_size);
-			if (size == 0) {
-				continue;
-			}
 			// fix insert_pos
 			while (insert_pos + size > doc->length()) {
 				insert_pos -= qMin(insert_pos, qrand());
