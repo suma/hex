@@ -305,15 +305,13 @@ bool Document::overwritable() const
 	quint64 index = 0;
 	FragmentList::const_iterator it = fragments.begin(), end = fragments.end();
 	while (it != end) {
-		if (it->length() != 0) {
-			if (it->type() == DOCTYPE_ORIGINAL) {
-				if (index != it->position()) {
-					// impossible
-					return false;
-				}
+		if (it->type() == DOCTYPE_ORIGINAL) {
+			if (index != it->position()) {
+				// impossible
+				return false;
 			}
-			index += it->length();
 		}
+		index += it->length();
 		++it;
 	}
 
@@ -362,12 +360,6 @@ bool Document::write(WriteCallback *callback)
 	// piece table
 	FragmentList::const_iterator it = fragments.begin(), end = fragments.end();
 	while (it != end) {
-		// check zero piece
-		if (it->length() == 0) {
-			++it;
-			continue;
-		}
-
 		uchar *data = NULL;
 		if (it->type() == DOCTYPE_BUFFER) {
 			if (!file_->seek(index)) {
@@ -456,12 +448,6 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 	// piece table
 	FragmentList::const_iterator it = fragments.begin(), end = fragments.end();
 	while (it != end) {
-		// check zero piece
-		if (it->length() == 0) {
-			++it;
-			continue;
-		}
-
 		uchar *data = NULL;
 		if (it->type() == DOCTYPE_BUFFER) {
 			data = &buffer_[static_cast<uint>(it->position())];
