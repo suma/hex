@@ -330,18 +330,16 @@ bool Document::write(WriteCallback *callback)
 	{
 		FragmentList::const_iterator it = fragments.begin();
 		while (it != fragments.end()) {
-			if (it->length() != 0) {
-				if (it->type() == DOCTYPE_BUFFER) {
-					write_size += it->length();
-				} else if (it->type() == DOCTYPE_ORIGINAL) {
-					if (index != it->position()) {
-						// impossible
-						return false;
-					}
+			if (it->type() == DOCTYPE_BUFFER) {
+				write_size += it->length();
+			} else if (it->type() == DOCTYPE_ORIGINAL) {
+				if (index != it->position()) {
+					// impossible
+					return false;
 				}
-
-				index += it->length();
 			}
+
+			index += it->length();
 			++it;
 		}
 	}
