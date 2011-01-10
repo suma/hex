@@ -5,7 +5,6 @@ HEADERS += \
     color.h \
 	commands.h \
     control.h \
-    cursor.h \
     document.h \
     document_i.h \
 	filemapreader.h \
@@ -28,7 +27,6 @@ HEADERS += \
 SOURCES += \
     control.cpp \
 	commands.cpp \
-    cursor.cpp \
     document.cpp \
     document_i.cpp \
 	filemapreader.cpp \

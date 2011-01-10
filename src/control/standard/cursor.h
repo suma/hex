@@ -16,6 +16,12 @@ namespace Standard {
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(quint64 top READ top WRITE setTop NOTIFY topChanged)
+		Q_PROPERTY(quint64 position READ position WRITE setPosition NOTIFY positionChanged)
+		Q_PROPERTY(quint64 anchor READ anchor WRITE setAnchor NOTIFY anchorChanged)
+		Q_PROPERTY(bool insert READ insert WRITE setInsert NOTIFY insertChanged)
+		Q_PROPERTY(bool nibble READ nibble WRITE setNibble)
+
 	private:
 		::Document *document_;
 
