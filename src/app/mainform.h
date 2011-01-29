@@ -29,7 +29,7 @@ protected:
 	Editor *currentEditor() const;
 
 	bool openFile(QString);
-	void saveFile(QString, Document *);
+	Document *saveFile(QString, Document *);
 
 protected:
 	Ui::MainWindow ui;

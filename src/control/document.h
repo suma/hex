@@ -66,6 +66,9 @@ public:
 	class WriteCallback
 	{
 	public:
+		WriteCallback();
+		virtual ~WriteCallback();
+		virtual void writeStarted(quint64 max);
 		virtual bool writeCallback(quint64 completed);
 		virtual void writeCompleted();
 	};
@@ -77,7 +80,7 @@ public:
 	Document(QFile *file);
 	Document(QFile *file, uint buffer_size);
 
-	static Document *reopenKeepUndo(Document *doc, size_t max_buffer);
+	static Document *reopenKeepUndo(Document *doc, QFile *file, size_t max_buffer);
 	// static Document * openFile(QFile*file);
 	// static Document * create();
 

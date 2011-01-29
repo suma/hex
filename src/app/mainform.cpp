@@ -7,6 +7,7 @@
 #include "control/document.h"
 #include "mainform.h"
 #include "editor.h"
+#include "writefileopration.h"
 
 MainForm::MainForm()
 {
@@ -59,6 +60,14 @@ void MainForm::open()
 
 void MainForm::save()
 {
+	Editor *editor = currentEditor();
+	if (editor == NULL) {
+		return;
+	}
+	Document *document = editor->document();
+	Q_ASSERT(document != NULL);
+
+	// save
 }
 
 void MainForm::saveAs()
@@ -79,7 +88,10 @@ void MainForm::saveAs()
 		QStringList files = dialog.selectedFiles();
 		QStringList::Iterator it = files.begin();
 		if (it != files.end()) {
-			saveFile(*it, document);
+			Document *d = saveFile(*it, document);
+			if (d != document) {
+				//editor->setDocument(d);
+			}
 		}
 
 		// TODO: change tab
@@ -117,13 +129,20 @@ bool MainForm::openFile(QString path)
 
 
 
-void MainForm::saveFile(QString path, Document *document)
+
+Document *MainForm::saveFile(QString path, Document *document)
 {
-	// dialog(UI blocked)
+	Q_ASSERT(document != NULL);
 
-	// TODO: support background thread(async-cancel and freeze connected view)
+	bool reopen_doc = false;
+	WriteFileOperation operation(this, path, document, reopen_doc);
+	
+	if (!operation.wasCanceled() && !operation.success()) {
+		// TODO: show error message
+	}
 
-
+	// TODO: return Tuple(success code, result doc);
+	return operation.result();
 }
 
 

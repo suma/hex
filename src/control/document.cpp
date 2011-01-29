@@ -118,6 +118,18 @@ private:
 	}
 };
 
+Document::WriteCallback::WriteCallback()
+{
+}
+
+Document::WriteCallback::~WriteCallback()
+{
+}
+
+void Document::WriteCallback::writeStarted(quint64 max)
+{
+}
+
 bool Document::WriteCallback::writeCallback(quint64)
 {
 	return true;
@@ -287,7 +299,7 @@ QUndoStack *Document::undoStack() const
 	return undo_stack_;
 }
 
-Document *Document::reopenKeepUndo(Document *doc, size_t max_buffer)
+Document *Document::reopenKeepUndo(Document *doc, QFile *file, size_t max_buffer)
 {
 	// TODO: implement
 	return NULL;
@@ -345,7 +357,7 @@ bool Document::write(WriteCallback *callback)
 	}
 
 	if (callback != NULL) {
-		//callback->setWrite(write_size);
+		callback->writeStarted(write_size);
 	}
 
 	// TODO: check file_->name() can be written
@@ -438,6 +450,10 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 	FileMapReader *reader = NULL;
 	if (file_ != NULL) {
 		reader = new FileMapReader(file_, BLOCK_SIZE);	// FIXME: BLOCK_SIZE
+	}
+
+	if (callback != NULL) {
+		callback->writeStarted(length());
 	}
 
 	QDataStream outStream(out);
