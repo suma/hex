@@ -93,7 +93,7 @@ void Editor::paintEvent(QPaintEvent *ev)
 	painter.fillRect(rect(), QBrush(QColor(200,200,255), Qt::CrossPattern));
 }
 
-void Editor::resizeEvent(QResizeEvent *resize)
+void Editor::resizeEvent(QResizeEvent *)
 {
 	view_->resize(width(), height());
 }

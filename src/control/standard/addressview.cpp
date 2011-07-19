@@ -6,6 +6,7 @@
 #include "textview.h"
 #include "cursor.h"
 #include "../util/util.h"
+#include "../scrollbar.h"
 
 namespace Standard {
 
@@ -122,6 +123,7 @@ int AddressConfig::drawableLines(int height) const
 
 AddressView::AddressView(QWidget *parent, ::Document *doc)
 	: QWidget(parent)
+	, scrollbar_(new ::ScrollBar(Qt::Vertical, parent))
 	, document_(doc)
 	, cursor_(new Cursor(doc))
 	, last_focus_(NULL)
@@ -132,9 +134,12 @@ AddressView::AddressView(QWidget *parent, ::Document *doc)
 	, column_visible_(true)
 	, line_visible_(true)
 {
-	// connect slot
+	// connect cursor slot
 	QObject::connect(cursor_, SIGNAL(topChanged(quint64)), this, SLOT(topChanged(quint64)));
 	QObject::connect(cursor_, SIGNAL(positionChanged(quint64, quint64)), this, SLOT(positionChanged(quint64, quint64)));
+
+	// connect scrollbar slot
+	QObject::connect(scrollbar_, SIGNAL(valueChanged(qint64)), this, SLOT(valueChanged(qint64)));
 
 	last_focus_ = hex_layer_;
 }
@@ -145,7 +150,9 @@ AddressView::~AddressView()
 
 void AddressView::connect(Cursor *cursor)
 {
+	// connect each other
 	cursor->connectTo(cursor_);
+	cursor_->connectTo(cursor);
 }
 
 void AddressView::setHexView(HexView *hex)
@@ -332,14 +339,22 @@ void AddressView::drawLine()
 	}
 }
 
-void AddressView::topChanged(quint64)
+void AddressView::topChanged(quint64 top)
 {
+	// Sync to value of ScrollBar
+	scrollbar_->setValue(static_cast<qint64>(top));
 	update();
 }
 
 void AddressView::positionChanged(quint64, quint64)
 {
 	update();
+}
+
+void AddressView::valueChanged(qint64 value)
+{
+	// Scrollbar value changed
+	cursor_->setTop(static_cast<quint64>(value));
 }
 
 void AddressView::childEvent(QChildEvent *)
@@ -357,6 +372,26 @@ void AddressView::resizeEvent(QResizeEvent *)
 		text_layer_->move(textPos(), y());
 		text_layer_->resize(text_->config().width(), h);
 	}
+
+	// ScrollBar
+	const int scroll_width = scrollbar_->sizeHint().width();
+	scrollbar_->move(width() - scroll_width, 0);
+	scrollbar_->resize(scroll_width, height());
+
+	// Refresh ScrollBar info
+	int pageStep = config_.drawableLines(height());
+	if (pageStep > 0) {
+		pageStep = qMax(pageStep - 1, 0);
+		qint64 maximum = document_->length() / config_.num();
+		if (document_->length() % config_.num()) {
+			maximum++;
+		}
+		maximum = maximum - pageStep;
+		scrollbar_->setMinimum(0);
+		scrollbar_->setMaximum(maximum);
+		scrollbar_->setPageStep(pageStep);
+	}
+	
 }
 
 int AddressView::hexPos() const
@@ -375,5 +410,5 @@ int AddressView::y() const
 }
 
 
-}	// namespace
+}	// namespace Standard
 

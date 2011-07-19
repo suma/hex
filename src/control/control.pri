@@ -2,6 +2,7 @@
 
 # Input
 HEADERS += \
+	abstractslider.h \
     color.h \
 	commands.h \
     control.h \
@@ -11,6 +12,7 @@ HEADERS += \
     keyboardhandler.h \
     qfragmentmap_p.h \
     standard.h \
+	scrollbar.h \
 	util/util.h \
     standard/addressview.h \
 	standard/caret.h \
@@ -25,12 +27,14 @@ HEADERS += \
 	standard/view.h
 
 SOURCES += \
+	abstractslider.cpp \
     control.cpp \
 	commands.cpp \
     document.cpp \
     document_i.cpp \
 	filemapreader.cpp \
     keyboardhandler.cpp \
+	scrollbar.cpp \
 	util/util.cpp \
     standard/addressview.cpp \
 	standard/caret.cpp \

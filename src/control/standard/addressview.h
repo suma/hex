@@ -1,10 +1,11 @@
-#ifndef STDADDRESSVIEW_H_INC
-#define STDADDRESSVIEW_H_INC
+
+#pragma once
 
 #include <QWidget>
 #include "../color.h"
 
 class Document;
+class ScrollBar;
 
 namespace Standard {
 
@@ -122,8 +123,12 @@ namespace Standard {
 		void topChanged(quint64);
 		void positionChanged(quint64, quint64);
 
+		// ScrollBar
+		void valueChanged(qint64 value);
+
 	protected:
 		AddressConfig config_;
+		::ScrollBar *scrollbar_;
 		::Document *document_;
 		Cursor *cursor_;
 		QWidget *last_focus_;
@@ -137,7 +142,5 @@ namespace Standard {
 	
 	};
 
-}
+}	// namespace Standard
 
-
-#endif
