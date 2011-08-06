@@ -96,13 +96,13 @@ int ScrollBar::drawBarSize() const
 	const int bar_size = base_size_ / 2;
 
 	const qint64 scroll_len = maximum_ - minimum_ + page_step_;
-	const int draw_bar_size = static_cast<int>((double)clientSize() * ((double)page_step_ / scroll_len));
 
-	if (draw_bar_size == 0) {
+	const double ratio = (double)page_step_ / scroll_len;
+	if (ratio <= 0 || ratio >= 1) {
 		return 0;
 	}
 
-	return qMax(draw_bar_size, bar_size);
+	return qMax(static_cast<int>(clientSize() * ratio), bar_size);
 }
 
 int ScrollBar::sliderPositionFromValue(qint64 logicalValue, int span, bool upsideDown) const
