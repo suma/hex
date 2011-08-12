@@ -141,6 +141,10 @@ AddressView::AddressView(QWidget *parent, ::Document *doc)
 	// connect scrollbar slot
 	QObject::connect(scrollbar_, SIGNAL(valueChanged(qint64)), this, SLOT(valueChanged(qint64)));
 
+	// connect document event slot
+	QObject::connect(document_, SIGNAL(inserted(quint64, quint64)), this, SLOT(inserted(quint64, quint64)));
+	QObject::connect(document_, SIGNAL(removed(quint64, quint64)), this, SLOT(removed(quint64, quint64)));
+
 	last_focus_ = hex_layer_;
 }
 
@@ -379,19 +383,7 @@ void AddressView::resizeEvent(QResizeEvent *)
 	scrollbar_->resize(scroll_width, height());
 
 	// Refresh ScrollBar info
-	int pageStep = config_.drawableLines(height());
-	if (pageStep > 0) {
-		pageStep = qMax(pageStep - 1, 0);
-		qint64 maximum = document_->length() / config_.num();
-		if (document_->length() % config_.num()) {
-			maximum++;
-		}
-		maximum = maximum - pageStep;
-		scrollbar_->setMinimum(0);
-		scrollbar_->setMaximum(maximum);
-		scrollbar_->setPageStep(pageStep);
-	}
-	
+	refreshScrollbarInfo();
 }
 
 int AddressView::hexPos() const
@@ -407,6 +399,38 @@ int AddressView::textPos() const
 int AddressView::y() const
 {
 	return config_.columnVisible() ? config_.columnHeight() : 0;
+}
+
+void AddressView::inserted(quint64, quint64)
+{
+	documentChanged();
+}
+
+void AddressView::removed(quint64, quint64)
+{
+	documentChanged();
+}
+
+void AddressView::refreshScrollbarInfo()
+{
+	int pageStep = config_.drawableLines(height());
+	if (pageStep > 0) {
+		pageStep = qMax(pageStep - 1, 0);
+		qint64 maximum = document_->length() / config_.num();
+		if (document_->length() % config_.num()) {
+			maximum++;
+		}
+		maximum = maximum - pageStep;
+		scrollbar_->setMinimum(0);
+		scrollbar_->setMaximum(maximum);
+		scrollbar_->setPageStep(pageStep);
+	}
+}
+
+void AddressView::documentChanged()
+{
+	// TODO: chaching document length
+	refreshScrollbarInfo();
 }
 
 

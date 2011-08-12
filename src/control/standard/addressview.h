@@ -118,6 +118,9 @@ namespace Standard {
 		int textPos() const;
 		// y
 		int y() const;
+
+		void refreshScrollbarInfo();
+		void documentChanged();
 	
 	private slots:
 		void topChanged(quint64);
@@ -125,6 +128,10 @@ namespace Standard {
 
 		// ScrollBar
 		void valueChanged(qint64 value);
+
+		// Document event
+		void inserted(quint64 pos, quint64 len);
+		void removed(quint64 pos, quint64 len);
 
 	protected:
 		AddressConfig config_;
