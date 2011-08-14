@@ -12,4 +12,5 @@ for(dir, EXTRAS) {
 
 
 app.depends = control
+tests.depends = control
 
