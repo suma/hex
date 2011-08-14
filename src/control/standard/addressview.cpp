@@ -142,8 +142,7 @@ AddressView::AddressView(QWidget *parent, ::Document *doc)
 	QObject::connect(scrollbar_, SIGNAL(valueChanged(qint64)), this, SLOT(valueChanged(qint64)));
 
 	// connect document event slot
-	QObject::connect(document_, SIGNAL(inserted(quint64, quint64)), this, SLOT(inserted(quint64, quint64)));
-	QObject::connect(document_, SIGNAL(removed(quint64, quint64)), this, SLOT(removed(quint64, quint64)));
+	QObject::connect(document_, SIGNAL(dataChanged()), this, SLOT(documentChanged()));
 
 	last_focus_ = hex_layer_;
 }
@@ -401,23 +400,14 @@ int AddressView::y() const
 	return config_.columnVisible() ? config_.columnHeight() : 0;
 }
 
-void AddressView::inserted(quint64, quint64)
-{
-	documentChanged();
-}
-
-void AddressView::removed(quint64, quint64)
-{
-	documentChanged();
-}
-
 void AddressView::refreshScrollbarInfo()
 {
 	int pageStep = config_.drawableLines(height());
 	if (pageStep > 0) {
 		pageStep = qMax(pageStep - 1, 0);
+		const qint64 modulo = document_->length() % config_.num();
 		qint64 maximum = document_->length() / config_.num();
-		if (document_->length() % config_.num()) {
+		if (modulo || maximum == pageStep) {
 			maximum++;
 		}
 		maximum = maximum - pageStep;
