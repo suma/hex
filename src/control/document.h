@@ -170,6 +170,7 @@ public slots:
 signals:
 	void inserted(quint64 pos, quint64 len);
 	void removed(quint64 pos, quint64 len);
+	void dataChanged();
 
 public:
 	const static size_t DEFAULT_BUFFER_SIZE;

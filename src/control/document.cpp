@@ -265,6 +265,7 @@ void Document::insert(quint64 pos, const uchar *buf, uint len)
 	buffer_.insert(buffer_.end(), buf, buf + len);
 	impl_->insert_data(pos, bufPos, len, DOCTYPE_BUFFER);
 	emit inserted(pos, static_cast<quint64>(len));
+	emit dataChanged();
 }
 
 void Document::insert(quint64 pos, DocumentFragment fragment)
@@ -273,6 +274,7 @@ void Document::insert(quint64 pos, DocumentFragment fragment)
 	Q_ASSERT(fragment.length() != 0);
 	impl_->insert_data(pos, fragment.position(), fragment.length(), fragment.type());
 	emit inserted(pos, fragment.length());
+	emit dataChanged();
 }
 
 void Document::remove(quint64 pos, quint64 len)
@@ -282,6 +284,7 @@ void Document::remove(quint64 pos, quint64 len)
 	Q_ASSERT(pos <= length() - len);
 	impl_->remove_data(pos, len);
 	emit removed(pos, len);
+	emit dataChanged();
 }
 
 Document::Buffer &Document::buffer()
