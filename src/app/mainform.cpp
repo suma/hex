@@ -18,9 +18,13 @@ MainForm::MainForm()
 	ui.tabWidget->addTab(editor, QString("test"));
 	ui.tabWidget->setDocumentMode(true);
 	ui.tabWidget->setUsesScrollButtons(true);
+	ui.tabWidget->setTabsClosable(true);
+	connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+	connect(ui.tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(tabCloseRequested(int)));
+
 	editor->setFocus(Qt::ActiveWindowFocusReason);
 
-	//connect(ui.actionNew_N, SIGNAL(activated()), this, SLOT(newDocument()));
+	connect(ui.actionNew_N, SIGNAL(activated()), this, SLOT(newDocument()));
 	connect(ui.actionOpen_O, SIGNAL(activated()), this, SLOT(open()));
 	connect(ui.actionSave_As, SIGNAL(activated()), this, SLOT(saveAs()));
 }
@@ -33,6 +37,9 @@ MainForm::~MainForm()
 // slots
 void MainForm::newDocument()
 {
+	MainForm *editor = new MainForm();
+	editor->move(x() + 40, y() + 40);
+	editor->show();
 }
 
 void MainForm::open()
@@ -145,7 +152,27 @@ Document *MainForm::saveFile(QString path, Document *document)
 	return operation.result();
 }
 
+void MainForm::tabChanged(int index)
+{
+	if (index == -1) {
+		// Close QMainWindow when all tabs are closed
+		close();
+	}
+}
 
+void MainForm::tabCloseRequested(int index)
+{
+   qDebug() << "tabCloseRequest " << index;
+   Q_ASSERT(index >= 0);
 
+   // remove editor
+   Editor *editor = currentEditor();
+   Q_ASSERT(editor != NULL);
+
+   // TODO: Check document modified using dialog
+   delete editor;
+
+   ui.tabWidget->removeTab(index);
+}
 
 

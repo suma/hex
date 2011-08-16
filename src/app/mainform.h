@@ -24,6 +24,9 @@ protected slots:
 	void save();
 	void saveAs();
 
+	void tabChanged(int index);
+	void tabCloseRequested(int index);
+
 protected:
 
 	Editor *currentEditor() const;
