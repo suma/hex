@@ -51,7 +51,7 @@ void WriteFileOperation::run()
 	if (reopen_document_) {
 		// reopen Document
 		size_t max_buffer = 1024 * 1024;	// FIXME: transfered Undo/Redo buffer size
-		result_ = Document::reopenKeepUndo(document_, file, max_buffer);
+		result_ = document_->reopenKeepUndo(file, max_buffer);
 	} else {
 		delete file;
 	}

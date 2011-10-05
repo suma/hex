@@ -80,7 +80,7 @@ public:
 	Document(QFile *file);
 	Document(QFile *file, uint buffer_size);
 
-	static Document *reopenKeepUndo(Document *doc, QFile *file, size_t max_buffer);
+	Document *reopenKeepUndo( QFile *file, size_t max_buffer) const;
 	// static Document * openFile(QFile*file);
 	// static Document * create();
 
@@ -91,6 +91,7 @@ public:
 
 	// 
 	quint64 length() const;
+	bool isModified() const;
 
 	// copy 
 	void get(quint64 pos, uchar *buf, uint len) const;
@@ -175,9 +176,12 @@ signals:
 public:
 	const static size_t DEFAULT_BUFFER_SIZE;
 
-private:
 	// ドキュメントの実体をバッファへコピーする
 	void copy(quint8 type, quint64 pos, quint64 len, uchar *buf) const;
+private:
+
+	// UndoStack helper
+	int findLimitIndex(size_t max_buffer) const;
 
 	// Fragment Copy iterator
 	class FragmentCopier;

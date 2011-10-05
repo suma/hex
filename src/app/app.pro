@@ -16,11 +16,13 @@ INCLUDEPATH += . \
 HEADERS += editor.h \
 	mainform.h \
 	writefileopration.h \
+	hexapp.h \
 	ui_main.h
 
 SOURCES += editor.cpp \
 	mainform.cpp \
 	writefileopration.cpp \
+	hexapp.cpp \
 	main.cpp
 
 FORMS = main.ui

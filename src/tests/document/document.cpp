@@ -28,6 +28,7 @@ private slots:
 	void testUndoDelete();
 	void testUndoInsert();
 	void testUndoReplace();
+	void testUndoStack();
 
 	void testDocumentSaveAs();
 	void testDocumentSave();
@@ -445,6 +446,10 @@ void TestDocument::testUndoReplace()
 	delete doc;
 }
 
+void TestDocument::testUndoStack()
+{
+	// TODO: implement Document::reopenKeepUndo test case
+}
 
 void TestDocument::testDocumentSaveAs()
 {

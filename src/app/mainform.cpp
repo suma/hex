@@ -2,6 +2,7 @@
 #include <QtGui>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 #include "editor.h"
 #include "control/standard.h"
 #include "control/document.h"
@@ -74,12 +75,15 @@ void MainForm::save()
 	Document *document = editor->document();
 	Q_ASSERT(document != NULL);
 
-	// save
+	// TODO: save
 }
 
-void MainForm::saveAs()
+void MainForm::saveAs(Editor *editor)
 {
-	Editor *editor = currentEditor();
+	if (editor == NULL) {
+		// get current tab
+		editor = currentEditor();
+	}
 	if (editor == NULL) {
 		return;
 	}
@@ -111,6 +115,16 @@ void MainForm::saveAs()
 Editor *MainForm::currentEditor() const
 {
 	QWidget *widget = ui.tabWidget->currentWidget();
+	if (widget == NULL) {
+		return NULL;
+	}
+
+	return dynamic_cast<Editor*>(widget);
+}
+
+Editor *MainForm::editorAt(int index) const
+{
+	QWidget *widget = ui.tabWidget->widget(index);
 	if (widget == NULL) {
 		return NULL;
 	}
@@ -162,17 +176,99 @@ void MainForm::tabChanged(int index)
 
 void MainForm::tabCloseRequested(int index)
 {
-   qDebug() << "tabCloseRequest " << index;
-   Q_ASSERT(index >= 0);
+	qDebug() << "tabCloseRequest " << index;
+	Q_ASSERT(index >= 0);
 
-   // remove editor
-   Editor *editor = currentEditor();
-   Q_ASSERT(editor != NULL);
-
-   // TODO: Check document modified using dialog
-   delete editor;
-
-   ui.tabWidget->removeTab(index);
+	// remove editor
+	closeDocument(index);
 }
 
+void MainForm::closeEvent(QCloseEvent *event)
+{
+	qDebug() << "MainForm::closeEvent";
+	bool modified = false;
+	for (int i = 0, count = ui.tabWidget->count(); i < count; i++) {
+		Editor *editor = editorAt(i);
+		Q_ASSERT(editor != NULL);
+
+		qDebug() << "isModified " << editor->document()->isModified();
+		modified = modified || editor->document()->isModified();
+		if (!modified) {
+			break;
+		}
+	}
+
+	if (modified) {
+		//  TODO: ask save all the document
+		bool canceled = false;
+		for (int i = 0, count = ui.tabWidget->count(); i < count; i++) {
+			Document *document = editorAt(i)->document();
+			if (document->isModified()) {
+				switch (askDocumentSave(document)) {
+					case QMessageBox::Save:
+						// save clicked
+						//  call save or saveas
+						break;
+					case QMessageBox::Discard:
+						// don't save was clicked
+						break;
+					case QMessageBox::Cancel:
+						canceled = true;
+						break;
+					default:
+						;
+				}
+			}
+		}
+		if (canceled) {
+		} else {
+			event->accept();
+		}
+	} else {
+		// close
+		event->accept();
+	}
+}
+
+void MainForm::closeDocument(int index)
+{
+	Editor *editor = editorAt(index);
+	Q_ASSERT(editor != NULL);
+
+	Document *document = editor->document();
+	if (document->isModified()) {
+		switch (askDocumentSave(document)) {
+			case QMessageBox::Save:
+				break;
+			case QMessageBox::Discard:
+				// don't save was clicked
+				break;
+			case QMessageBox::Cancel:
+				return;
+			default:
+				;
+		}
+	}
+
+	// close tab
+	ui.tabWidget->removeTab(index);
+	delete editor;
+}
+
+int MainForm::askDocumentSave(Document *document)
+{
+	QMessageBox msgBox;
+	msgBox.setText("The document has been modified");
+	msgBox.setInformativeText("Do you want to save your changes");
+	msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+	msgBox.setDefaultButton(QMessageBox::Save);
+	int ret = msgBox.exec();
+	if (ret == QMessageBox::Save) {
+		// save or saveAs
+		// save -> call Save
+		// saveAs -> call saveAs(document);
+	}
+
+	return ret;
+}
 
