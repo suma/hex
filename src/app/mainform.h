@@ -37,7 +37,7 @@ protected:
 	Document *saveFile(QString, Document *);
 	void closeDocument(int index);
 
-	int askDocumentSave(Document *document);
+	int askAndDocumentSave(Document *document);
 
 protected:
 	Ui::MainWindow ui;

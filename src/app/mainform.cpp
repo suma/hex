@@ -204,11 +204,7 @@ void MainForm::closeEvent(QCloseEvent *event)
 		for (int i = 0, count = ui.tabWidget->count(); i < count; i++) {
 			Document *document = editorAt(i)->document();
 			if (document->isModified()) {
-				switch (askDocumentSave(document)) {
-					case QMessageBox::Save:
-						// save clicked
-						//  call save or saveas
-						break;
+				switch (askAndDocumentSave(document)) {
 					case QMessageBox::Discard:
 						// don't save was clicked
 						break;
@@ -237,9 +233,7 @@ void MainForm::closeDocument(int index)
 
 	Document *document = editor->document();
 	if (document->isModified()) {
-		switch (askDocumentSave(document)) {
-			case QMessageBox::Save:
-				break;
+		switch (askAndDocumentSave(document)) {
 			case QMessageBox::Discard:
 				// don't save was clicked
 				break;
@@ -255,7 +249,7 @@ void MainForm::closeDocument(int index)
 	delete editor;
 }
 
-int MainForm::askDocumentSave(Document *document)
+int MainForm::askAndDocumentSave(Document *document)
 {
 	QMessageBox msgBox;
 	msgBox.setText("The document has been modified");
@@ -267,6 +261,21 @@ int MainForm::askDocumentSave(Document *document)
 		// save or saveAs
 		// save -> call Save
 		// saveAs -> call saveAs(document);
+		QFileDialog dialog(this);
+		dialog.setAcceptMode(QFileDialog::AcceptSave);
+		dialog.setFileMode(QFileDialog::AnyFile);
+		dialog.setViewMode(QFileDialog::Detail);
+
+		if (dialog.exec()) {
+			QStringList files = dialog.selectedFiles();
+			QStringList::Iterator it = files.begin();
+			if (it != files.end()) {
+				saveFile(*it, document);
+			}
+
+		} else {
+			return QMessageBox::Discard;
+		}
 	}
 
 	return ret;
