@@ -74,7 +74,7 @@ namespace Standard {
 		}
 		int charHeight() const
 		{
-			return fontMetrics().height();
+			return global_->config().charHeight();
 		}
 		int byteWidth() const
 		{
