@@ -1,15 +1,16 @@
 
 #include "keyboard.h"
-#include "keyboard.h"
 #include "../document.h"
 #include "cursor.h"
 #include "hexview.h"
+#include "global.h"
 
 namespace Standard {
 
 
-Keyboard::Keyboard(::Document *doc, HexView *view)
-	: ::KeyboardHandler(doc)
+Keyboard::Keyboard(Global *global, HexView *view)
+	: ::KeyboardHandler(global->document())
+	, global_(global)
 	, view_(view)
 {
 }
@@ -23,17 +24,17 @@ Keyboard::~Keyboard()
 void Keyboard::keyPressEvent(QKeyEvent *ev)
 {
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
-	Cursor &cursor = view_->cursor();
-	HexConfig &config = view_->config();
+	Cursor &cursor = global_->cursor();
+	const int NUM = global_->config().num();
 
 	switch (ev->key()) {
 	case Qt::Key_Home:
 		cursor.setNibble(true);
-		view_->cursor().movePosition(view_, 0, keepAnchor, false);
+		view_->cursor().movePosition(global_, 0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
 		cursor.setNibble(true);
-		view_->cursor().movePosition(view_, document_->length(), keepAnchor, false);
+		view_->cursor().movePosition(global_, document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
 		cursor.setNibble(true);
@@ -45,19 +46,19 @@ void Keyboard::keyPressEvent(QKeyEvent *ev)
 		break;
 	case Qt::Key_Up:
 		cursor.setNibble(true);
-		view_->moveRelativePosition((qint64)-1 * config.getNum(), keepAnchor, false);
+		view_->moveRelativePosition((qint64)-1 * NUM, keepAnchor, false);
 		break;
 	case Qt::Key_Down:
 		cursor.setNibble(true);
-		view_->moveRelativePosition((qint64)config.getNum(), keepAnchor, false);
+		view_->moveRelativePosition((qint64)NUM, keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
 		cursor.setNibble(true);
-		view_->moveRelativePosition((qint64)-1 * config.getNum() * 15, keepAnchor, true);
+		view_->moveRelativePosition((qint64)-1 * NUM * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
 		cursor.setNibble(true);
-		view_->moveRelativePosition((qint64)config.getNum() * 15, keepAnchor, true);
+		view_->moveRelativePosition((qint64)NUM * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
 		if (cursor.hasSelection()) {

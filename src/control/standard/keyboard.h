@@ -8,17 +8,18 @@
 
 namespace Standard {
 
-class Document;
+class Global;
 class HexView;
 class TextView;
 
 class Keyboard : public ::KeyboardHandler
 {
 private:
+	Global *global_;
 	HexView *view_;
 
 public:
-	Keyboard(::Document *doc, HexView *view);
+	Keyboard(Global *global, HexView *view);
 	~Keyboard();
 
 	void keyPressEvent(QKeyEvent *);

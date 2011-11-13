@@ -12,13 +12,9 @@ namespace Standard {
 
 ////////////////////////////////////////
 // Config
-HexConfig::HexConfig()
-	: num_(16)
-	, margin_(2, 2, 3, 3)
+HexConfig::HexConfig(Global *global)
+	: global_(global)
 	, byteMargin_(3, 0, 2, 0)
-	, font_("Monaco", 17)
-	, charWidth_(0)
-	, fontMetrics_(font_)
 {
 	// Coloring
 	colors_[Color::Background] = QColor(0xEF,0xEF,0xEF, 0);
@@ -27,51 +23,36 @@ HexConfig::HexConfig()
 	colors_[Color::SelText] = QColor(0,0,0);
 	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
 
-	// Font
-	font_.setFixedPitch(true);
-
 	update();
 }
 
 void HexConfig::update()
 {
-	// get charWidth
-	for (int i = 0; i < 16; i++) {
-		QChar ch(util::itohex(i));
-		charWidth_ = qMax(charWidth_, fontMetrics_.boundingRect(ch).width());
-	}
-
 	x_begin.clear();
 	x_end.clear();
 	x_area.clear();
 
 	// Pos
-	x_begin.push_back(margin_.left() + byteMargin_.left());
-	for (size_t i = 1; i < num_; i++) {
+	x_begin.push_back(margin().left() + byteMargin_.left());
+	for (size_t i = 1; i < num(); i++) {
 		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
 	// Pos of end
-	for (size_t i = 0; i < num_; i++) {
+	for (size_t i = 0; i < num(); i++) {
 		x_end.push_back(x_begin[i] + charWidth(2) + byteMargin_.right());
 	}
 
 	// Area
-	x_area.push_back(margin_.left() + byteMargin_.left());
+	x_area.push_back(margin().left() + byteMargin_.left());
 	for (size_t i = 1; i < getNumV(); i++) {
 		x_area.push_back(x_area.back() + byteWidth());
 	}
 }
 
-int HexConfig::drawableLines(int height) const
-{
-	const int y = top() + byteMargin().top();
-	return (height - y + byteHeight()) / byteHeight();
-}
-
 int HexConfig::XToPos(int x) const
 {
-	if (x < margin_.left()) {
+	if (x < margin().left()) {
 		return -1;
 	}
 
@@ -89,12 +70,14 @@ int HexConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-HexView::HexView(QWidget *parent, ::Document *doc)
+HexView::HexView(QWidget *parent, Global *global)
 	: View(parent)
-	, document_(doc)
-	, cursor_(new Cursor(doc))
+	, global_(global)
+	, document_(global->document())
+	, config_(global)
+	, cursor_(new Cursor)
 	, caret_(CARET_BLOCK, CARET_FRAME)
-	, keyboard_(new Keyboard(doc, this))
+	, keyboard_(new Keyboard(global, this))
 {
 	// Enable keyboard input
 	setFocusPolicy(Qt::WheelFocus);
@@ -130,22 +113,22 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 
 	// FIXME: refactoring refresh event
 	QPainter painter(this);
-	painter.setFont(config_.font());
+	painter.setFont(global_->config().font());
 
 	Q_ASSERT(0 <= line_start);
-	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / config_.getNum() + 1);
+	Q_ASSERT(static_cast<uint>(line_start) <= document_->length() / config_.num() + 1);
 	Q_ASSERT(0 <= end);
-	Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.getNum() + 1);
+	Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.num() + 1);
 
 	// Get draw range
 	int y_top = config_.top();
-	int y = config_.top() + config_.byteMargin().top();
+	int y = config_.top() + global_->config().byteMargin().top();
 	int count_draw_line, max_y;
 
 	// Get minumum drawing area
 	switch (mode) {
 	case DRAW_ALL:
-		count_draw_line = config_.drawableLines(height());
+		count_draw_line = global_->config().drawableLines(height());
 		break;
 	case DRAW_LINE:
 		y_top += config_.byteHeight() * line_start;
@@ -156,19 +139,19 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 		y_top += config_.byteHeight() * line_start;
 		y     += config_.byteHeight() * line_start;
 		max_y = qMax(y + config_.byteHeight(), height());
-		count_draw_line = config_.drawableLines(max_y - y);
+		count_draw_line = global_->config().drawableLines(max_y - y);
 		break;
 	case DRAW_RANGE:
 		y_top += config_.byteHeight() * line_start;
 		y     += config_.byteHeight() * line_start;
 		max_y = qMin(y + config_.byteHeight() * end, height());
-		count_draw_line = config_.drawableLines(max_y - y);
+		count_draw_line = global_->config().drawableLines(max_y - y);
 		break;
 	}
 
 	// Get top position of view
-	const quint64 top = (cursor_->top() + line_start) * config_.getNum();
-	const uint size = qMin(document_->length() - top, (quint64)config_.getNum() * count_draw_line);
+	const quint64 top = (cursor_->top() + line_start) * config_.num();
+	const uint size = qMin(document_->length() - top, (quint64)config_.num() * count_draw_line);
 	if (size == 0) {
 		return;
 	}
@@ -192,7 +175,7 @@ void HexView::drawView(DrawMode mode, int line_start, int end)
 
 //inline void HexView::drawViewAfter(quint64 pos)
 //{
-//	drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+//	drawView(DRAW_AFTER, pos / config_.num() - cursor_-> Top);
 //}
 
 void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, int x_end, uint size)
@@ -257,7 +240,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		//qDebug("mouse press");
 
 		cursor_->setNibble(true);
-		cursor_->movePosition(this, posAt(ev->pos()), false, false);
+		cursor_->movePosition(global_, posAt(ev->pos()), false, false);
 
 		// Start mouse capture
 		grabMouse();
@@ -271,7 +254,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	if (height() < ev->pos().y()) {
 		return;
 	}
-	cursor_->movePosition(this, posAt(ev->pos()), true, false);
+	cursor_->movePosition(global_, posAt(ev->pos()), true, false);
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *)
@@ -294,7 +277,7 @@ quint64 HexView::posAt(const QPoint &pos) const
 		x = y = 0;
 	}
 
-	return qMin((cursor_->top() + y) * config_.getNum() + x, document_->length());
+	return qMin((cursor_->top() + y) * config_.num() + x, document_->length());
 }
 
 CaretDrawer * HexView::createCaretWidget()
@@ -310,14 +293,14 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 
 void HexView::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 {
-	cursor_->movePosition(this, cursor_->getRelativePosition(pos), sel, holdViewPos);
+	cursor_->movePosition(global_, cursor_->getRelativePosition(pos, document_), sel, holdViewPos);
 }
 
 void HexView::redrawSelection(quint64 begin, quint64 end)
 {
 	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
-	begin /= config_.getNum();
-	end   /= config_.getNum();
+	begin /= config_.num();
+	end   /= config_.num();
 
 	const int beginLine = qMax(begin, cursor_->top()) - cursor_->top();
 	const int endLine   = qMax(end, cursor_->top()) - cursor_->top();

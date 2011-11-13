@@ -1,5 +1,6 @@
 
 #include <QtGui>
+#include "global.h"
 #include "addressview.h"
 #include "layeredwidget.h"
 #include "hexview.h"
@@ -11,12 +12,9 @@
 namespace Standard {
 
 
-AddressConfig::AddressConfig()
-	: num_(16)
-	, margin_(2, 2, 3, 3)
+AddressConfig::AddressConfig(Global *global)
+	: global_(global)
 	, byteMargin_(3, 0, 2, 0)
-	, font_("Monaco", 17)
-	, fontMetrics_(font_)
 	, column_visible_(true)
 	, line_visible_(true)
 {
@@ -32,19 +30,14 @@ AddressConfig::~AddressConfig()
 {
 }
 
-uint AddressConfig::num() const
-{
-	return num_;
-}
-
 QFont AddressConfig::font() const
 {
-	return font_;
+	return global_->config().font();
 }
 
 const QFontMetrics &AddressConfig::fontMetrics() const
 {
-	return fontMetrics_;
+	return global_->config().fontMetrics();
 }
 
 QColor AddressConfig::color(size_t index) const
@@ -53,9 +46,14 @@ QColor AddressConfig::color(size_t index) const
 	return colors_[index];
 }
 
+uint AddressConfig::num() const
+{
+	return global_->config().num();
+}
+
 QRect AddressConfig::margin() const
 {
-	return margin_;
+	return global_->config().margin();
 }
 
 QRect AddressConfig::byteMargin() const
@@ -65,17 +63,21 @@ QRect AddressConfig::byteMargin() const
 
 int AddressConfig::top() const
 {
-	return margin_.top();
+	return margin().top();
+}
+int AddressConfig::charWidth(int num) const
+{
+	return global_->config().charWidth(num);
 }
 
 int AddressConfig::byteHeight() const
 {
-	return byteMargin_.top() + fontMetrics_.height() + byteMargin_.bottom();
+	return global_->config().byteHeight();
 }
 
 int AddressConfig::columnHeight() const
 {
-	return fontMetrics_.height();
+	return fontMetrics().height();
 }
 
 bool AddressConfig::columnVisible() const
@@ -98,22 +100,6 @@ void AddressConfig::setLineVisible(bool visible)
 	line_visible_ = visible;
 }
 
-void AddressConfig::setFont(QFont font)
-{
-	if (font_ != font) {
-		font_ = font;
-		emit fontChanged(font);
-	}
-}
-
-void AddressConfig::setNum(uint num)
-{
-	if (num_ != num) {
-		num_ = num;
-		emit numChanged(num);
-	}
-}
-
 int AddressConfig::drawableLines(int height) const
 {
 	const int y = top() + byteMargin_.top() + (columnVisible() ? columnHeight() : 0);
@@ -121,11 +107,13 @@ int AddressConfig::drawableLines(int height) const
 }
 
 
-AddressView::AddressView(QWidget *parent, ::Document *doc)
+AddressView::AddressView(QWidget *parent, Global *global)
 	: QWidget(parent)
+	, config_(global)
+	, global_(global)
 	, scrollbar_(new ::ScrollBar(Qt::Vertical, parent))
-	, document_(doc)
-	, cursor_(new Cursor(doc))
+	, document_(global->document())
+	, cursor_(new Cursor)
 	, last_focus_(NULL)
 	, hex_(NULL)
 	, text_(NULL)

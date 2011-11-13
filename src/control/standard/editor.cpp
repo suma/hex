@@ -1,43 +1,23 @@
 
 #include <QtGui>
 #include "editor.h"
-#include "control/standard.h"
-#include "control/document.h"
-#include "control/standard/caretdrawer.h"
+#include "../standard.h"
+#include "caretdrawer.h"
+
+namespace Standard {
 
 Editor::Editor(QWidget *parent)
 	: QWidget(parent)
-	, document_(new Document())
+	, global_(new Global(this, new ::Document()))
 {
-	// test
-#if 1
-	srand(173);
-	//for (int i = 0; i < 1064; i++) {
-	//for (int i = 0; i < 10 * 16; i++) { rand(); }
-	for (int i = 0; i < 157 * 200; i++) {
-		uchar c = rand() & 0xFF;
-		document_->insert(i, &c, 1);
-	}
-	uchar h = 0xFF;
-	document_->insert(10, &h, 1);
-	document_->insert(24, &h, 1);
-	document_->insert(30, &h, 1);
-	document_->insert(50, &h, 1);
-#endif
-
 	initView();
 }
 
-Editor::Editor(QWidget *parent, Document *document)
+Editor::Editor(QWidget *parent, ::Document *document)
 	: QWidget(parent)
-	, document_(document)
+	, global_(new Global(this, document))
 {
 	initView();
-}
-
-Document *Editor::document() const
-{
-	return document_;
 }
 
 void Editor::initView()
@@ -45,20 +25,20 @@ void Editor::initView()
 	setFocusPolicy(Qt::StrongFocus);
 
 	// create address view
-	view_ = new Standard::AddressView(this, document_);
+	view_ = new AddressView(this, global_);
 	view_->move(0, 0);
 	view_->resize(width(), height());
 	view_->show();
 
-	Standard::HexView *hex = new Standard::HexView(view_, document_);
+	HexView *hex = new HexView(view_, global_);
 	hex->show();
 
-	Standard::TextView *text = new Standard::TextView(view_, document_);
+	TextView *text = new TextView(view_, global_);
 	text->show();
 
 	// sync cursor
-	Standard::Cursor &hc = hex->cursor();
-	Standard::Cursor &tc = text->cursor();
+	Cursor &hc = hex->cursor();
+	Cursor &tc = text->cursor();
 	hc.connectTo(&tc);
 	tc.connectTo(&hc);
 
@@ -71,8 +51,8 @@ void Editor::initView()
 	view_->setTextView(text);
 
 	// Caret
-	Standard::CaretDrawer *hex_caret = hex->createCaretWidget();
-	Standard::CaretDrawer *text_caret = text->createCaretWidget();
+	CaretDrawer *hex_caret = hex->createCaretWidget();
+	CaretDrawer *text_caret = text->createCaretWidget();
 
 
 	view_->addHex(static_cast<QWidget*>(hex_caret));
@@ -89,8 +69,8 @@ void Editor::initView()
 void Editor::paintEvent(QPaintEvent *ev)
 {
 	// FIXME: set background
-	QPainter painter(this);
-	painter.fillRect(rect(), QBrush(QColor(200,200,255), Qt::CrossPattern));
+	//QPainter painter(this);
+	//painter.fillRect(rect(), QBrush(QColor(200,200,255), Qt::CrossPattern));
 }
 
 void Editor::resizeEvent(QResizeEvent *)
@@ -103,8 +83,4 @@ void Editor::focusInEvent(QFocusEvent *)
 	view_->setFocus(Qt::OtherFocusReason);
 }
 
-
-
-
-
-
+}	// namespace Standard

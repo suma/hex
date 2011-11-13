@@ -5,6 +5,7 @@
 #include <QFontMetrics>
 #include "../util/util.h"
 #include "view.h"
+#include "global.h"
 #include "caret.h"
 #include "cursor.h"
 #include "hexview.h"
@@ -18,29 +19,26 @@ namespace Standard {
 	class TextConfig
 	{
 	private:
-		uint num_;
-		QRect margin_;
+		Global *global_;
 		QRect byteMargin_;
-		QFont font_;
 		QColor colors_[Color::ColorCount];
 
-	private:
-		QFontMetrics fontMetrics_;
 		std::vector<int> x_begin;	// pos of value
 		std::vector<int> x_end;		// pos of end
 		std::vector<int> x_area;
 	
-	public:
-		TextConfig();
-
-		uint getNum() const
+	private:
+		uint numV() const
 		{
-			return num_;
+			return global_->config().num() + 1;
 		}
 
-		uint getNumV() const
+	public:
+		TextConfig(Global *global);
+
+		uint num() const
 		{
-			return num_ + 1;
+			return global_->config().num();
 		}
 
 		QColor color(size_t index) const
@@ -57,23 +55,23 @@ namespace Standard {
 
 		const QFont &font() const
 		{
-			return font_;
+			return global_->config().font();
 		}
 		void updateFont()
 		{
-			fontMetrics_ = QFontMetrics(font_);
+			global_->config().updateFont();
 		}
 		int textWidth(const QString &string) const
 		{
-			return fontMetrics_.width(string);
+			return fontMetrics().width(string);
 		}
 		int charWidth(int num = 1) const
 		{
-			return fontMetrics_.width(QChar('A')) * num;
+			return global_->config().charWidth(num);
 		}
 		int charHeight() const
 		{
-			return fontMetrics_.height();
+			return global_->config().charHeight();
 		}
 		int byteWidth() const
 		{
@@ -81,11 +79,11 @@ namespace Standard {
 		}
 		int byteHeight() const
 		{
-			return byteMargin_.top() + fontMetrics_.height() + byteMargin_.bottom();
+			return global_->config().byteHeight();
 		}
 		const QRect &margin() const
 		{
-			return margin_;
+			return global_->config().margin();
 		}
 		const QRect &byteMargin() const
 		{
@@ -93,25 +91,25 @@ namespace Standard {
 		}
 		const QFontMetrics &fontMetrics() const
 		{
-			return fontMetrics_;
+			return global_->config().fontMetrics();
 		}
 		int top() const
 		{
-			return margin_.top();
+			return margin().top();
 		}
 		int maxWidth() const
 		{
-			return X(x_begin.size() - 1) + margin_.right();
+			return X(x_begin.size() - 1) + margin().right();
 		}
 		int x(size_t i) const
 		{
 			Q_ASSERT(i < x_begin.size());
-			return margin_.left() + x_begin[i];
+			return margin().left() + x_begin[i];
 		}
 		int X(size_t i) const
 		{
 			Q_ASSERT(i < x_end.size());
-			return margin_.left() + x_end[i];
+			return margin().left() + x_end[i];
 		}
 		int x_(size_t i) const
 		{
@@ -142,7 +140,7 @@ namespace Standard {
 		}
 		int width()
 		{
-			return charWidth(getNumV()) + margin_.left() + margin_.right();
+			return charWidth(numV()) + margin().left() + margin().right();
 		}
 		int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..N => N + 2 patterns
@@ -174,7 +172,7 @@ namespace Standard {
 			XIterator &operator+=(uint i)
 			{
 				const int old = pos_;
-				pos_ = (pos_ + i) % conf.getNum();
+				pos_ = (pos_ + i) % conf.num();
 				setNext(pos_ < old);
 				return *this;
 			}
@@ -256,7 +254,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		TextView(QWidget *parent = NULL, ::Document *doc = NULL);
+		TextView(QWidget *parent, Global *global);
 		~TextView();
 
 		TextConfig &config()
@@ -284,7 +282,7 @@ namespace Standard {
 		void keyPressEvent(QKeyEvent *);
 
 		void inputMethodEvent(QInputMethodEvent *);
-		QVariant inputMethodQuery(Qt::InputMethodQuery query) const;
+		//QVariant inputMethodQuery(Qt::InputMethodQuery query) const;
 
 		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
 		void redrawSelection(quint64 begin, quint64 end);
@@ -320,6 +318,7 @@ namespace Standard {
 
 	private:
 		// Main components
+		Global *global_;
 		::Document *document_;
 		TextConfig config_;
 		Cursor *cursor_;

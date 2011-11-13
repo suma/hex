@@ -13,13 +13,13 @@ INCLUDEPATH += . \
 
 
 # Input
-HEADERS += editor.h \
+HEADERS += \
 	mainform.h \
 	writefileopration.h \
 	hexapp.h \
 	ui_main.h
 
-SOURCES += editor.cpp \
+SOURCES += \
 	mainform.cpp \
 	writefileopration.cpp \
 	hexapp.cpp \

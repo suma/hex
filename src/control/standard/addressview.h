@@ -9,6 +9,7 @@ class ScrollBar;
 
 namespace Standard {
 
+	class Global;
 	class HexView;
 	class TextView;
 	class Cursor;
@@ -19,11 +20,8 @@ namespace Standard {
 		Q_OBJECT
 
 	private:
-		uint num_;
-		QRect margin_;
+		Global *global_;
 		QRect byteMargin_;
-		QFont font_;
-		QFontMetrics fontMetrics_;
 		QColor colors_[Color::ColorCount];
 
 		// FIXME: separete 3 attributes 
@@ -35,7 +33,7 @@ namespace Standard {
 		bool line_visible_;
 
 	public:
-		AddressConfig();
+		AddressConfig(Global *global);
 		~AddressConfig();
 
 		uint num() const;
@@ -45,10 +43,7 @@ namespace Standard {
 		const QFontMetrics &fontMetrics() const;
 		QColor color(size_t index) const;
 
-		int charWidth(int num = 1) const
-		{
-			return fontMetrics_.width(QChar('A')) * num;
-		}
+		int charWidth(int num = 1) const;
 
 		int drawableLines(int height) const;
 		int top() const;
@@ -60,11 +55,6 @@ namespace Standard {
 		bool lineVisible() const;
 		void setColumnVisible(bool);
 		void setLineVisible(bool);
-
-	public slots:
-		void setFont(QFont font);
-		void setNum(uint num);
-		//void setStyle();	// FIXME
 
 	signals:
 		void fontChanged(QFont);
@@ -78,7 +68,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		AddressView(QWidget *parent, ::Document *doc);
+		AddressView(QWidget *parent, Global *global);
 		~AddressView();
 
 		AddressConfig &config()
@@ -133,6 +123,7 @@ namespace Standard {
 
 	protected:
 		AddressConfig config_;
+		Global *global_;
 		::ScrollBar *scrollbar_;
 		::Document *document_;
 		Cursor *cursor_;

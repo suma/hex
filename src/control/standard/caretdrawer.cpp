@@ -78,8 +78,8 @@ void TextCaretDrawer::paintEvent(QPaintEvent *event)
 
 	// Get caret coordinates
 	const quint64 pos = cursor_->position();
-	const int x = pos % config_.getNum();
-	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
+	const int x = pos % config_.num();
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.num() - cursor_->top());
 
 	const bool caret_middle = pos < document_->length();
 
@@ -181,8 +181,8 @@ void HexCaretDrawer::paintEvent(QPaintEvent *event)
 
 	// Get caret coordinates
 	const quint64 pos = cursor_->position();
-	const int x = pos % config_.getNum();
-	const int y = config_.top() + config_.byteHeight() * (pos / config_.getNum() - cursor_->top());
+	const int x = pos % config_.num();
+	const int y = config_.top() + config_.byteHeight() * (pos / config_.num() - cursor_->top());
 
 	const bool caret_middle = pos < document_->length();
 

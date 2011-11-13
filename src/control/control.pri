@@ -14,11 +14,13 @@ HEADERS += \
     standard.h \
 	scrollbar.h \
 	util/util.h \
+	standard/global.h \
     standard/addressview.h \
 	standard/caret.h \
 	standard/caretdrawer.h \
 	standard/cursor.h \
 	standard/cursorutil.h \
+	standard/editor.h \
     standard/hexview.h \
     standard/keyboard.h \
     standard/layeredwidget.h \
@@ -36,9 +38,12 @@ SOURCES += \
     keyboardhandler.cpp \
 	scrollbar.cpp \
 	util/util.cpp \
+	standard/global.cpp \
     standard/addressview.cpp \
 	standard/caret.cpp \
 	standard/caretdrawer.cpp \
+	standard/cursor.cpp \
+	standard/editor.cpp \
     standard/hexview.cpp \
     standard/keyboard.cpp \
     standard/layeredwidget.cpp \

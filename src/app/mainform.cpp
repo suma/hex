@@ -3,12 +3,12 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
-#include "editor.h"
 #include "control/standard.h"
 #include "control/document.h"
 #include "mainform.h"
-#include "editor.h"
 #include "writefileopration.h"
+
+using Standard::Editor;
 
 MainForm::MainForm()
 {
