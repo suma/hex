@@ -102,8 +102,7 @@ void AddressConfig::setLineVisible(bool visible)
 
 int AddressConfig::drawableLines(int height) const
 {
-	const int y = top() + byteMargin_.top() + (columnVisible() ? columnHeight() : 0);
-	return (height - y + byteHeight()) / byteHeight();
+	return global_->config().drawableLines(height - (columnVisible() ? columnHeight() : 0));
 }
 
 

@@ -55,12 +55,6 @@ void TextConfig::update()
 	x_area.back() += byteWidth();
 }
 
-int TextConfig::drawableLines(int height) const
-{
-	const int y = top() + byteMargin_.top();
-	return (height - y + byteHeight()) / byteHeight();
-}
-
 int TextConfig::XToPos(int x) const
 {
 	if (x < margin().left()) {
@@ -143,7 +137,7 @@ void TextView::drawView()
 
 	// Get draw range
 	int y_top = config_.top();
-	int count_draw_line = config_.drawableLines(height());
+	int count_draw_line = global_->config().drawableLines(height());
 
 	// Get top position of view
 	const quint64 top = cursor_->top() * config_.num();

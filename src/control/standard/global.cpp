@@ -14,6 +14,7 @@ GlobalConfig::GlobalConfig()
 	, margin_(2, 2, 3, 3)
 	, byteMargin_(0, 0, 0, 0)
 	, font_("Monaco", 17)
+	, charWidth_(0)
 	, fontMetrics_(font_)
 {
 	// Coloring

@@ -142,7 +142,7 @@ namespace Standard {
 		{
 			return charWidth(numV()) + margin().left() + margin().right();
 		}
-		int drawableLines(int height) const;
+		//int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..N => N + 2 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void update();
