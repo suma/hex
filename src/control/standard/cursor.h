@@ -142,7 +142,7 @@ namespace Standard {
 		}
 
 	public:
-		void movePosition(Global *global, quint64 pos, bool sel, bool holdViewPos);
+		void movePosition(Global *global, int height, quint64 pos, bool sel, bool holdViewPos);
 		void connectTo(Cursor *cursor);
 		quint64 getRelativePosition(qint64 relative_pos, ::Document *document_) const;
 

@@ -266,7 +266,7 @@ void TextView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		qDebug("mosue press");
 
-		cursor_->movePosition(global_, posAt(ev->pos()), false, false);
+		cursor_->movePosition(global_, height(), posAt(ev->pos()), false, false);
 
 		// Start mouse capture
 		//grabMouse();
@@ -281,7 +281,7 @@ void TextView::mouseMoveEvent(QMouseEvent *ev)
 	if (height() < ev->pos().y()) {
 		return;
 	}
-	cursor_->movePosition(global_, posAt(ev->pos()), true, false);
+	cursor_->movePosition(global_, height(), posAt(ev->pos()), true, false);
 }
 
 void TextView::mouseReleaseEvent(QMouseEvent *)
@@ -330,10 +330,10 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
 	case Qt::Key_Home:
-		cursor_->movePosition(global_, 0, keepAnchor, false);
+		cursor_->movePosition(global_, height(), 0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
-		cursor_->movePosition(global_, document_->length(), keepAnchor, false);
+		cursor_->movePosition(global_, height(), document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
 		moveRelativePosition(-1, keepAnchor, false);
@@ -406,7 +406,7 @@ void TextView::inputMethodEvent(QInputMethodEvent *ev)
 
 void TextView::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 {
-	cursor_->movePosition(global_, cursor_->getRelativePosition(pos, document_), sel, holdViewPos);
+	cursor_->movePosition(global_, height(), cursor_->getRelativePosition(pos, document_), sel, holdViewPos);
 }
 
 void TextView::redrawSelection(quint64 begin, quint64 end)

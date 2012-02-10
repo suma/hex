@@ -44,9 +44,4 @@ Global::Global(Editor *parent, ::Document *doc)
 {
 }
 
-int Global::drawableLines() const
-{
-	return config_.drawableLines(view_->height());
-}
-
 }	// namesapce Standard

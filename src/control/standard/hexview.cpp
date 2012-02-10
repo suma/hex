@@ -240,7 +240,7 @@ void HexView::mousePressEvent(QMouseEvent *ev)
 		//qDebug("mouse press");
 
 		cursor_->setNibble(true);
-		cursor_->movePosition(global_, posAt(ev->pos()), false, false);
+		cursor_->movePosition(global_, height(), posAt(ev->pos()), false, false);
 
 		// Start mouse capture
 		grabMouse();
@@ -254,7 +254,7 @@ void HexView::mouseMoveEvent(QMouseEvent *ev)
 	if (height() < ev->pos().y()) {
 		return;
 	}
-	cursor_->movePosition(global_, posAt(ev->pos()), true, false);
+	cursor_->movePosition(global_, height(), posAt(ev->pos()), true, false);
 }
 
 void HexView::mouseReleaseEvent(QMouseEvent *)
@@ -293,7 +293,7 @@ void HexView::keyPressEvent(QKeyEvent *ev)
 
 void HexView::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 {
-	cursor_->movePosition(global_, cursor_->getRelativePosition(pos, document_), sel, holdViewPos);
+	cursor_->movePosition(global_, height(), cursor_->getRelativePosition(pos, document_), sel, holdViewPos);
 }
 
 void HexView::redrawSelection(quint64 begin, quint64 end)

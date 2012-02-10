@@ -117,8 +117,6 @@ namespace Standard {
 			return document_;
 		}
 
-		int drawableLines() const;
-
 	private:
 		Editor *view_;
 		::Document *document_;

@@ -14,7 +14,7 @@ Cursor::Cursor()
 }
 
 
-void Cursor::movePosition(Global *global, quint64 pos, bool sel, bool holdViewPos)
+void Cursor::movePosition(Global *global, int height, quint64 pos, bool sel, bool holdViewPos)
 {
 	::Document *doc = global->document();
 	// view depends on
@@ -31,7 +31,7 @@ void Cursor::movePosition(Global *global, quint64 pos, bool sel, bool holdViewPo
 		vwOldPosLine = top_ - position_ / NUM;
 	}
 
-	const uint vwCountLine = global->drawableLines() - 1;
+	const uint vwCountLine = global->config().drawableLines(height) - 1;
 
 	//-- Update Cursor::top_ with position_
 	const bool goDown = position_ < pos;
