@@ -44,6 +44,8 @@ public:
 class DocumentOriginal
 {
 public:
+	DocumentOriginal();
+	virtual ~DocumentOriginal();
 	virtual quint64 length() const = 0;
 	virtual void get(quint64 pos, uchar *buf, quint64 len) const = 0;
 };

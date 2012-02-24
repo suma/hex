@@ -234,18 +234,15 @@ void AddressView::focusInEvent(QFocusEvent *)
 
 bool AddressView::eventFilter(QObject *obj, QEvent *event)
 {
-	QWidget *widget = NULL;
-	if (!obj->isWidgetType()) {
-		goto standard_processing;
+	if (obj->isWidgetType()) {
+		// Classify which view(hex/text) focused in
+		QWidget *widget = dynamic_cast<QWidget*>(obj);
+		Q_ASSERT(widget != NULL);
+		if (event->type() == QEvent::FocusIn) {
+			last_focus_ = widget;
+		}
 	}
 
-	// Classfy which view(hex/text) focused in
-	widget = dynamic_cast<QWidget*>(obj);
-	if (event->type() == QEvent::FocusIn) {
-		last_focus_ = widget;
-	}
-
-standard_processing:
 	return QObject::eventFilter(obj, event);
 }
 

@@ -3,12 +3,20 @@
 #include <QFile>
 #include <QDataStream>
 #include <QUndoStack>
+#include <QScopedPointer>
 #include "document.h"
 #include "commands.h"
 #include "filemapreader.h"
 
 const size_t Document::DEFAULT_BUFFER_SIZE = 0x100000;
 
+DocumentOriginal::DocumentOriginal()
+{
+}
+
+DocumentOriginal::~DocumentOriginal()
+{
+}
 
 class EmptyOriginal : public DocumentOriginal
 {
@@ -127,7 +135,7 @@ Document::WriteCallback::~WriteCallback()
 {
 }
 
-void Document::WriteCallback::writeStarted(quint64 max)
+void Document::WriteCallback::writeStarted(quint64)
 {
 }
 
@@ -497,6 +505,7 @@ bool Document::write(QFile *out, WriteCallback *callback)
 	return write(0, length(), out, callback);
 }
 
+// TODO: Replace exception based error handling
 bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callback)
 {
 	Q_ASSERT(out != NULL);
@@ -517,9 +526,9 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 
 	quint64 completed = 0;
 
-	FileMapReader *reader = NULL;
+	QScopedPointer<FileMapReader> reader;
 	if (file_ != NULL) {
-		reader = new FileMapReader(file_, BLOCK_SIZE);	// FIXME: BLOCK_SIZE
+		reader.reset(new FileMapReader(file_, BLOCK_SIZE));	// FIXME: BLOCK_SIZE
 	}
 
 	if (callback != NULL) {
@@ -550,7 +559,8 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 			Q_ASSERT(data != NULL);
 			const int res = outStream.writeRawData(reinterpret_cast<char*>(data), copy_size);
 			if (res == -1) {
-				goto label_error;
+				// TODO: error
+				return false;
 			}
 			const size_t wrote_size = static_cast<size_t>(res);
 			Q_ASSERT(wrote_size <= copy_size);
@@ -565,7 +575,8 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 
 			// callback
 			if (callback != NULL && !callback->writeCallback(completed)) {
-				goto label_cancel;
+				out->remove();	// Delete file
+				return true;
 			}
 
 			// iterate pointer
@@ -580,13 +591,13 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 	}
 
 	if (!out->resize(len)) {
-		goto label_error;
+		// TODO: error
+		return false;
 	}
 
 	if (callback != NULL) {
 		callback->writeCompleted();
 	}
-	delete reader;
 
 
 	// TODO: 
@@ -597,20 +608,6 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 	//   Editor側（Document作成する側）でDocument::reopenKeepUndoを呼ぶ
 
 	undo_stack_->setClean();
-	return true;
-
-label_error:
-	// handling error
-
-	delete reader;
-	return false;
-
-label_cancel:
-
-	delete reader;
-
-	// Delete file
-	out->remove();
 	return true;
 }
 
