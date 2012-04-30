@@ -6,6 +6,7 @@
 #include "../util/util.h"
 #include "view.h"
 #include "global.h"
+#include "local.h"
 #include "caret.h"
 #include "cursor.h"
 #include "hexview.h"
@@ -16,12 +17,10 @@ namespace Standard {
 	class TextDecodeHelper;
 	class CaretDrawer;
 
-	class TextConfig
+	class TextConfig : public LocalConfig
 	{
 	private:
-		Global *global_;
 		QRect byteMargin_;
-		QColor colors_[Color::ColorCount];
 
 		std::vector<int> x_begin;	// pos of value
 		std::vector<int> x_end;		// pos of end
@@ -41,45 +40,9 @@ namespace Standard {
 			return global_->config().num();
 		}
 
-		QColor color(size_t index) const
-		{
-			Q_ASSERT(index < Color::ColorCount);
-			return colors_[index];
-		}
-
-		void setColor(size_t index, QColor color)
-		{
-			Q_ASSERT(index < Color::ColorCount);
-			colors_[index] = color;
-		}
-
-		const QFont &font() const
-		{
-			return global_->config().font();
-		}
-		void updateFont()
-		{
-			global_->config().updateFont();
-		}
-		int textWidth(const QString &string) const
-		{
-			return fontMetrics().width(string);
-		}
-		int charWidth(int num = 1) const
-		{
-			return global_->config().charWidth(num);
-		}
-		int charHeight() const
-		{
-			return global_->config().charHeight();
-		}
 		int byteWidth() const
 		{
 			return charWidth(1);
-		}
-		int byteHeight() const
-		{
-			return global_->config().byteHeight();
 		}
 		const QRect &margin() const
 		{
@@ -88,14 +51,6 @@ namespace Standard {
 		const QRect &byteMargin() const
 		{
 			return byteMargin_;
-		}
-		const QFontMetrics &fontMetrics() const
-		{
-			return global_->config().fontMetrics();
-		}
-		int top() const
-		{
-			return margin().top();
 		}
 		int maxWidth() const
 		{

@@ -29,9 +29,9 @@ namespace Standard {
 		ColorType color(quint64 pos) const
 		{
 			if (selected(pos)) {
-				return ColorType(Color::SelBackground, Color::SelText);
+				return ColorType(Color::kSelectBackground, Color::kSelectText);
 			} else {
-				return ColorType(Color::Background, Color::Text);
+				return ColorType(Color::kBackground, Color::kText);
 			}
 		}
 	};

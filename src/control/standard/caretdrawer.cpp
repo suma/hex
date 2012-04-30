@@ -126,13 +126,13 @@ void TextCaretDrawer::drawCaretLine(const CaretDrawInfo &info)
 	} else {
 		x = config_.x(info.x) + config_.charWidth();
 	}
-	QBrush brush(config_.color(Color::CaretBackground));
+	QBrush brush(config_.color(Color::kCaretBackground));
 	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
 }
 
 void TextCaretDrawer::drawCaretBlock(const CaretDrawInfo &info)
 {
-	QBrush brush(config_.color(Color::CaretBackground));
+	QBrush brush(config_.color(Color::kCaretBackground));
 	if (info.caret_middle) {
 		info.painter.fillRect(config_.x(info.x), info.y, config_.byteWidth(), config_.byteHeight(), brush);
 		// TODO: 本当はここで文字描画
@@ -147,7 +147,7 @@ void TextCaretDrawer::drawCaretFrame(const CaretDrawInfo &info)
 	int width = config_.byteWidth() - 1;
 	int x = config_.x(info.x);
 
-	info.painter.setPen(config_.color(Color::CaretBackground));
+	info.painter.setPen(config_.color(Color::kCaretBackground));
 	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
 }
 
@@ -156,7 +156,7 @@ void TextCaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
 	int width = config_.byteWidth() - 1;
 	int x = config_.x(info.x);
 
-	QBrush brush(config_.color(Color::CaretBackground));
+	QBrush brush(config_.color(Color::kCaretBackground));
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
 }
 
@@ -228,13 +228,13 @@ void HexCaretDrawer::drawCaretLine(const CaretDrawInfo &info)
 	} else {
 		x = config_.x(info.x) + config_.byteMargin().left() + config_.charWidth();
 	}
-	QBrush brush(config_.color(Color::CaretBackground));
+	QBrush brush(config_.color(Color::kCaretBackground));
 	info.painter.fillRect(x, info.y, 2, config_.byteHeight(), brush);
 }
 
 void HexCaretDrawer::drawCaretBlock(const CaretDrawInfo &info)
 {
-	QBrush brush(config_.color(Color::CaretBackground));
+	QBrush brush(config_.color(Color::kCaretBackground));
 	ColorType color = cursor_->getSelection().color(info.pos);
 	
 	if (info.caret_middle) {
@@ -261,7 +261,7 @@ void HexCaretDrawer::drawCaretFrame(const CaretDrawInfo &info)
 		width = config_.charWidth() + config_.byteMargin().right() - 1;
 		x = config_.x(info.x) + config_.charWidth() + config_.byteMargin().left();
 	}
-	info.painter.setPen(config_.color(Color::CaretBackground));
+	info.painter.setPen(config_.color(Color::kCaretBackground));
 	info.painter.drawRect(x, info.y, width, config_.byteHeight() - 1);
 }
 
@@ -276,7 +276,7 @@ void HexCaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
 		x = config_.x(info.x) + config_.byteMargin().left() + config_.charWidth();
 	}
 
-	QBrush brush(config_.color(Color::CaretBackground));
+	QBrush brush(config_.color(Color::kCaretBackground));
 	info.painter.fillRect(x, info.y + config_.byteHeight() - 2, width, 2, brush);
 }
 

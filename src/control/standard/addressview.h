@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "../color.h"
+#include "local.h"
 
 class Document;
 class ScrollBar;
@@ -15,14 +16,12 @@ namespace Standard {
 	class Cursor;
 	class LayeredWidget;
 
-	class AddressConfig : public QObject
+	class AddressConfig : public QObject, public LocalConfig
 	{
 		Q_OBJECT
 
 	private:
-		Global *global_;
 		QRect byteMargin_;
-		QColor colors_[Color::ColorCount];
 
 		// FIXME: separete 3 attributes 
 		//  line
@@ -36,18 +35,11 @@ namespace Standard {
 		AddressConfig(Global *global);
 		~AddressConfig();
 
-		uint num() const;
 		QRect margin() const;
 		QRect byteMargin() const;
-		QFont font() const;
-		const QFontMetrics &fontMetrics() const;
-		QColor color(size_t index) const;
-
-		int charWidth(int num = 1) const;
 
 		int drawableLines(int height) const;
 		int top() const;
-		int byteHeight() const;
 
 		int columnHeight() const;
 

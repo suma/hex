@@ -79,6 +79,27 @@ namespace Standard {
 			const int y = top() + byteMargin_.top();
 			return (height - y + byteHeight()) / byteHeight();
 		}
+
+		Color::ColorContainer &color()
+		{
+			return colors_;
+		}
+
+		QColor color(const QString &key) const
+		{
+			Color::ColorContainer::const_iterator it = colors_.find(key);
+			Q_ASSERT(it != colors_.end());
+			if (it != colors_.end()) {
+				return it.value();
+			} else {
+				return colors_[Color::kText];
+			}
+		}
+
+		void setColor(const QString &key, const QColor &color)
+		{
+			colors_.insert(key, color);
+		}
 	private:
 		uint num_;
 		QRect margin_;
@@ -86,7 +107,7 @@ namespace Standard {
 		QFont font_;
 		int charWidth_;
 
-		QColor colors_[Color::ColorCount];
+		Color::ColorContainer colors_;
 		QFontMetrics fontMetrics_;
 	};
 

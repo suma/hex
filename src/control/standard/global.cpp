@@ -18,11 +18,11 @@ GlobalConfig::GlobalConfig()
 	, fontMetrics_(font_)
 {
 	// Coloring
-	colors_[Color::Background] = QColor(0xEF,0xEF,0xEF, 0);
-	colors_[Color::Text] = QColor(0,0,0);
-	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF, 170);
-	colors_[Color::SelText] = QColor(0,0,0);
-	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
+	colors_[Color::kBackground] = QColor(0xEF,0xEF,0xEF, 0);
+	colors_[Color::kText] = QColor(0,0,0);
+	colors_[Color::kSelectBackground] = QColor(0xA0,0xA0,0xFF, 170);
+	colors_[Color::kSelectText] = QColor(0,0,0);
+	colors_[Color::kCaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
 
 	update();
 }

@@ -5,6 +5,7 @@
 #include <QFontMetrics>
 #include "view.h"
 #include "global.h"
+#include "local.h"
 #include "cursor.h"
 #include "caret.h"
 #include "keyboard.h"
@@ -22,13 +23,10 @@ namespace Standard {
 		DRAW_RANGE,	// [begin, end)
 	};
 
-	class HexConfig
+	class HexConfig : public LocalConfig
 	{
 	private:
-		Global *global_;
 		QRect byteMargin_;
-
-		QColor colors_[Color::ColorCount];
 
 	private:
 		std::vector<int> x_begin;	// pos of value
@@ -47,43 +45,12 @@ namespace Standard {
 		{
 			return global_->config().num();
 		}
-		QColor color(size_t index) const
-		{
-			Q_ASSERT(index < Color::ColorCount);
-			return colors_[index];
-		}
 
-		void setColor(size_t index, QColor color)
-		{
-			Q_ASSERT(index < Color::ColorCount);
-			colors_[index] = color;
-		}
-
-		const QFont &font() const
-		{
-			return global_->config().font();
-		}
-
-		void updateFont()
-		{
-			global_->config().updateFont();
-		}
-		int charWidth(int num = 1) const
-		{
-			return global_->config().charWidth(num);
-		}
-		int charHeight() const
-		{
-			return global_->config().charHeight();
-		}
 		int byteWidth() const
 		{
 			return byteMargin_.left() + charWidth(2) + byteMargin_.right();
 		}
-		int byteHeight() const
-		{
-			return global_->config().byteHeight();
-		}
+
 		const QRect &margin() const
 		{
 			return global_->config().margin();
@@ -91,14 +58,6 @@ namespace Standard {
 		const QRect &byteMargin() const
 		{
 			return byteMargin_;
-		}
-		const QFontMetrics &fontMetrics() const
-		{
-			return global_->config().fontMetrics();
-		}
-		int top() const
-		{
-			return global_->config().top();
 		}
 		int maxWidth() const
 		{

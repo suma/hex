@@ -13,42 +13,21 @@ namespace Standard {
 
 
 AddressConfig::AddressConfig(Global *global)
-	: global_(global)
+	: LocalConfig(global)
 	, byteMargin_(3, 0, 2, 0)
 	, column_visible_(true)
 	, line_visible_(true)
 {
 	// Coloring
-	colors_[Color::Background] = QColor(0xCC,0xFF,0xFF);
-	colors_[Color::Text] = QColor(0,0,0);
-	colors_[Color::SelBackground] = QColor(0xFF,0xA0,0xFF);
-	colors_[Color::SelText] = QColor(0,0,0);
+	colors_[Color::kBackground] = QColor(0xCC,0xFF,0xFF);
+	colors_[Color::kText] = QColor(0,0,0);
+	colors_[Color::kSelectBackground] = QColor(0xFF,0xA0,0xFF);
+	colors_[Color::kSelectText] = QColor(0,0,0);
 
 }
 
 AddressConfig::~AddressConfig()
 {
-}
-
-QFont AddressConfig::font() const
-{
-	return global_->config().font();
-}
-
-const QFontMetrics &AddressConfig::fontMetrics() const
-{
-	return global_->config().fontMetrics();
-}
-
-QColor AddressConfig::color(size_t index) const
-{
-	Q_ASSERT(index < Color::ColorCount);
-	return colors_[index];
-}
-
-uint AddressConfig::num() const
-{
-	return global_->config().num();
 }
 
 QRect AddressConfig::margin() const
@@ -64,15 +43,6 @@ QRect AddressConfig::byteMargin() const
 int AddressConfig::top() const
 {
 	return margin().top();
-}
-int AddressConfig::charWidth(int num) const
-{
-	return global_->config().charWidth(num);
-}
-
-int AddressConfig::byteHeight() const
-{
-	return global_->config().byteHeight();
 }
 
 int AddressConfig::columnHeight() const
@@ -265,18 +235,18 @@ void AddressView::drawColumn()
 		HexConfig::XIterator hi = hc.createXIterator();
 		for (int i = 0; i < Num; i++, ++hi) {
 			if (i == sel_pos) {
-				painter.setPen(config_.color(Color::SelText));
-				painter.setBackground(QBrush(config_.color(Color::SelBackground)));
+				painter.setPen(config_.color(Color::kSelectText));
+				painter.setBackground(QBrush(config_.color(Color::kSelectBackground)));
 			} else {
-				painter.setPen(config_.color(Color::Text));
-				painter.setBackground(QBrush(config_.color(Color::Background)));
+				painter.setPen(config_.color(Color::kText));
+				painter.setBackground(QBrush(config_.color(Color::kBackground)));
 			}
 			QString str("+");
 			str += QChar(util::itohex(i));
 
 			// draw column background
 			if (i == sel_pos) {
-				painter.fillRect(hx + hi.screenX(), 0, hc.byteWidth(), hc.byteHeight(), QBrush(config_.color(Color::SelBackground)));
+				painter.fillRect(hx + hi.screenX(), 0, hc.byteWidth(), hc.byteHeight(), QBrush(config_.color(Color::kSelectBackground)));
 			}
 			// draw text
 			painter.drawText(hx + hi.textX(), 0, hc.fontMetrics().width(str), config_.byteHeight(), Qt::AlignLeft, str);
@@ -312,12 +282,12 @@ void AddressView::drawLine()
 		}
 		// Change cursor color
 		if ((line / config_.num()) == sel_pos) {
-			painter.setPen(config_.color(Color::SelText));
-			painter.setBackground(QBrush(config_.color(Color::SelBackground)));
-			painter.fillRect(0, y, config_.fontMetrics().width(str), config_.byteHeight(), QBrush(config_.color(Color::SelBackground)));
+			painter.setPen(config_.color(Color::kSelectText));
+			painter.setBackground(QBrush(config_.color(Color::kSelectBackground)));
+			painter.fillRect(0, y, config_.fontMetrics().width(str), config_.byteHeight(), QBrush(config_.color(Color::kSelectBackground)));
 		} else {
-			painter.setPen(config_.color(Color::Text));
-			painter.setBackground(QBrush(config_.color(Color::Background)));
+			painter.setPen(config_.color(Color::kText));
+			painter.setBackground(QBrush(config_.color(Color::kBackground)));
 		}
 		painter.drawText(0, y, config_.fontMetrics().width(str), config_.byteHeight(), Qt::AlignLeft, str);
 

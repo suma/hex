@@ -1,22 +1,23 @@
 
 #pragma once
 
+#include <QHash>
+
 namespace Color {
-	enum color {
-		Background = 0,
-		Text,
-		SelBackground,	// hilighted
-		SelText,
-		CaretBackground,
-		ColorCount,
-	};
+	extern const QString kBackground;
+	extern const QString kText;
+	extern const QString kSelectBackground;
+	extern const QString kSelectText;
+	extern const QString kCaretBackground;
+
+	typedef QHash<QString, QColor> ColorContainer;
 }
 
 
 struct ColorType {
-	int Background;
-	int Text;
-	ColorType(int bg_color = Color::Background, int text_color = Color::Text)
+	QString Background;
+	QString Text;
+	ColorType(const QString &bg_color = Color::kBackground, const QString &text_color = Color::kText)
 	{
 		Background = bg_color;
 		Text = text_color;
