@@ -79,6 +79,25 @@ class QFragmentMapData
 {
     enum Color { Red, Black };
 public:
+
+    static int qAllocMore(int alloc, int extra)
+    {
+        const int page = 1 << 12;
+        int nalloc;
+        alloc += extra;
+        if (alloc < 1<<6) {
+            nalloc = (1<<3) + ((alloc >>3) << 3);
+        } else  {
+            nalloc = (alloc < page) ? 1 << 3 : page;
+            while (nalloc < alloc) {
+                if (nalloc <= 0)
+                    return INT_MAX;
+                nalloc *= 2;
+            }
+        }
+        return nalloc - extra;
+    }
+
     QFragmentMapData();
     ~QFragmentMapData();
 
@@ -236,24 +255,6 @@ template <class Fragment>
 QFragmentMapData<Fragment>::~QFragmentMapData()
 {
     free(head);
-}
-
-static int qAllocMore(int alloc, int extra)
-{
-    const int page = 1 << 12;
-    int nalloc;
-    alloc += extra;
-    if (alloc < 1<<6) {
-        nalloc = (1<<3) + ((alloc >>3) << 3);
-    } else  {
-        nalloc = (alloc < page) ? 1 << 3 : page;
-        while (nalloc < alloc) {
-            if (nalloc <= 0)
-                return INT_MAX;
-            nalloc *= 2;
-        }
-    }
-    return nalloc - extra;
 }
 
 template <class Fragment>
