@@ -3,7 +3,6 @@
 TEMPLATE = app
 LANGUAGE = C++
 TARGET = ../hex
-CONFIG += precompile_header
 
 PRECOMPILED_HEADER = ../stable.h
 

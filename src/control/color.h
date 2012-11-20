@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <QColor>
 #include <QHash>
 
 namespace Color {

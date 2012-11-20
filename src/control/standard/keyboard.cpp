@@ -1,4 +1,5 @@
 
+#include <QtCore>
 #include "keyboard.h"
 #include "../document.h"
 #include "cursor.h"
@@ -93,7 +94,7 @@ void Keyboard::keyPressEvent(QKeyEvent *ev)
 	default:
 		{
 			QString text = ev->text();
-			qDebug() << "hoge";
+			qDebug() << "key input " << text;
 			for (int i = 0; i < text.length(); i++) {
 				keyInputEvent(text.at(i));
 			}

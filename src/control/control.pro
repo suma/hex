@@ -2,7 +2,7 @@
 TEMPLATE = lib
 LANGUAGE = C++
 TARGET = ../control
-CONFIG += precompile_header staticlib
+CONFIG += staticlib
 
 PRECOMPILED_HEADER = ../stable.h
 
