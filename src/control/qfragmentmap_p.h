@@ -1,16 +1,18 @@
 /****************************************************************************
 **
-** Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
-** Contact: Qt Software Information (qt-info@nokia.com)
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
-** Commercial Usage
-** Licensees holding valid Qt Commercial licenses may use this file in
-** accordance with the Qt Commercial License Agreement provided with the
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
 ** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and Nokia.
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -20,10 +22,9 @@
 ** ensure the GNU Lesser General Public License version 2.1 requirements
 ** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
 **
-** In addition, as a special exception, Nokia gives you certain
-** additional rights. These rights are described in the Nokia Qt LGPL
-** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
-** package.
+** In addition, as a special exception, Digia gives you certain additional
+** rights.  These rights are described in the Digia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
 **
 ** GNU General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU
@@ -33,8 +34,7 @@
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
 **
-** If you are unsure which license is appropriate for your use, please
-** contact the sales department at qt-sales@nokia.com.
+**
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
@@ -215,6 +215,10 @@ public:
         head->root = new_root;
     }
 
+    inline bool isValid(uint n) const {
+        return n > 0 && n != head->freelist;
+    }
+
     union {
         Header *head;
         Fragment *fragments;
@@ -234,6 +238,7 @@ private:
 
 template <class Fragment>
 QFragmentMapData<Fragment>::QFragmentMapData()
+    : fragments(0)
 {
     init();
 }
@@ -241,12 +246,19 @@ QFragmentMapData<Fragment>::QFragmentMapData()
 template <class Fragment>
 void QFragmentMapData<Fragment>::init()
 {
-    fragments = (Fragment *)malloc(64*fragmentSize);
+    // the following code will realloc an existing fragment or create a new one.
+    // it will also ignore errors when shrinking an existing fragment.
+    Fragment *newFragments = (Fragment *)realloc(fragments, 64*fragmentSize);
+    if (newFragments) {
+        fragments = newFragments;
+        head->allocated = 64;
+    }
+    Q_CHECK_PTR(fragments);
+
     head->tag = (((quint32)'p') << 24) | (((quint32)'m') << 16) | (((quint32)'a') << 8) | 'p'; //TAG('p', 'm', 'a', 'p');
     head->root = 0;
     head->freelist = 1;
     head->node_count = 0;
-    head->allocated = 64;
     // mark all items to the right as unused
     F(head->freelist).right = 0;
 }
@@ -254,7 +266,7 @@ void QFragmentMapData<Fragment>::init()
 template <class Fragment>
 QFragmentMapData<Fragment>::~QFragmentMapData()
 {
-    free(head);
+    free(fragments);
 }
 
 template <class Fragment>
@@ -267,7 +279,9 @@ uint QFragmentMapData<Fragment>::createFragment()
         // need to create some free space
         uint needed = qAllocMore((freePos+1)*fragmentSize, 0);
         Q_ASSERT(needed/fragmentSize > head->allocated);
-        fragments = (Fragment *)realloc(fragments, needed);
+        Fragment *newFragments = (Fragment *)realloc(fragments, needed);
+        Q_CHECK_PTR(newFragments);
+        fragments = newFragments;
         head->allocated = needed/fragmentSize;
         F(freePos).right = 0;
     }
@@ -807,6 +821,8 @@ public:
     QFragmentMap() {}
     ~QFragmentMap()
     {
+        if (!data.fragments)
+            return; // in case of out-of-memory, we won't have fragments
         for (Iterator it = begin(); !it.atEnd(); ++it)
             it.value()->free();
     }
@@ -814,7 +830,6 @@ public:
     inline void clear() {
         for (Iterator it = begin(); !it.atEnd(); ++it)
             it.value()->free();
-        ::free(data.head);
         data.init();
     }
 
