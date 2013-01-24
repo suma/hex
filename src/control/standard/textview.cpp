@@ -81,7 +81,7 @@ TextView::TextView(QWidget *parent, Global *global)
 	, document_(global->document())
 	, config_(global)
 	, cursor_(new Cursor)
-	, caret_drawer_(new TextCaretDrawer(this, config_, cursor_, document_))
+	, caret_drawer_(new TextCaretDrawer(this, config_, cursor_, caret_, document_))
 	, decode_helper_(new TextDecodeHelper(*document_, QString("Shift-JIS"), cursor_->top()))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {
@@ -185,7 +185,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			uint i = 0;
 			while (i < printableBytes && *xitr + i < config_.num()) {
 				// Set color
-				ColorType color = selection.color(docpos);
+				ColorType color = selection.color(docpos, caret_);
 				QBrush brush = QBrush(config_.color(color.Background));
 				painter.setBackground(brush);
 				painter.setPen(config_.color(color.Text));
@@ -209,7 +209,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 				++yitr;
 
 				while (i < printableBytes) {
-					ColorType color = selection.color(docpos);
+					ColorType color = selection.color(docpos, caret_);
 					QBrush brush = QBrush(config_.color(color.Background));
 					painter.setBackground(brush);
 					painter.setPen(config_.color(color.Text));
@@ -228,7 +228,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			index += printableBytes;
 		} else {
 			// Set color
-			ColorType color = selection.color(docpos);
+			ColorType color = selection.color(docpos, caret_);
 			QBrush brush = QBrush(config_.color(color.Background));
 			painter.setBackground(brush);
 			painter.setPen(config_.color(color.Text));

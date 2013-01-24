@@ -77,7 +77,7 @@ HexView::HexView(QWidget *parent, Global *global)
 	, config_(global)
 	, cursor_(new Cursor)
 	, caret_(CARET_BLOCK, CARET_FRAME)
-	, caret_drawer_(new HexCaretDrawer(this, config_, cursor_, document_))
+	, caret_drawer_(new HexCaretDrawer(this, config_, cursor_, caret_, document_))
 	, keyboard_(new Keyboard(global, this))
 {
 	// Enable keyboard input
@@ -192,7 +192,7 @@ void HexView::drawLines(QPainter &painter, quint64 docpos, int y, int x_begin, i
 	for (uint index = 0; index < size; ++index) {
 		if (x_begin <= *xitr && *xitr < x_end) {
 			// Set color
-			ColorType color = selection.color(docpos++);
+			ColorType color = selection.color(docpos++, caret_);
 			QBrush brush = QBrush(config_.color(color.Background));
 			painter.setBackground(brush);
 			painter.setPen(config_.color(color.Text));

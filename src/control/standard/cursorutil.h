@@ -3,19 +3,12 @@
 
 #include <QtGlobal>
 #include "../color.h"
+#include "caret.h"
 
 namespace Standard {
 
 	struct HPos {
 		quint64 X, Y;
-	};
-
-	enum CaretShape {
-		CARET_NONE,
-		CARET_LINE,
-		CARET_BLOCK,
-		CARET_FRAME,
-		CARET_UNDERBAR,
 	};
 
 	struct CursorSelection {
@@ -28,10 +21,10 @@ namespace Standard {
 			return begin <= pos && pos < end;
 		}
 
-		ColorType color(quint64 pos) const
+		ColorType color(quint64 pos, const Caret &caret) const
 		{
 			if (selected(pos)) {
-				if (pos == begin && pos != anchor) {
+				if (caret.visible() && pos == begin && pos != anchor) {
 					return ColorType(Color::kCaretBackground, Color::kSelectText);
 				} else {
 					return ColorType(Color::kSelectBackground, Color::kSelectText);

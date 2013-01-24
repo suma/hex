@@ -1,9 +1,18 @@
 
 #pragma once
 
-#include "cursorutil.h"
+#include <QtGlobal>
+#include "../color.h"
 
 namespace Standard {
+
+	enum CaretShape {
+		CARET_NONE,
+		CARET_LINE,
+		CARET_BLOCK,
+		CARET_FRAME,
+		CARET_UNDERBAR
+	};
 
 	class Caret
 	{
@@ -109,8 +118,6 @@ namespace Standard {
 		{
 			setEnable(false);
 		}
-
-
 	};
 
 

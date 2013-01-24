@@ -7,9 +7,9 @@
 
 namespace Standard {
 
-CaretDrawer::CaretDrawer(QWidget *parent)
+CaretDrawer::CaretDrawer(QWidget *parent, Caret &caret)
 	: QObject(parent)
-	, caret_(CARET_BLOCK, CARET_FRAME)
+	, caret_(caret)
 {
 	//setFocusPolicy(Qt::NoFocus);
 	enable();
@@ -61,8 +61,8 @@ void CaretDrawer::timerEvent(QTimerEvent *event)
 	}
 }
 
-TextCaretDrawer::TextCaretDrawer(QWidget *parent, TextConfig &config, Cursor *cursor, ::Document *document)
-	: CaretDrawer(parent)
+TextCaretDrawer::TextCaretDrawer(QWidget *parent, TextConfig &config, Cursor *cursor, Caret &caret, ::Document *document)
+	: CaretDrawer(parent, caret)
 	, config_(config)
 	, cursor_(cursor)
 	, document_(document)
@@ -165,8 +165,8 @@ void TextCaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
 
 
 
-HexCaretDrawer::HexCaretDrawer(QWidget *parent, HexConfig &config, Cursor *cursor, ::Document *document)
-	: CaretDrawer(parent)
+HexCaretDrawer::HexCaretDrawer(QWidget *parent, HexConfig &config, Cursor *cursor, Caret &caret, ::Document *document)
+	: CaretDrawer(parent, caret)
 	, config_(config)
 	, cursor_(cursor)
 	, document_(document)
@@ -239,7 +239,7 @@ void HexCaretDrawer::drawCaretLine(const CaretDrawInfo &info)
 void HexCaretDrawer::drawCaretBlock(const CaretDrawInfo &info)
 {
 	QBrush brush(config_.color(Color::kCaretBackground));
-	ColorType color = cursor_->getSelection().color(info.pos);
+	ColorType color = cursor_->getSelection().color(info.pos, caret_);
 	
 	if (info.caret_middle) {
 		if (cursor_->nibble() || cursor_->hasSelection()) {

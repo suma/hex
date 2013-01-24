@@ -41,7 +41,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		CaretDrawer(QWidget *parent = NULL);
+		CaretDrawer(QWidget *parent, Caret &caret);
 		virtual ~CaretDrawer();
 		
 		virtual void drawCaret(CaretDrawInfo info) = 0;
@@ -55,7 +55,7 @@ namespace Standard {
 		void timerEvent(QTimerEvent *);
 
 	protected:
-		Caret caret_;
+		Caret& caret_;
 	};
 
 	class TextCaretDrawer : public CaretDrawer
@@ -66,7 +66,7 @@ namespace Standard {
 		Cursor *cursor_;
 		::Document *document_;
 	public:
-		TextCaretDrawer(QWidget *parent, TextConfig &config, Cursor *cursor, ::Document *document);
+		TextCaretDrawer(QWidget *parent, TextConfig &config, Cursor *cursor, Caret &caret, ::Document *document);
 		~TextCaretDrawer();
 		void paintEvent(QPaintEvent*);
 		void drawCaret(CaretDrawInfo info);
@@ -87,7 +87,7 @@ namespace Standard {
 		Cursor *cursor_;
 		::Document *document_;
 	public:
-		HexCaretDrawer(QWidget *parent, HexConfig &config, Cursor *cursor, ::Document *document);
+		HexCaretDrawer(QWidget *parent, HexConfig &config, Cursor *cursor, Caret &caret, ::Document *document);
 		~HexCaretDrawer();
 		void paintEvent(QPaintEvent*);
 		void drawCaret(CaretDrawInfo info);
