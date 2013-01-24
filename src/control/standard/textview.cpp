@@ -81,6 +81,7 @@ TextView::TextView(QWidget *parent, Global *global)
 	, document_(global->document())
 	, config_(global)
 	, cursor_(new Cursor)
+	, caret_drawer_(new TextCaretDrawer(this, config_, cursor_, document_))
 	, decode_helper_(new TextDecodeHelper(*document_, QString("Shift-JIS"), cursor_->top()))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {
@@ -119,9 +120,10 @@ TextView::~TextView()
 	delete cursor_;
 }
 
-void TextView::paintEvent(QPaintEvent*)
+void TextView::paintEvent(QPaintEvent *event)
 {
 	// FIXME: refactoring
+	caret_drawer_->paintEvent(event);
 	drawView();
 }
 
@@ -309,7 +311,7 @@ quint64 TextView::posAt(const QPoint &pos) const
 
 CaretDrawer * TextView::createCaretWidget()
 {
-	return new TextCaretDrawer(config_, cursor_, document_);
+	return caret_drawer_;
 }
 
 void TextView::keyPressEvent(QKeyEvent *ev)

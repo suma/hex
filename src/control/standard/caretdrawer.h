@@ -36,7 +36,7 @@ namespace Standard {
 		}
 	};
 
-	class CaretDrawer : public QWidget
+	class CaretDrawer : public QObject
 	{
 		Q_OBJECT
 
@@ -66,7 +66,7 @@ namespace Standard {
 		Cursor *cursor_;
 		::Document *document_;
 	public:
-		TextCaretDrawer(TextConfig &config, Cursor *cursor, ::Document *document);
+		TextCaretDrawer(QWidget *parent, TextConfig &config, Cursor *cursor, ::Document *document);
 		~TextCaretDrawer();
 		void paintEvent(QPaintEvent*);
 		void drawCaret(CaretDrawInfo info);
@@ -87,7 +87,7 @@ namespace Standard {
 		Cursor *cursor_;
 		::Document *document_;
 	public:
-		HexCaretDrawer(HexConfig &config, Cursor *cursor, ::Document *document);
+		HexCaretDrawer(QWidget *parent, HexConfig &config, Cursor *cursor, ::Document *document);
 		~HexCaretDrawer();
 		void paintEvent(QPaintEvent*);
 		void drawCaret(CaretDrawInfo info);

@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <QtGlobal>
 #include "../color.h"
 
 namespace Standard {
@@ -20,6 +21,7 @@ namespace Standard {
 	struct CursorSelection {
 		quint64 begin;
 		quint64 end;
+        quint64 anchor;
 
 		bool selected(quint64 pos) const
 		{
@@ -29,10 +31,15 @@ namespace Standard {
 		ColorType color(quint64 pos) const
 		{
 			if (selected(pos)) {
-				return ColorType(Color::kSelectBackground, Color::kSelectText);
+				if (pos == begin && pos != anchor) {
+					return ColorType(Color::kCaretBackground, Color::kSelectText);
+				} else {
+					return ColorType(Color::kSelectBackground, Color::kSelectText);
+				}
 			} else {
 				return ColorType(Color::kBackground, Color::kText);
 			}
 		}
+
 	};
 }

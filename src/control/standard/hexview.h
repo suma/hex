@@ -15,6 +15,7 @@ class Document;
 namespace Standard {
 
 	class CaretDrawer;
+	class HexCaretDrawer;
 
 	enum DrawMode {
 		DRAW_ALL = 0,
@@ -270,6 +271,7 @@ namespace Standard {
 		HexConfig config_;
 		Cursor *cursor_;
 		Caret caret_;
+		HexCaretDrawer *caret_drawer_;
 		Keyboard *keyboard_;
 		std::vector<uchar> buff_;
 	};

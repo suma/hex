@@ -55,8 +55,8 @@ void Editor::initView()
 	CaretDrawer *text_caret = text->createCaretWidget();
 
 
-	view_->addHex(static_cast<QWidget*>(hex_caret));
-	view_->addText(static_cast<QWidget*>(text_caret));
+	//view_->addHex(static_cast<QWidget*>(hex_caret));
+	//view_->addText(static_cast<QWidget*>(text_caret));
 
 	connect(hex, SIGNAL(focusIn()), hex_caret, SLOT(enable()));
 	connect(hex, SIGNAL(focusOut()), hex_caret, SLOT(disable()));

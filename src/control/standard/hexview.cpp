@@ -77,6 +77,7 @@ HexView::HexView(QWidget *parent, Global *global)
 	, config_(global)
 	, cursor_(new Cursor)
 	, caret_(CARET_BLOCK, CARET_FRAME)
+	, caret_drawer_(new HexCaretDrawer(this, config_, cursor_, document_))
 	, keyboard_(new Keyboard(global, this))
 {
 	// Enable keyboard input
@@ -100,9 +101,10 @@ HexView::~HexView()
 	delete cursor_;
 }
 
-void HexView::paintEvent(QPaintEvent*)
+void HexView::paintEvent(QPaintEvent *event)
 {
 	// FIXME: refactoring
+	caret_drawer_->paintEvent(event);
 	drawView();
 }
 
@@ -282,7 +284,7 @@ quint64 HexView::posAt(const QPoint &pos) const
 
 CaretDrawer * HexView::createCaretWidget()
 {
-	return new HexCaretDrawer(config_, cursor_, document_);
+	return caret_drawer_;
 }
 
 void HexView::keyPressEvent(QKeyEvent *ev)

@@ -16,6 +16,7 @@ class Document;
 namespace Standard {
 	class TextDecodeHelper;
 	class CaretDrawer;
+	class TextCaretDrawer;
 
 	class TextConfig : public LocalConfig
 	{
@@ -277,6 +278,7 @@ namespace Standard {
 		::Document *document_;
 		TextConfig config_;
 		Cursor *cursor_;
+		TextCaretDrawer *caret_drawer_;
 		TextDecodeHelper *decode_helper_;
 		Caret caret_;
 		std::vector<uchar> buff_;

@@ -84,7 +84,8 @@ namespace Standard {
 		{
 			CursorSelection c = {
 				qMin(position_, anchor_),	// begin
-				qMax(position_, anchor_)	// end
+				qMax(position_, anchor_),	// end
+				anchor_
 			};
 			return c;
 		}

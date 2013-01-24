@@ -1,5 +1,6 @@
 
 #include "textview.h"
+#include <QWidget>
 #include "caretdrawer.h"
 #include "cursor.h"
 #include "../document.h"
@@ -7,10 +8,11 @@
 namespace Standard {
 
 CaretDrawer::CaretDrawer(QWidget *parent)
-	: QWidget(parent)
+	: QObject(parent)
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {
-	setFocusPolicy(Qt::NoFocus);
+	//setFocusPolicy(Qt::NoFocus);
+	enable();
 }
 
 
@@ -29,7 +31,7 @@ void CaretDrawer::disable()
 	setCaretBlink(false);
 	if (!caret_.visible()) {
 		caret_.setVisible(true);
-		update();
+		qobject_cast<QWidget*>(parent())->update();
 	}
 }
 
@@ -55,12 +57,13 @@ void CaretDrawer::timerEvent(QTimerEvent *event)
 {
 	if (caret_.timerId() == event->timerId()) {
 		caret_.inverseVisible();
-		update();
+		qobject_cast<QWidget*>(parent())->update();
 	}
 }
 
-TextCaretDrawer::TextCaretDrawer(TextConfig &config, Cursor *cursor, ::Document *document)
-	: config_(config)
+TextCaretDrawer::TextCaretDrawer(QWidget *parent, TextConfig &config, Cursor *cursor, ::Document *document)
+	: CaretDrawer(parent)
+	, config_(config)
 	, cursor_(cursor)
 	, document_(document)
 {
@@ -90,7 +93,7 @@ void TextCaretDrawer::paintEvent(QPaintEvent *event)
 		return;
 	}
 
-	QPainter painter(this);
+	QPainter painter(qobject_cast<QWidget*>(parent()));
 	painter.setFont(config_.font());
 	CaretDrawInfo info(painter, caret_.currentShape(), pos, x, y, caret_middle);
 	drawCaret(info);
@@ -162,8 +165,9 @@ void TextCaretDrawer::drawCaretUnderbar(const CaretDrawInfo &info)
 
 
 
-HexCaretDrawer::HexCaretDrawer(HexConfig &config, Cursor *cursor, ::Document *document)
-	: config_(config)
+HexCaretDrawer::HexCaretDrawer(QWidget *parent, HexConfig &config, Cursor *cursor, ::Document *document)
+	: CaretDrawer(parent)
+	, config_(config)
 	, cursor_(cursor)
 	, document_(document)
 {
@@ -194,7 +198,7 @@ void HexCaretDrawer::paintEvent(QPaintEvent *event)
 	}
 
 
-	QPainter painter(this);
+	QPainter painter(qobject_cast<QWidget*>(parent()));
 	painter.setFont(config_.font());
 	CaretDrawInfo info(painter, caret_.currentShape(), pos, x, y, caret_middle);
 	drawCaret(info);
