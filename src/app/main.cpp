@@ -5,7 +5,7 @@
 int main(int argc, char *argv[])
 {
 	HexApp app(argc, argv);
-	QTextCodec::setCodecForTr(QTextCodec::codecForLocale());
+	QTextCodec::setCodecForLocale(QTextCodec::codecForLocale());
 	MainForm *editor = new MainForm();
 	editor->show();
 	return app.exec();

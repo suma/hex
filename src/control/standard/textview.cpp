@@ -1,6 +1,5 @@
 
 #include <QtGui>
-#include <QInputContextFactory>
 #include <algorithm>
 #include <vector>
 #include "textview.h"
