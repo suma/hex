@@ -1,6 +1,5 @@
 
 #include <QtGui>
-#include <QInputContextFactory>
 #include <algorithm>
 #include <vector>
 #include "textview.h"
@@ -15,22 +14,16 @@ namespace Standard {
 
 ////////////////////////////////////////
 // Config
-TextConfig::TextConfig()
-	: num_(16)
-	, margin_(2, 2, 3, 3)
+TextConfig::TextConfig(Global *global)
+	: LocalConfig(global)
 	, byteMargin_(0, 0, 0, 0)
-	, font_("Monaco", 17)
-	, fontMetrics_(font_)
 {
 	// Coloring
-	colors_[Color::Background] = QColor(0xEF,0xDF,0xDF, 0);
-	colors_[Color::Text] = QColor(0,0,0);
-	colors_[Color::SelBackground] = QColor(0xA0,0xA0,0xFF, 170);
-	colors_[Color::SelText] = QColor(0,0,0);
-	colors_[Color::CaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
-
-	// Font
-	font_.setFixedPitch(true);
+	colors_[Color::kBackground] = QColor(0xEF,0xDF,0xDF, 0);
+	colors_[Color::kText] = QColor(0,0,0);
+	colors_[Color::kSelectBackground] = QColor(0xA0,0xA0,0xFF, 170);
+	colors_[Color::kSelectText] = QColor(0,0,0);
+	colors_[Color::kCaretBackground] = QColor(0xFF, 0, 0, 200);	// + transparency
 
 	update();
 }
@@ -43,7 +36,7 @@ void TextConfig::update()
 
 	// Pos
 	x_begin.push_back(0);
-	for (size_t i = 1; i < num_; i++) {
+	for (size_t i = 1; i < num(); i++) {
 		x_begin.push_back(x_begin.back() + byteWidth());
 	}
 
@@ -55,21 +48,15 @@ void TextConfig::update()
 
 	// Area
 	x_area.push_back(0);
-	for (size_t i = 1; i < num_; i++) {
+	for (size_t i = 1; i < num(); i++) {
 		x_area.push_back(x_area.back() + byteWidth());
 	}
 	x_area.back() += byteWidth();
 }
 
-int TextConfig::drawableLines(int height) const
-{
-	const int y = top() + byteMargin_.top();
-	return (height - y + byteHeight()) / byteHeight();
-}
-
 int TextConfig::XToPos(int x) const
 {
-	if (x < margin_.left()) {
+	if (x < margin().left()) {
 		return -1;
 	}
 
@@ -87,11 +74,14 @@ int TextConfig::YToLine(int y) const
 ////////////////////////////////////////
 // View
 
-TextView::TextView(QWidget *parent, ::Document *doc)
+TextView::TextView(QWidget *parent, Global *global)
 	: View(parent)
-	, document_(doc)
-	, cursor_(new Cursor(doc))
-	, decode_helper_(new TextDecodeHelper(*doc, QString("Shift-JIS"), cursor_->top()))
+	, global_(global)
+	, document_(global->document())
+	, config_(global)
+	, cursor_(new Cursor)
+	, caret_drawer_(new TextCaretDrawer(this, config_, cursor_, caret_, document_))
+	, decode_helper_(new TextDecodeHelper(*document_, QString("Shift-JIS"), cursor_->top()))
 	, caret_(CARET_BLOCK, CARET_FRAME)
 {
 	// Enable keyboard input
@@ -129,9 +119,10 @@ TextView::~TextView()
 	delete cursor_;
 }
 
-void TextView::paintEvent(QPaintEvent*)
+void TextView::paintEvent(QPaintEvent *event)
 {
 	// FIXME: refactoring
+	caret_drawer_->paintEvent(event);
 	drawView();
 }
 
@@ -143,15 +134,15 @@ void TextView::drawView()
 
 	// TODO: draw Empty Background only
 
-	//Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.getNum() + 1);
+	//Q_ASSERT(static_cast<uint>(end) <= document_->length() / config_.num() + 1);
 
 	// Get draw range
 	int y_top = config_.top();
-	int count_draw_line = config_.drawableLines(height());
+	int count_draw_line = global_->config().drawableLines(height());
 
 	// Get top position of view
-	const quint64 top = cursor_->top() * config_.getNum();
-	const uint size = qMin(document_->length() - top, (quint64)config_.getNum() * count_draw_line);
+	const quint64 top = cursor_->top() * config_.num();
+	const uint size = qMin(document_->length() - top, (quint64)config_.num() * count_draw_line);
 
 	qDebug("refresh event line:%llu end:%d", cursor_->top(), count_draw_line);
 	//qDebug(" pos:%llu, anchor:%llu", cursor_->position(), cursor_->anchor());
@@ -191,9 +182,9 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			QString text = decode_helper_->getCodec()->toUnicode((char*)b, printableBytes, &state);
 
 			uint i = 0;
-			while (i < printableBytes && *xitr + i < config_.getNum()) {
+			while (i < printableBytes && *xitr + i < config_.num()) {
 				// Set color
-				ColorType color = selection.color(docpos);
+				ColorType color = selection.color(docpos, caret_);
 				QBrush brush = QBrush(config_.color(color.Background));
 				painter.setBackground(brush);
 				painter.setPen(config_.color(color.Text));
@@ -217,7 +208,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 				++yitr;
 
 				while (i < printableBytes) {
-					ColorType color = selection.color(docpos);
+					ColorType color = selection.color(docpos, caret_);
 					QBrush brush = QBrush(config_.color(color.Background));
 					painter.setBackground(brush);
 					painter.setPen(config_.color(color.Text));
@@ -236,7 +227,7 @@ void TextView::drawLines(QPainter &painter, quint64 docpos, int y, uint size)
 			index += printableBytes;
 		} else {
 			// Set color
-			ColorType color = selection.color(docpos);
+			ColorType color = selection.color(docpos, caret_);
 			QBrush brush = QBrush(config_.color(color.Background));
 			painter.setBackground(brush);
 			painter.setPen(config_.color(color.Text));
@@ -276,7 +267,7 @@ void TextView::mousePressEvent(QMouseEvent *ev)
 	if (ev->button() == Qt::LeftButton) {
 		qDebug("mosue press");
 
-		cursor_->movePosition(this, posAt(ev->pos()), false, false);
+		cursor_->movePosition(global_, height(), posAt(ev->pos()), false, false);
 
 		// Start mouse capture
 		//grabMouse();
@@ -291,7 +282,7 @@ void TextView::mouseMoveEvent(QMouseEvent *ev)
 	if (height() < ev->pos().y()) {
 		return;
 	}
-	cursor_->movePosition(this, posAt(ev->pos()), true, false);
+	cursor_->movePosition(global_, height(), posAt(ev->pos()), true, false);
 }
 
 void TextView::mouseReleaseEvent(QMouseEvent *)
@@ -314,12 +305,12 @@ quint64 TextView::posAt(const QPoint &pos) const
 		x = y = 0;
 	}
 
-	return qMin((cursor_->top() + y) * config_.getNum() + x, document_->length());
+	return qMin((cursor_->top() + y) * config_.num() + x, document_->length());
 }
 
 CaretDrawer * TextView::createCaretWidget()
 {
-	return new TextCaretDrawer(config_, cursor_, document_);
+	return caret_drawer_;
 }
 
 void TextView::keyPressEvent(QKeyEvent *ev)
@@ -340,10 +331,10 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 	bool keepAnchor = ev->modifiers() & Qt::SHIFT ? true : false;
 	switch (ev->key()) {
 	case Qt::Key_Home:
-		cursor_->movePosition(this, 0, keepAnchor, false);
+		cursor_->movePosition(global_, height(), 0, keepAnchor, false);
 		break;
 	case Qt::Key_End:
-		cursor_->movePosition(this, document_->length(), keepAnchor, false);
+		cursor_->movePosition(global_, height(), document_->length(), keepAnchor, false);
 		break;
 	case Qt::Key_Left:
 		moveRelativePosition(-1, keepAnchor, false);
@@ -352,16 +343,16 @@ void TextView::keyPressEvent(QKeyEvent *ev)
 		moveRelativePosition(1, keepAnchor, false);
 		break;
 	case Qt::Key_Up:
-		moveRelativePosition((qint64)-1 * config_.getNum(), keepAnchor, false);
+		moveRelativePosition((qint64)-1 * config_.num(), keepAnchor, false);
 		break;
 	case Qt::Key_Down:
-		moveRelativePosition((qint64)config_.getNum(), keepAnchor, false);
+		moveRelativePosition((qint64)config_.num(), keepAnchor, false);
 		break;
 	case Qt::Key_PageUp:
-		moveRelativePosition((qint64)-1 * config_.getNum() * 15, keepAnchor, true);
+		moveRelativePosition((qint64)-1 * config_.num() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_PageDown:
-		moveRelativePosition((qint64)config_.getNum() * 15, keepAnchor, true);
+		moveRelativePosition((qint64)config_.num() * 15, keepAnchor, true);
 		break;
 	case Qt::Key_Backspace:
 		if (cursor_->hasSelection()) {
@@ -410,20 +401,20 @@ void TextView::inputMethodEvent(QInputMethodEvent *ev)
 	qDebug() << "input method" << ev->preeditString();
 }
 
-QVariant TextView::inputMethodQuery(Qt::InputMethodQuery query) const
-{
-}
+//QVariant TextView::inputMethodQuery(Qt::InputMethodQuery query) const
+//{
+//}
 
 void TextView::moveRelativePosition(qint64 pos, bool sel, bool holdViewPos)
 {
-	cursor_->movePosition(this, cursor_->getRelativePosition(pos), sel, holdViewPos);
+	cursor_->movePosition(global_, height(), cursor_->getRelativePosition(pos, document_), sel, holdViewPos);
 }
 
 void TextView::redrawSelection(quint64 begin, quint64 end)
 {
 	//qDebug("redrawSelection %llu, %llu, Top:%llu", begin, end, Top);
-	begin /= config_.getNum();
-	end   /= config_.getNum();
+	begin /= config_.num();
+	end   /= config_.num();
 
 	// FIXIME: redraw [beginLine, endLine]
 	//drawView();
@@ -441,7 +432,7 @@ void TextView::removeData(quint64 pos, quint64 len)
 void TextView::inserted(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
-	//drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+	//drawView(DRAW_AFTER, pos / config_.num() - cursor_-> Top);
 	//drawView();
 	update();
 }
@@ -450,7 +441,7 @@ void TextView::inserted(quint64 pos, quint64 len)
 void TextView::removed(quint64 pos, quint64 len)
 {
 	// TODO: lazy redraw
-	//drawView(DRAW_AFTER, pos / config_.getNum() - cursor_-> Top);
+	//drawView(DRAW_AFTER, pos / config_.num() - cursor_-> Top);
 	update();
 }
 

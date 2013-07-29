@@ -69,7 +69,7 @@ public:
 		// Delete
 		cout << "## Delete " << endl;
 		for ( int i = 0; i < length; i++ ) {
-			for ( int k = 0; i + k < length; k++ ) {
+			for ( int k = 1; i + k < length; k++ ) {
 				Init();
 				//cout << "size; "<< test.length() << endl;
 				//cout << " try index:" << i << " len:" << k <<endl;
@@ -87,7 +87,7 @@ public:
 		// Replace
 		cout << "## Replace ";
 		for ( int i = 0; i < length; i++ ) {
-			for ( int k = 0; i + k < length; k++ ) {
+			for ( int k = 1; i + k < length; k++ ) {
 				Init();
 				// 置換のための文字数が適当すぎるかも
 				string s = GenRandomString( k + 10 );
@@ -120,7 +120,8 @@ public:
 	void Init(bool b = false)
 	{
 
-		static const char *str[] = {
+#define TEST_MAX 6
+		static const char *str[TEST_MAX] = {
 			"01234",
 			"<>?_}*{`~",
 			"abc",
@@ -128,7 +129,6 @@ public:
 			"44444",
 			"555",
 		};
-#define TEST_MAX 6
 
 		doc = new Document();
 		doc->insert(0, (const uchar*)org_str, strlen(org_str));
@@ -165,6 +165,7 @@ public:
 
 	void Delete(int index, int length)
 	{
+		Q_ASSERT( length > 0 );
 		Q_ASSERT( index + length <= doc->length() );
 
 		doc->remove( index, (quint64)length );
@@ -173,6 +174,7 @@ public:
 
 	void Replace(int index, int length, const char *buf, int bufLength)
 	{
+		Q_ASSERT( length > 0 );
 		Q_ASSERT( index + length <= doc->length() );
 		
 		//doc->Replace( index, length, buf, bufLength );
@@ -249,9 +251,9 @@ public:
 	{
 		const char *t = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
 		const int l = strlen(t);
-		string s;
+		string s(length, 'X');
 		for ( int i = 0; i < length; i++ ) {
-			s += (char)( t[ rand() & l ] );
+			s[i] = static_cast<char>( t[ rand() & l ] );
 		}
 		return s;
 	}

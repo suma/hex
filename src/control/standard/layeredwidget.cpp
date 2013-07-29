@@ -1,6 +1,8 @@
 
 
 #include "layeredwidget.h"
+#include <QChildEvent>
+#include <QResizeEvent>
 
 namespace Standard {
 

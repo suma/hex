@@ -44,6 +44,8 @@ public:
 class DocumentOriginal
 {
 public:
+	DocumentOriginal();
+	virtual ~DocumentOriginal();
 	virtual quint64 length() const = 0;
 	virtual void get(quint64 pos, uchar *buf, quint64 len) const = 0;
 };
@@ -66,6 +68,9 @@ public:
 	class WriteCallback
 	{
 	public:
+		WriteCallback();
+		virtual ~WriteCallback();
+		virtual void writeStarted(quint64 max);
 		virtual bool writeCallback(quint64 completed);
 		virtual void writeCompleted();
 	};
@@ -77,7 +82,7 @@ public:
 	Document(QFile *file);
 	Document(QFile *file, uint buffer_size);
 
-	static Document *reopenKeepUndo(Document *doc, size_t max_buffer);
+	Document *reopenKeepUndo( QFile *file, size_t max_buffer) const;
 	// static Document * openFile(QFile*file);
 	// static Document * create();
 
@@ -88,6 +93,7 @@ public:
 
 	// 
 	quint64 length() const;
+	bool isModified() const;
 
 	// copy 
 	void get(quint64 pos, uchar *buf, uint len) const;
@@ -97,6 +103,7 @@ public:
 	template <class T>
 	T get(quint64 pos, quint64 len, T result) const
 	{
+		Q_ASSERT(len != 0);
 		Q_ASSERT(pos <= length());
 		Q_ASSERT(len <= length());
 		Q_ASSERT(pos <= length() - len);
@@ -104,31 +111,36 @@ public:
 		uint x = impl_->documents_.findNode(pos);
 
 		Q_ASSERT(x != 0);
+		Q_ASSERT(impl_->documents_.size(x) != 0);
 		const quint64 diff = pos - impl_->documents_.position(x);
 		if (diff) {
-			const quint64 fragmentSize = impl_->documents_.size(x) - diff;
+			const quint64 copy_size = qMin(len, impl_->documents_.size(x) - diff);
 			DocumentData *X = impl_->documents_.fragment(x);
-			if (fragmentSize < len) {
-				*result =  DocumentFragment(X->type, X->bufferPosition + diff, fragmentSize);
-				
-				++result;
-				len -= fragmentSize;
-				x = impl_->documents_.next(x);
-			} else {
-				*result = DocumentFragment(X->type, X->bufferPosition + diff, len);
+			*result =  DocumentFragment(X->type, X->bufferPosition + diff, copy_size);
+			if (copy_size == len) {
+				// copy finished
 				return result;
 			}
+
+			// next piece
+			len -= copy_size;
+			++result;
+			x = impl_->documents_.next(x);
 		}
 
 		Q_ASSERT(x != 0);
-		while (0 < len) {
+		while (len != 0) {
 			const quint64 fragmentSize = impl_->documents_.size(x);
-			const uint copy_size = (static_cast<quint64>(len) < fragmentSize) ? len : static_cast<uint>(fragmentSize);
-			const DocumentData *X = impl_->documents_.fragment(x);
-			*result = DocumentFragment(X->type, X->bufferPosition, copy_size);
-			++result;
+			// skip zero-length piece
+			if (fragmentSize != 0) {
+				const quint64 copy_size = qMin(len, fragmentSize);
+				const DocumentData *X = impl_->documents_.fragment(x);
+				Q_ASSERT(copy_size != 0);
+				*result = DocumentFragment(X->type, X->bufferPosition, copy_size);
+				++result;
 
-			len -= copy_size;
+				len -= copy_size;
+			}
 			x = impl_->documents_.next(x);
 		}
 
@@ -161,13 +173,17 @@ public slots:
 signals:
 	void inserted(quint64 pos, quint64 len);
 	void removed(quint64 pos, quint64 len);
+	void dataChanged();
 
 public:
 	const static size_t DEFAULT_BUFFER_SIZE;
 
-private:
 	// ドキュメントの実体をバッファへコピーする
 	void copy(quint8 type, quint64 pos, quint64 len, uchar *buf) const;
+private:
+
+	// UndoStack helper
+	int findLimitIndex(size_t max_buffer) const;
 
 	// Fragment Copy iterator
 	class FragmentCopier;

@@ -1,8 +1,11 @@
-
+QT += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = app
 LANGUAGE = C++
 TARGET = ../hex
+
+PRECOMPILED_HEADER = ../stable.h
 
 DEPENDPATH += . ..
 INCLUDEPATH += . \
@@ -13,12 +16,16 @@ INCLUDEPATH += . \
 
 
 # Input
-HEADERS += editor.h \
+HEADERS += \
 	mainform.h \
+	writefileopration.h \
+	hexapp.h \
 	ui_main.h
 
-SOURCES += editor.cpp \
+SOURCES += \
 	mainform.cpp \
+	writefileopration.cpp \
+	hexapp.cpp \
 	main.cpp
 
 FORMS = main.ui

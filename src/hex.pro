@@ -10,6 +10,11 @@ for(dir, EXTRAS) {
 	}
 }
 
+precompile_header:!isEmpty(PRECOMPILED_HEADER) {
+    DEFINES += USING_PCH
+}
+
 
 app.depends = control
+tests.depends = control
 

@@ -1,29 +1,28 @@
 
 #include <QtGui>
+#include "global.h"
 #include "addressview.h"
 #include "layeredwidget.h"
 #include "hexview.h"
 #include "textview.h"
 #include "cursor.h"
 #include "../util/util.h"
+#include "../scrollbar.h"
 
 namespace Standard {
 
 
-AddressConfig::AddressConfig()
-	: num_(16)
-	, margin_(2, 2, 3, 3)
+AddressConfig::AddressConfig(Global *global)
+	: LocalConfig(global)
 	, byteMargin_(3, 0, 2, 0)
-	, font_("Monaco", 17)
-	, fontMetrics_(font_)
 	, column_visible_(true)
 	, line_visible_(true)
 {
 	// Coloring
-	colors_[Color::Background] = QColor(0xCC,0xFF,0xFF);
-	colors_[Color::Text] = QColor(0,0,0);
-	colors_[Color::SelBackground] = QColor(0xFF,0xA0,0xFF);
-	colors_[Color::SelText] = QColor(0,0,0);
+	colors_[Color::kBackground] = QColor(0xCC,0xFF,0xFF);
+	colors_[Color::kText] = QColor(0,0,0);
+	colors_[Color::kSelectBackground] = QColor(0xFF,0xA0,0xFF);
+	colors_[Color::kSelectText] = QColor(0,0,0);
 
 }
 
@@ -31,30 +30,9 @@ AddressConfig::~AddressConfig()
 {
 }
 
-uint AddressConfig::num() const
-{
-	return num_;
-}
-
-QFont AddressConfig::font() const
-{
-	return font_;
-}
-
-const QFontMetrics &AddressConfig::fontMetrics() const
-{
-	return fontMetrics_;
-}
-
-QColor AddressConfig::color(size_t index) const
-{
-	Q_ASSERT(index < Color::ColorCount);
-	return colors_[index];
-}
-
 QRect AddressConfig::margin() const
 {
-	return margin_;
+	return global_->config().margin();
 }
 
 QRect AddressConfig::byteMargin() const
@@ -64,17 +42,12 @@ QRect AddressConfig::byteMargin() const
 
 int AddressConfig::top() const
 {
-	return margin_.top();
-}
-
-int AddressConfig::byteHeight() const
-{
-	return byteMargin_.top() + fontMetrics_.height() + byteMargin_.bottom();
+	return margin().top();
 }
 
 int AddressConfig::columnHeight() const
 {
-	return fontMetrics_.height();
+	return fontMetrics().height();
 }
 
 bool AddressConfig::columnVisible() const
@@ -97,33 +70,19 @@ void AddressConfig::setLineVisible(bool visible)
 	line_visible_ = visible;
 }
 
-void AddressConfig::setFont(QFont font)
-{
-	if (font_ != font) {
-		font_ = font;
-		emit fontChanged(font);
-	}
-}
-
-void AddressConfig::setNum(uint num)
-{
-	if (num_ != num) {
-		num_ = num;
-		emit numChanged(num);
-	}
-}
-
 int AddressConfig::drawableLines(int height) const
 {
-	const int y = top() + byteMargin_.top() + (columnVisible() ? columnHeight() : 0);
-	return (height - y + byteHeight()) / byteHeight();
+	return global_->config().drawableLines(height - (columnVisible() ? columnHeight() : 0));
 }
 
 
-AddressView::AddressView(QWidget *parent, ::Document *doc)
+AddressView::AddressView(QWidget *parent, Global *global)
 	: QWidget(parent)
-	, document_(doc)
-	, cursor_(new Cursor(doc))
+	, config_(global)
+	, global_(global)
+	, scrollbar_(new ::ScrollBar(Qt::Vertical, parent))
+	, document_(global->document())
+	, cursor_(new Cursor)
 	, last_focus_(NULL)
 	, hex_(NULL)
 	, text_(NULL)
@@ -132,9 +91,15 @@ AddressView::AddressView(QWidget *parent, ::Document *doc)
 	, column_visible_(true)
 	, line_visible_(true)
 {
-	// connect slot
+	// connect cursor slot
 	QObject::connect(cursor_, SIGNAL(topChanged(quint64)), this, SLOT(topChanged(quint64)));
 	QObject::connect(cursor_, SIGNAL(positionChanged(quint64, quint64)), this, SLOT(positionChanged(quint64, quint64)));
+
+	// connect scrollbar slot
+	QObject::connect(scrollbar_, SIGNAL(valueChanged(qint64)), this, SLOT(valueChanged(qint64)));
+
+	// connect document event slot
+	QObject::connect(document_, SIGNAL(dataChanged()), this, SLOT(documentChanged()));
 
 	last_focus_ = hex_layer_;
 }
@@ -145,7 +110,9 @@ AddressView::~AddressView()
 
 void AddressView::connect(Cursor *cursor)
 {
+	// connect each other
 	cursor->connectTo(cursor_);
+	cursor_->connectTo(cursor);
 }
 
 void AddressView::setHexView(HexView *hex)
@@ -237,18 +204,15 @@ void AddressView::focusInEvent(QFocusEvent *)
 
 bool AddressView::eventFilter(QObject *obj, QEvent *event)
 {
-	QWidget *widget = NULL;
-	if (!obj->isWidgetType()) {
-		goto standard_processing;
+	if (obj->isWidgetType()) {
+		// Classify which view(hex/text) focused in
+		QWidget *widget = dynamic_cast<QWidget*>(obj);
+		Q_ASSERT(widget != NULL);
+		if (event->type() == QEvent::FocusIn) {
+			last_focus_ = widget;
+		}
 	}
 
-	// Classfy which view(hex/text) focused in
-	widget = dynamic_cast<QWidget*>(obj);
-	if (event->type() == QEvent::FocusIn) {
-		last_focus_ = widget;
-	}
-
-standard_processing:
 	return QObject::eventFilter(obj, event);
 }
 
@@ -271,18 +235,18 @@ void AddressView::drawColumn()
 		HexConfig::XIterator hi = hc.createXIterator();
 		for (int i = 0; i < Num; i++, ++hi) {
 			if (i == sel_pos) {
-				painter.setPen(config_.color(Color::SelText));
-				painter.setBackground(QBrush(config_.color(Color::SelBackground)));
+				painter.setPen(config_.color(Color::kSelectText));
+				painter.setBackground(QBrush(config_.color(Color::kSelectBackground)));
 			} else {
-				painter.setPen(config_.color(Color::Text));
-				painter.setBackground(QBrush(config_.color(Color::Background)));
+				painter.setPen(config_.color(Color::kText));
+				painter.setBackground(QBrush(config_.color(Color::kBackground)));
 			}
 			QString str("+");
 			str += QChar(util::itohex(i));
 
 			// draw column background
 			if (i == sel_pos) {
-				painter.fillRect(hx + hi.screenX(), 0, hc.byteWidth(), hc.byteHeight(), QBrush(config_.color(Color::SelBackground)));
+				painter.fillRect(hx + hi.screenX(), 0, hc.byteWidth(), hc.byteHeight(), QBrush(config_.color(Color::kSelectBackground)));
 			}
 			// draw text
 			painter.drawText(hx + hi.textX(), 0, hc.fontMetrics().width(str), config_.byteHeight(), Qt::AlignLeft, str);
@@ -318,12 +282,12 @@ void AddressView::drawLine()
 		}
 		// Change cursor color
 		if ((line / config_.num()) == sel_pos) {
-			painter.setPen(config_.color(Color::SelText));
-			painter.setBackground(QBrush(config_.color(Color::SelBackground)));
-			painter.fillRect(0, y, config_.fontMetrics().width(str), config_.byteHeight(), QBrush(config_.color(Color::SelBackground)));
+			painter.setPen(config_.color(Color::kSelectText));
+			painter.setBackground(QBrush(config_.color(Color::kSelectBackground)));
+			painter.fillRect(0, y, config_.fontMetrics().width(str), config_.byteHeight(), QBrush(config_.color(Color::kSelectBackground)));
 		} else {
-			painter.setPen(config_.color(Color::Text));
-			painter.setBackground(QBrush(config_.color(Color::Background)));
+			painter.setPen(config_.color(Color::kText));
+			painter.setBackground(QBrush(config_.color(Color::kBackground)));
 		}
 		painter.drawText(0, y, config_.fontMetrics().width(str), config_.byteHeight(), Qt::AlignLeft, str);
 
@@ -332,14 +296,22 @@ void AddressView::drawLine()
 	}
 }
 
-void AddressView::topChanged(quint64)
+void AddressView::topChanged(quint64 top)
 {
+	// Sync to value of ScrollBar
+	scrollbar_->setValue(static_cast<qint64>(top));
 	update();
 }
 
 void AddressView::positionChanged(quint64, quint64)
 {
 	update();
+}
+
+void AddressView::valueChanged(qint64 value)
+{
+	// Scrollbar value changed
+	cursor_->setTop(static_cast<quint64>(value));
 }
 
 void AddressView::childEvent(QChildEvent *)
@@ -357,6 +329,14 @@ void AddressView::resizeEvent(QResizeEvent *)
 		text_layer_->move(textPos(), y());
 		text_layer_->resize(text_->config().width(), h);
 	}
+
+	// ScrollBar
+	const int scroll_width = scrollbar_->sizeHint().width();
+	scrollbar_->move(width() - scroll_width, 0);
+	scrollbar_->resize(scroll_width, height());
+
+	// Refresh ScrollBar info
+	refreshScrollbarInfo();
 }
 
 int AddressView::hexPos() const
@@ -374,6 +354,29 @@ int AddressView::y() const
 	return config_.columnVisible() ? config_.columnHeight() : 0;
 }
 
+void AddressView::refreshScrollbarInfo()
+{
+	int pageStep = config_.drawableLines(height());
+	if (pageStep > 0) {
+		pageStep = qMax(pageStep - 1, 0);
+		const qint64 modulo = document_->length() % config_.num();
+		qint64 maximum = document_->length() / config_.num();
+		if (modulo || maximum == pageStep) {
+			maximum++;
+		}
+		maximum = maximum - pageStep;
+		scrollbar_->setMinimum(0);
+		scrollbar_->setMaximum(maximum);
+		scrollbar_->setPageStep(pageStep);
+	}
+}
 
-}	// namespace
+void AddressView::documentChanged()
+{
+	// TODO: chaching document length
+	refreshScrollbarInfo();
+}
+
+
+}	// namespace Standard
 

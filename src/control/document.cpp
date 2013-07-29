@@ -3,11 +3,20 @@
 #include <QFile>
 #include <QDataStream>
 #include <QUndoStack>
+#include <QScopedPointer>
 #include "document.h"
+#include "commands.h"
 #include "filemapreader.h"
 
 const size_t Document::DEFAULT_BUFFER_SIZE = 0x100000;
 
+DocumentOriginal::DocumentOriginal()
+{
+}
+
+DocumentOriginal::~DocumentOriginal()
+{
+}
 
 class EmptyOriginal : public DocumentOriginal
 {
@@ -26,7 +35,7 @@ public:
 class FileOriginal : public DocumentOriginal
 {
 protected:
-	size_t buffer_size_;
+	size_t buffer_size_;	// mmap buffer size
 
 	QFile *file_;
 
@@ -118,6 +127,18 @@ private:
 	}
 };
 
+Document::WriteCallback::WriteCallback()
+{
+}
+
+Document::WriteCallback::~WriteCallback()
+{
+}
+
+void Document::WriteCallback::writeStarted(quint64)
+{
+}
+
 bool Document::WriteCallback::writeCallback(quint64)
 {
 	return true;
@@ -203,6 +224,11 @@ quint64 Document::length() const
 	return impl_->length();
 }
 
+bool Document::isModified() const
+{
+	return !undo_stack_->isClean();
+}
+
 void Document::get(quint64 pos, uchar *buf, uint len) const
 {
 	Q_ASSERT(pos <= length());
@@ -253,6 +279,7 @@ void Document::insert(quint64 pos, const uchar *buf, uint len)
 	buffer_.insert(buffer_.end(), buf, buf + len);
 	impl_->insert_data(pos, bufPos, len, DOCTYPE_BUFFER);
 	emit inserted(pos, static_cast<quint64>(len));
+	emit dataChanged();
 }
 
 void Document::insert(quint64 pos, DocumentFragment fragment)
@@ -261,6 +288,7 @@ void Document::insert(quint64 pos, DocumentFragment fragment)
 	Q_ASSERT(fragment.length() != 0);
 	impl_->insert_data(pos, fragment.position(), fragment.length(), fragment.type());
 	emit inserted(pos, fragment.length());
+	emit dataChanged();
 }
 
 void Document::remove(quint64 pos, quint64 len)
@@ -270,6 +298,7 @@ void Document::remove(quint64 pos, quint64 len)
 	Q_ASSERT(pos <= length() - len);
 	impl_->remove_data(pos, len);
 	emit removed(pos, len);
+	emit dataChanged();
 }
 
 Document::Buffer &Document::buffer()
@@ -287,10 +316,69 @@ QUndoStack *Document::undoStack() const
 	return undo_stack_;
 }
 
-Document *Document::reopenKeepUndo(Document *doc, size_t max_buffer)
+Document *Document::reopenKeepUndo(QFile *file, size_t max_buffer) const
 {
 	// TODO: implement
-	return NULL;
+	Document *doc = new Document(file);
+	QUndoStack *stack = doc->undoStack();
+	
+	int index = findLimitIndex(max_buffer);
+
+	// Reconstruct undo stacks from base doc
+	Q_ASSERT(index >= 0 && index < undo_stack_->count());
+	while (index < undo_stack_->count()) {
+		const QUndoCommand *c = undo_stack_->command(index);
+		QUndoCommand *newcmd = NULL;
+		if (const InsertCommand *cmd = dynamic_cast<const InsertCommand*>(c)) {
+			newcmd = new InsertCommand(doc, cmd);
+		} else if (const DeleteCommand *cmd = dynamic_cast<const DeleteCommand*>(c)) {
+			newcmd = new DeleteCommand(doc, cmd);
+		} else if (const ReplaceCommand *cmd = dynamic_cast<const ReplaceCommand*>(c)) {
+			newcmd = new ReplaceCommand(doc, cmd);
+		}
+
+		Q_ASSERT(newcmd != NULL);
+		stack->push(newcmd);
+		index++;
+	}
+
+	// reset
+	for (int index = 0; index < stack->count(); index++) {
+		const QUndoCommand *c = undo_stack_->command(index);
+		if (UndoCommand *cmd = dynamic_cast<UndoCommand*>(const_cast<QUndoCommand*>(c))) {
+			cmd->setEnable(true);
+		}
+	}
+
+	int diff = undo_stack_->count() - undo_stack_->index();
+	stack->setIndex(stack->count() - diff);
+	stack->setClean();
+	
+	return doc;
+}
+
+int Document::findLimitIndex(size_t max_buffer) const
+{
+	// check buffer size
+	int index = undo_stack_->count() - 1;
+	quint64 buf_size = 0;
+	while (index >= 0) {
+		const QUndoCommand *c = undo_stack_->command(index);
+
+		if (const DeleteCommand *cmd = dynamic_cast<const DeleteCommand*>(c)) {
+			buf_size += cmd->length();
+		} else if (const ReplaceCommand *cmd = dynamic_cast<const ReplaceCommand*>(c)) {
+			buf_size += cmd->deleteCommand()->length();
+		}
+
+		// check
+		if (buf_size > max_buffer) {
+			break;
+		}
+		index--;
+	}
+	
+	return index + 1;
 }
 
 bool Document::overwritable() const
@@ -305,18 +393,17 @@ bool Document::overwritable() const
 	quint64 index = 0;
 	FragmentList::const_iterator it = fragments.begin(), end = fragments.end();
 	while (it != end) {
-		if (it->length() != 0) {
-			if (it->type() == DOCTYPE_ORIGINAL) {
-				if (index != it->position()) {
-					// impossible
-					return false;
-				}
+		if (it->type() == DOCTYPE_ORIGINAL) {
+			if (index != it->position()) {
+				// impossible
+				return false;
 			}
-			index += it->length();
 		}
+		index += it->length();
 		++it;
 	}
 
+	undo_stack_->setClean();
 	return true;
 }
 
@@ -329,27 +416,25 @@ bool Document::write(WriteCallback *callback)
 	// get overwrite size
 	quint64 index = 0;
 	quint64 write_size = 0;
-	{
+	{	// check overwritable and get write size
 		FragmentList::const_iterator it = fragments.begin();
 		while (it != fragments.end()) {
-			if (it->length() != 0) {
-				if (it->type() == DOCTYPE_BUFFER) {
-					write_size += it->length();
-				} else if (it->type() == DOCTYPE_ORIGINAL) {
-					if (index != it->position()) {
-						// impossible
-						return false;
-					}
+			if (it->type() == DOCTYPE_BUFFER) {
+				write_size += it->length();
+			} else if (it->type() == DOCTYPE_ORIGINAL) {
+				if (index != it->position()) {
+					// impossible
+					return false;
 				}
-
-				index += it->length();
 			}
+
+			index += it->length();
 			++it;
 		}
 	}
 
 	if (callback != NULL) {
-		//callback->setWrite(write_size);
+		callback->writeStarted(write_size);
 	}
 
 	// TODO: check file_->name() can be written
@@ -362,12 +447,6 @@ bool Document::write(WriteCallback *callback)
 	// piece table
 	FragmentList::const_iterator it = fragments.begin(), end = fragments.end();
 	while (it != end) {
-		// check zero piece
-		if (it->length() == 0) {
-			++it;
-			continue;
-		}
-
 		uchar *data = NULL;
 		if (it->type() == DOCTYPE_BUFFER) {
 			if (!file_->seek(index)) {
@@ -413,6 +492,7 @@ bool Document::write(WriteCallback *callback)
 		callback->writeCompleted();
 	}
 
+	undo_stack_->setClean();
 	return true;
 
 label_error:
@@ -425,6 +505,7 @@ bool Document::write(QFile *out, WriteCallback *callback)
 	return write(0, length(), out, callback);
 }
 
+// TODO: Replace exception based error handling
 bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callback)
 {
 	Q_ASSERT(out != NULL);
@@ -445,9 +526,13 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 
 	quint64 completed = 0;
 
-	FileMapReader *reader = NULL;
+	QScopedPointer<FileMapReader> reader;
 	if (file_ != NULL) {
-		reader = new FileMapReader(file_, BLOCK_SIZE);	// FIXME: BLOCK_SIZE
+		reader.reset(new FileMapReader(file_, BLOCK_SIZE));	// FIXME: BLOCK_SIZE
+	}
+
+	if (callback != NULL) {
+		callback->writeStarted(length());
 	}
 
 	QDataStream outStream(out);
@@ -456,12 +541,6 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 	// piece table
 	FragmentList::const_iterator it = fragments.begin(), end = fragments.end();
 	while (it != end) {
-		// check zero piece
-		if (it->length() == 0) {
-			++it;
-			continue;
-		}
-
 		uchar *data = NULL;
 		if (it->type() == DOCTYPE_BUFFER) {
 			data = &buffer_[static_cast<uint>(it->position())];
@@ -480,7 +559,8 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 			Q_ASSERT(data != NULL);
 			const int res = outStream.writeRawData(reinterpret_cast<char*>(data), copy_size);
 			if (res == -1) {
-				goto label_error;
+				// TODO: error
+				return false;
 			}
 			const size_t wrote_size = static_cast<size_t>(res);
 			Q_ASSERT(wrote_size <= copy_size);
@@ -495,7 +575,8 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 
 			// callback
 			if (callback != NULL && !callback->writeCallback(completed)) {
-				goto label_cancel;
+				out->remove();	// Delete file
+				return true;
 			}
 
 			// iterate pointer
@@ -510,13 +591,13 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 	}
 
 	if (!out->resize(len)) {
-		goto label_error;
+		// TODO: error
+		return false;
 	}
 
 	if (callback != NULL) {
 		callback->writeCompleted();
 	}
-	delete reader;
 
 
 	// TODO: 
@@ -524,22 +605,9 @@ bool Document::write(quint64 pos, quint64 len, QFile *out, WriteCallback *callba
 	//  case B: 保存したバッファで編集をし直す（Documentを再構築）. UndoStackの修正が必須
 	//
 	//  case Aをデフォルト（write()）の動作として、再構築する(case Bの)場合は
-	//   Editor側（Document作成する側）で制御すべき
+	//   Editor側（Document作成する側）でDocument::reopenKeepUndoを呼ぶ
 
-	return true;
-
-label_error:
-	// handling error
-
-	delete reader;
-	return false;
-
-label_cancel:
-
-	delete reader;
-
-	// Delete file
-	out->remove();
+	undo_stack_->setClean();
 	return true;
 }
 

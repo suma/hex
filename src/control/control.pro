@@ -1,8 +1,10 @@
+QT += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = lib
 LANGUAGE = C++
 TARGET = ../control
-CONFIG += precompile_header staticlib
+CONFIG += staticlib
 
 PRECOMPILED_HEADER = ../stable.h
 

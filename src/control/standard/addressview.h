@@ -1,29 +1,27 @@
-#ifndef STDADDRESSVIEW_H_INC
-#define STDADDRESSVIEW_H_INC
+
+#pragma once
 
 #include <QWidget>
 #include "../color.h"
+#include "local.h"
 
 class Document;
+class ScrollBar;
 
 namespace Standard {
 
+	class Global;
 	class HexView;
 	class TextView;
 	class Cursor;
 	class LayeredWidget;
 
-	class AddressConfig : public QObject
+	class AddressConfig : public QObject, public LocalConfig
 	{
 		Q_OBJECT
 
 	private:
-		uint num_;
-		QRect margin_;
 		QRect byteMargin_;
-		QFont font_;
-		QFontMetrics fontMetrics_;
-		QColor colors_[Color::ColorCount];
 
 		// FIXME: separete 3 attributes 
 		//  line
@@ -34,24 +32,14 @@ namespace Standard {
 		bool line_visible_;
 
 	public:
-		AddressConfig();
+		AddressConfig(Global *global);
 		~AddressConfig();
 
-		uint num() const;
 		QRect margin() const;
 		QRect byteMargin() const;
-		QFont font() const;
-		const QFontMetrics &fontMetrics() const;
-		QColor color(size_t index) const;
-
-		int charWidth(int num = 1) const
-		{
-			return fontMetrics_.width(QChar('A')) * num;
-		}
 
 		int drawableLines(int height) const;
 		int top() const;
-		int byteHeight() const;
 
 		int columnHeight() const;
 
@@ -59,11 +47,6 @@ namespace Standard {
 		bool lineVisible() const;
 		void setColumnVisible(bool);
 		void setLineVisible(bool);
-
-	public slots:
-		void setFont(QFont font);
-		void setNum(uint num);
-		//void setStyle();	// FIXME
 
 	signals:
 		void fontChanged(QFont);
@@ -77,7 +60,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		AddressView(QWidget *parent, ::Document *doc);
+		AddressView(QWidget *parent, Global *global);
 		~AddressView();
 
 		AddressConfig &config()
@@ -117,13 +100,23 @@ namespace Standard {
 		int textPos() const;
 		// y
 		int y() const;
+
+		void refreshScrollbarInfo();
 	
 	private slots:
 		void topChanged(quint64);
 		void positionChanged(quint64, quint64);
 
+		// ScrollBar
+		void valueChanged(qint64 value);
+
+		// Document event
+		void documentChanged();
+
 	protected:
 		AddressConfig config_;
+		Global *global_;
+		::ScrollBar *scrollbar_;
 		::Document *document_;
 		Cursor *cursor_;
 		QWidget *last_focus_;
@@ -137,7 +130,5 @@ namespace Standard {
 	
 	};
 
-}
+}	// namespace Standard
 
-
-#endif

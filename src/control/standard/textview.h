@@ -5,6 +5,8 @@
 #include <QFontMetrics>
 #include "../util/util.h"
 #include "view.h"
+#include "global.h"
+#include "local.h"
 #include "caret.h"
 #include "cursor.h"
 #include "hexview.h"
@@ -14,104 +16,56 @@ class Document;
 namespace Standard {
 	class TextDecodeHelper;
 	class CaretDrawer;
+	class TextCaretDrawer;
 
-	class TextConfig
+	class TextConfig : public LocalConfig
 	{
 	private:
-		uint num_;
-		QRect margin_;
 		QRect byteMargin_;
-		QFont font_;
-		QColor colors_[Color::ColorCount];
 
-	private:
-		QFontMetrics fontMetrics_;
 		std::vector<int> x_begin;	// pos of value
 		std::vector<int> x_end;		// pos of end
 		std::vector<int> x_area;
 	
+	private:
+		uint numV() const
+		{
+			return global_->config().num() + 1;
+		}
+
 	public:
-		TextConfig();
+		TextConfig(Global *global);
 
-		uint getNum() const
+		uint num() const
 		{
-			return num_;
-		}
-
-		uint getNumV() const
-		{
-			return num_ + 1;
+			return global_->config().num();
 		}
 
-		QColor color(size_t index) const
-		{
-			Q_ASSERT(index < Color::ColorCount);
-			return colors_[index];
-		}
-
-		void setColor(size_t index, QColor color)
-		{
-			Q_ASSERT(index < Color::ColorCount);
-			colors_[index] = color;
-		}
-
-		const QFont &font() const
-		{
-			return font_;
-		}
-		void updateFont()
-		{
-			fontMetrics_ = QFontMetrics(font_);
-		}
-		int textWidth(const QString &string) const
-		{
-			return fontMetrics_.width(string);
-		}
-		int charWidth(int num = 1) const
-		{
-			return fontMetrics_.width(QChar('A')) * num;
-		}
-		int charHeight() const
-		{
-			return fontMetrics_.height();
-		}
 		int byteWidth() const
 		{
 			return charWidth(1);
 		}
-		int byteHeight() const
-		{
-			return byteMargin_.top() + fontMetrics_.height() + byteMargin_.bottom();
-		}
 		const QRect &margin() const
 		{
-			return margin_;
+			return global_->config().margin();
 		}
 		const QRect &byteMargin() const
 		{
 			return byteMargin_;
 		}
-		const QFontMetrics &fontMetrics() const
-		{
-			return fontMetrics_;
-		}
-		int top() const
-		{
-			return margin_.top();
-		}
 		int maxWidth() const
 		{
-			return X(x_begin.size() - 1) + margin_.right();
+			return X(x_begin.size() - 1) + margin().right();
 		}
 		int x(size_t i) const
 		{
 			Q_ASSERT(i < x_begin.size());
-			return margin_.left() + x_begin[i];
+			return margin().left() + x_begin[i];
 		}
 		int X(size_t i) const
 		{
 			Q_ASSERT(i < x_end.size());
-			return margin_.left() + x_end[i];
+			return margin().left() + x_end[i];
 		}
 		int x_(size_t i) const
 		{
@@ -142,9 +96,9 @@ namespace Standard {
 		}
 		int width()
 		{
-			return charWidth(getNumV()) + margin_.left() + margin_.right();
+			return charWidth(numV()) + margin().left() + margin().right();
 		}
-		int drawableLines(int height) const;
+		//int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..N => N + 2 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void update();
@@ -174,7 +128,7 @@ namespace Standard {
 			XIterator &operator+=(uint i)
 			{
 				const int old = pos_;
-				pos_ = (pos_ + i) % conf.getNum();
+				pos_ = (pos_ + i) % conf.num();
 				setNext(pos_ < old);
 				return *this;
 			}
@@ -256,7 +210,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		TextView(QWidget *parent = NULL, ::Document *doc = NULL);
+		TextView(QWidget *parent, Global *global);
 		~TextView();
 
 		TextConfig &config()
@@ -284,7 +238,7 @@ namespace Standard {
 		void keyPressEvent(QKeyEvent *);
 
 		void inputMethodEvent(QInputMethodEvent *);
-		QVariant inputMethodQuery(Qt::InputMethodQuery query) const;
+		//QVariant inputMethodQuery(Qt::InputMethodQuery query) const;
 
 		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
 		void redrawSelection(quint64 begin, quint64 end);
@@ -320,9 +274,11 @@ namespace Standard {
 
 	private:
 		// Main components
+		Global *global_;
 		::Document *document_;
 		TextConfig config_;
 		Cursor *cursor_;
+		TextCaretDrawer *caret_drawer_;
 		TextDecodeHelper *decode_helper_;
 		Caret caret_;
 		std::vector<uchar> buff_;

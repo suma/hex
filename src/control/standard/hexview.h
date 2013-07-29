@@ -4,6 +4,8 @@
 #include <QFont>
 #include <QFontMetrics>
 #include "view.h"
+#include "global.h"
+#include "local.h"
 #include "cursor.h"
 #include "caret.h"
 #include "keyboard.h"
@@ -13,6 +15,7 @@ class Document;
 namespace Standard {
 
 	class CaretDrawer;
+	class HexCaretDrawer;
 
 	enum DrawMode {
 		DRAW_ALL = 0,
@@ -21,100 +24,54 @@ namespace Standard {
 		DRAW_RANGE,	// [begin, end)
 	};
 
-	class HexConfig
+	class HexConfig : public LocalConfig
 	{
 	private:
-		uint num_;
-		QRect margin_;
 		QRect byteMargin_;
-		QFont font_;
-		int charWidth_;
-
-		QColor colors_[Color::ColorCount];
 
 	private:
-		QFontMetrics fontMetrics_;
 		std::vector<int> x_begin;	// pos of value
 		std::vector<int> x_end;		// pos of end
 		std::vector<int> x_area;
 	
-	public:
-		HexConfig();
-
-		uint getNum() const
-		{
-			return num_;
-		}
 		uint getNumV() const
 		{
-			return num_ + 1;
+			return global_->config().num() + 1;
 		}
 
-		QColor color(size_t index) const
+	public:
+		HexConfig(Global *global);
+
+		uint num() const
 		{
-			Q_ASSERT(index < Color::ColorCount);
-			return colors_[index];
+			return global_->config().num();
 		}
 
-		void setColor(size_t index, QColor color)
-		{
-			Q_ASSERT(index < Color::ColorCount);
-			colors_[index] = color;
-		}
-
-		const QFont &font() const
-		{
-			return font_;
-		}
-
-		void updateFont()
-		{
-			fontMetrics_ = QFontMetrics(font_);
-		}
-		int charWidth(int num = 1) const
-		{
-			return charWidth_ * num;
-		}
-		int charHeight() const
-		{
-			return fontMetrics_.height();
-		}
 		int byteWidth() const
 		{
 			return byteMargin_.left() + charWidth(2) + byteMargin_.right();
 		}
-		int byteHeight() const
-		{
-			return byteMargin_.top() + fontMetrics_.height() + byteMargin_.bottom();
-		}
+
 		const QRect &margin() const
 		{
-			return margin_;
+			return global_->config().margin();
 		}
 		const QRect &byteMargin() const
 		{
 			return byteMargin_;
 		}
-		const QFontMetrics &fontMetrics() const
-		{
-			return fontMetrics_;
-		}
-		int top() const
-		{
-			return margin_.top();
-		}
 		int maxWidth() const
 		{
-			return X(num_ - 1) + margin_.right();
+			return X(num() - 1) + margin().right();
 		}
 		int x(size_t i) const
 		{
-			Q_ASSERT(i < num_);
+			Q_ASSERT(i < num());
 			return x_begin[i];
 		}
 		int X(size_t i) const
 		{
-			Q_ASSERT(i < num_);
+			Q_ASSERT(i < num());
 			return x_end[i];
 		}
 		int caretWidth() const
@@ -128,9 +85,9 @@ namespace Standard {
 		}
 		int width()
 		{
-			return byteWidth() * num_ + margin_.left() + margin_.right();
+			return byteWidth() * num() + margin().left() + margin().right();
 		}
-		int drawableLines(int height) const;
+		//int drawableLines(int height) const;
 		int XToPos(int x) const;	// -1, 0..N => N + 1 patterns
 		int YToLine(int y) const;	// -1, 0..N
 		void update();
@@ -158,7 +115,7 @@ namespace Standard {
 			XIterator &operator+=(uint i)
 			{
 				const int old = pos_;
-				pos_ = (pos_ + i) % conf.getNum();
+				pos_ = (pos_ + i) % conf.num();
 				setNext(pos_ < old);
 				return *this;
 			}
@@ -245,7 +202,7 @@ namespace Standard {
 		Q_OBJECT
 
 	public:
-		HexView(QWidget *parent = NULL, ::Document *doc = NULL);
+		HexView(QWidget *parent, Global *global);
 		~HexView();
 
 		HexConfig &config()
@@ -309,10 +266,12 @@ namespace Standard {
 
 	private:
 		// Main components
+		Global *global_;
 		::Document *document_;
 		HexConfig config_;
 		Cursor *cursor_;
 		Caret caret_;
+		HexCaretDrawer *caret_drawer_;
 		Keyboard *keyboard_;
 		std::vector<uchar> buff_;
 	};

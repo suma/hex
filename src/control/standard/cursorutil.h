@@ -1,7 +1,9 @@
 
 #pragma once
 
+#include <QtGlobal>
 #include "../color.h"
+#include "caret.h"
 
 namespace Standard {
 
@@ -9,30 +11,28 @@ namespace Standard {
 		quint64 X, Y;
 	};
 
-	enum CaretShape {
-		CARET_NONE,
-		CARET_LINE,
-		CARET_BLOCK,
-		CARET_FRAME,
-		CARET_UNDERBAR,
-	};
-
 	struct CursorSelection {
 		quint64 begin;
 		quint64 end;
+        quint64 anchor;
 
 		bool selected(quint64 pos) const
 		{
 			return begin <= pos && pos < end;
 		}
 
-		ColorType color(quint64 pos) const
+		ColorType color(quint64 pos, const Caret &caret) const
 		{
 			if (selected(pos)) {
-				return ColorType(Color::SelBackground, Color::SelText);
+				if (caret.visible() && pos == begin && pos != anchor) {
+					return ColorType(Color::kCaretBackground, Color::kSelectText);
+				} else {
+					return ColorType(Color::kSelectBackground, Color::kSelectText);
+				}
 			} else {
-				return ColorType(Color::Background, Color::Text);
+				return ColorType(Color::kBackground, Color::kText);
 			}
 		}
+
 	};
 }

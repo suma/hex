@@ -28,6 +28,7 @@ private slots:
 	void testUndoDelete();
 	void testUndoInsert();
 	void testUndoReplace();
+	void testUndoStack();
 
 	void testDocumentSaveAs();
 	void testDocumentSave();
@@ -267,9 +268,6 @@ void TestDocument::testOverwritable2()
 	for (int insert_pos = doc->length() / 2; insert_size > 0; ) {
 		// assert: pos + len <= doc->lenght
 		const int size = qMin(qMin(1024, qrand()), insert_size);
-		if (size == 0) {
-			continue;
-		}
 		// fix insert_pos
 		while (insert_pos + size > doc->length()) {
 			insert_pos -= qMin(insert_pos, qrand());
@@ -448,6 +446,10 @@ void TestDocument::testUndoReplace()
 	delete doc;
 }
 
+void TestDocument::testUndoStack()
+{
+	// TODO: implement Document::reopenKeepUndo test case
+}
 
 void TestDocument::testDocumentSaveAs()
 {
@@ -497,9 +499,6 @@ void TestDocument::testDocumentSave()
 		for (int insert_pos = doc->length() / 2; insert_size > 0; ) {
 			// assert: pos + len <= doc->lenght
 			const int size = qMin(qMin(1024, qrand()), insert_size);
-			if (size == 0) {
-				continue;
-			}
 			// fix insert_pos
 			while (insert_pos + size > doc->length()) {
 				insert_pos -= qMin(insert_pos, qrand());

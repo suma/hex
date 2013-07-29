@@ -14,6 +14,7 @@
 #include <QtGlobal>
 #include <QObject>
 
+#include <QScopedPointer>
 #include <QString>
 #include <QMap>
 

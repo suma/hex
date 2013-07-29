@@ -6,7 +6,9 @@
 #include "ui_main.h"
 
 
-class Editor;
+namespace Standard {
+	class Editor;
+}
 class Document;
 
 class MainForm : public QMainWindow
@@ -22,14 +24,22 @@ protected slots:
 	void newDocument();
 	void open();
 	void save();
-	void saveAs();
+	void saveAs(Standard::Editor *editor = NULL);
+
+	void tabChanged(int index);
+	void tabCloseRequested(int index);
 
 protected:
+	void closeEvent(QCloseEvent *event);
 
-	Editor *currentEditor() const;
+	Standard::Editor *currentEditor() const;
+	Standard::Editor *editorAt(int index) const;
 
 	bool openFile(QString);
-	void saveFile(QString, Document *);
+	Document *saveFile(QString, Document *);
+	void closeDocument(int index);
+
+	int askAndDocumentSave(Document *document);
 
 protected:
 	Ui::MainWindow ui;

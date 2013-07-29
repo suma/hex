@@ -7,7 +7,7 @@
 #include <limits>
 #include "../document.h"
 #include "cursorutil.h"
-
+#include "global.h"
 
 
 namespace Standard {
@@ -16,8 +16,13 @@ namespace Standard {
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(quint64 top READ top WRITE setTop NOTIFY topChanged)
+		Q_PROPERTY(quint64 position READ position WRITE setPosition NOTIFY positionChanged)
+		Q_PROPERTY(quint64 anchor READ anchor WRITE setAnchor NOTIFY anchorChanged)
+		Q_PROPERTY(bool insert READ insert WRITE setInsert NOTIFY insertChanged)
+		Q_PROPERTY(bool nibble READ nibble WRITE setNibble)
+
 	private:
-		::Document *document_;
 
 		quint64 top_;		// Number of Line
 		quint64 position_;	// pos(not line)
@@ -28,15 +33,7 @@ namespace Standard {
 		bool highNibble_;	// for hexview
 	
 	public:
-		Cursor(::Document *doc)
-			: document_(doc)
-			, top_(0)
-			, position_(0)
-			, anchor_(0)
-			, insert_(true)
-			, highNibble_(true)
-		{
-		}
+		Cursor();
 
 		quint64 top() const
 		{
@@ -87,7 +84,8 @@ namespace Standard {
 		{
 			CursorSelection c = {
 				qMin(position_, anchor_),	// begin
-				qMax(position_, anchor_)	// end
+				qMax(position_, anchor_),	// end
+				anchor_
 			};
 			return c;
 		}
@@ -145,109 +143,9 @@ namespace Standard {
 		}
 
 	public:
-
-		template <class V>
-		void movePosition(V view, quint64 pos, bool sel, bool holdViewPos)
-		{
-			// view depends on
-			//   view->config()
-			//   view->height()
-
-			Q_ASSERT(pos <= document_->length());
-			quint64 top = top_;
-			
-			// Compute virtual position_ of caret
-			int vwOldPosLine = 0;
-			if (holdViewPos) {
-				vwOldPosLine = top_ - position_ / view->config().getNum();
-			}
-
-			const uint vwCountLine = view->config().drawableLines(view->height()) - 1;
-
-			//-- Update Cursor::top_ with position_
-			const bool goDown = position_ < pos;
-			if (goDown) {
-				const quint64 posLine = pos / view->config().getNum();
-
-				// if top_ + vwCountLine < posLine then Pos is invisible
-				if (vwCountLine <= posLine && top_ <= posLine - vwCountLine) {
-					top = (posLine - vwCountLine + 1);
-				}
-			} else {
-				top = (qMin(pos / view->config().getNum(), top_));
-			}
-
-			// Hold virtual position_ of caret
-			if (holdViewPos) {
-				const int vwNewPosLine = top_ - pos / view->config().getNum();
-				const uint diff = qAbs(vwOldPosLine - vwNewPosLine);
-				if (vwOldPosLine < vwNewPosLine) {
-					if (diff < top_) {
-						top = top_ - diff;
-					} else {
-						top = 0;
-					}
-				} else {
-					const quint64 maxTop = document_->length() / view->config().getNum() - vwCountLine + 1;
-					if (top_ < std::numeric_limits<quint64>::max() - diff && top_ + diff <= maxTop) {
-						top = top_ + diff;
-					} else {
-						top = maxTop;
-					}
-				}
-			}
-
-			if (top == top_) {
-				if (!sel && sel == hasSelection()) {
-					setPosition(pos);
-					setAnchor(pos);
-				} else {
-					// Redraw position only
-					quint64 begin = qMin(qMin(position_, anchor_), pos);
-					quint64 end = qMax(qMax(position_, anchor_), pos);
-					if (sel != hasSelection()) {
-						setAnchor(sel ? anchor_ : pos);
-					}
-					setPosition(pos);
-					redrawSelection(begin, end);
-				}
-			} else {
-				// Redraw all
-				setPosition(pos);
-				setAnchor(sel ? anchor_ : position_);
-				setTop(top);
-			}
-		}
-
-		void connectTo(Cursor *cursor)
-		{
-			QObject::connect(this, SIGNAL(topChanged(quint64)), cursor,  SLOT(setTop(quint64)));
-			QObject::connect(this, SIGNAL(positionChanged(quint64)), cursor,  SLOT(setPosition(quint64)));
-			QObject::connect(this, SIGNAL(anchorChanged(quint64)), cursor,  SLOT(setAnchor(quint64)));
-			QObject::connect(this, SIGNAL(insertChanged(bool)), cursor,  SLOT(setInsert(bool)));
-			QObject::connect(this, SIGNAL(selectionUpdate(quint64, quint64, bool)), cursor,  SLOT(redrawSelection(quint64, quint64, bool)));
-		}
-
-		quint64 getRelativePosition(qint64 relative_pos) const
-		{
-			const quint64 diff = static_cast<quint64>(qAbs(relative_pos));
-			quint64 pos = 0;
-			if (relative_pos < 0) {
-				if (position_ < diff) {
-					pos = 0;
-				} else {
-					pos = position_ - diff;
-				}
-			} else {
-				if (position_ < std::numeric_limits<quint64>::max() - diff && position_ + diff <= document_->length()) {
-					pos = position_ + diff;
-				} else {
-					pos = document_->length();
-				}
-			}
-			
-			return pos;
-		}
+		void movePosition(Global *global, int height, quint64 pos, bool sel, bool holdViewPos);
+		void connectTo(Cursor *cursor);
+		quint64 getRelativePosition(qint64 relative_pos, ::Document *document_) const;
 
 	signals:
 		void topChanged(quint64);

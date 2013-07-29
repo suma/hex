@@ -27,14 +27,14 @@ public:
 	~DocumentImpl();
 
 	uint insert_data(ulint pos, ulint bufPos, ulint length, quint8 type);
-	uint remove_data(ulint pos, ulint length);
+	uint remove_data(qint64 pos, ulint length);
+	uint move(qint64 pos, qint64 to, ulint length);
 	bool split(ulint pos);
 	bool unite(uint f);
 
-	inline ulint length() const { return length_; }
+	inline ulint length() const { return documents_.length(); }
 
 protected:
-	ulint length_;
 	DocumentMap documents_;
 
 };
