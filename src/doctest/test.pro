@@ -3,22 +3,28 @@
 ######################################################################
 
 QT += testlib
-TEMPLATE = app
+CONFIG += console
 TARGET = test
 DEPENDPATH += . ../control
 INCLUDEPATH += . ../control
 
-# Input
+mac {
+	CONFIG -= app_bundle
+}
+
+win32 {
+	CONFIG += console
+}
+
+unix {
+	LIBS += ../libcontrol.a
+}
+
 HEADERS += \
-	document.h \
-	document_i.h \
-	qfragmentmap_p.h \
 	rectest.h
 
 SOURCES += \
-	doctest.cpp \
-	document.cpp \
-	document_i.cpp
+	doctest.cpp
 
 
 CONFIG += x86_64
