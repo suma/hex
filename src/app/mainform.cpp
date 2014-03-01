@@ -25,9 +25,9 @@ MainForm::MainForm()
 
 	editor->setFocus(Qt::ActiveWindowFocusReason);
 
-	connect(ui.actionNew_N, SIGNAL(activated()), this, SLOT(newDocument()));
-	connect(ui.actionOpen_O, SIGNAL(activated()), this, SLOT(open()));
-	connect(ui.actionSave_As, SIGNAL(activated()), this, SLOT(saveAs()));
+    connect(ui.actionNew_N, SIGNAL(triggered()), this, SLOT(newDocument()));
+    connect(ui.actionOpen_O, SIGNAL(triggered()), this, SLOT(open()));
+    connect(ui.actionSave_As, SIGNAL(triggered()), this, SLOT(saveAs()));
 }
 
 MainForm::~MainForm()
@@ -146,6 +146,7 @@ bool MainForm::openFile(QString path)
 	Editor *editor = new Editor(this, document);
 
 	ui.tabWidget->addTab(editor, QFileInfo(path).fileName());
+    return true;
 }
 
 

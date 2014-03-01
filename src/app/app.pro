@@ -19,8 +19,7 @@ INCLUDEPATH += . \
 HEADERS += \
 	mainform.h \
 	writefileopration.h \
-	hexapp.h \
-	ui_main.h
+    hexapp.h
 
 SOURCES += \
 	mainform.cpp \

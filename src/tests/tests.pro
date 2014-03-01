@@ -1,6 +1,6 @@
 
 TEMPLATE = subdirs
-CONFIG += qtestlib
+QT += testlib
 SUBDIRS = document
 
 mac {
