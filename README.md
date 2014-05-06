@@ -1,6 +1,8 @@
 hex
 =========
-hex editor, I am currently developing.
+hex editor.
+
+This project is closed.
 
 
 ## Features
