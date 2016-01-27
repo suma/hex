@@ -2,6 +2,7 @@
 #pragma once
 
 #include <QtGlobal>
+#include <QObject>
 #include "../color.h"
 
 namespace Standard {
