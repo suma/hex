@@ -6,11 +6,11 @@ class Document;
 class Cursor
 {
 protected:
-	Document *doc_;
+  Document *doc_;
 
 public:
-	Cursor(Document *doc);
-	virtual ~Cursor();
+  Cursor(Document *doc);
+  virtual ~Cursor();
 
 };
 

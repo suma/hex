@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <QFont>
@@ -14,268 +13,266 @@ class Document;
 
 namespace Standard {
 
-	class CaretDrawer;
-	class HexCaretDrawer;
+  class CaretDrawer;
+  class HexCaretDrawer;
 
-	enum DrawMode {
-		DRAW_ALL = 0,
-		DRAW_LINE,
-		DRAW_AFTER,
-		DRAW_RANGE,	// [begin, end)
-	};
+  enum DrawMode {
+    DRAW_ALL = 0,
+    DRAW_LINE,
+    DRAW_AFTER,
+    DRAW_RANGE,  // [begin, end)
+  };
 
-	class HexConfig : public LocalConfig
-	{
-	private:
-		QRect byteMargin_;
+  class HexConfig : public LocalConfig
+  {
+  private:
+    QRect byteMargin_;
 
-	private:
-		std::vector<int> x_begin;	// pos of value
-		std::vector<int> x_end;		// pos of end
-		std::vector<int> x_area;
-	
-		uint getNumV() const
-		{
-			return global_->config().num() + 1;
-		}
+  private:
+    std::vector<int> x_begin;  // pos of value
+    std::vector<int> x_end;    // pos of end
+    std::vector<int> x_area;
 
-	public:
-		HexConfig(Global *global);
+    uint getNumV() const
+    {
+      return global_->config().num() + 1;
+    }
 
-		uint num() const
-		{
-			return global_->config().num();
-		}
+  public:
+    HexConfig(Global *global);
 
-		int byteWidth() const
-		{
-			return byteMargin_.left() + charWidth(2) + byteMargin_.right();
-		}
+    uint num() const
+    {
+      return global_->config().num();
+    }
 
-		const QRect &margin() const
-		{
-			return global_->config().margin();
-		}
-		const QRect &byteMargin() const
-		{
-			return byteMargin_;
-		}
-		int maxWidth() const
-		{
-			return X(num() - 1) + margin().right();
-		}
-		int x(size_t i) const
-		{
-			Q_ASSERT(i < num());
-			return x_begin[i];
-		}
-		int X(size_t i) const
-		{
-			Q_ASSERT(i < num());
-			return x_end[i];
-		}
-		int caretWidth() const
-		{
-			return 3;
-			//return byteMargin_.left() + charWidth();
-		}
-		int caretHeight() const
-		{
-			return byteHeight();
-		}
-		int width()
-		{
-			return byteWidth() * num() + margin().left() + margin().right();
-		}
-		//int drawableLines(int height) const;
-		int XToPos(int x) const;	// -1, 0..N => N + 1 patterns
-		int YToLine(int y) const;	// -1, 0..N
-		void update();
+    int byteWidth() const
+    {
+      return byteMargin_.left() + charWidth(2) + byteMargin_.right();
+    }
 
-		class XIterator
-		{
-		private:
-			const HexConfig &conf;
-			int pos_;
-			bool next_flag_;
-		public:
-			XIterator(const HexConfig &conf, int pos)
-				: conf(conf)
-				, pos_(pos)
-				, next_flag_(false)
-			{
-			}
+    const QRect &margin() const
+    {
+      return global_->config().margin();
+    }
+    const QRect &byteMargin() const
+    {
+      return byteMargin_;
+    }
+    int maxWidth() const
+    {
+      return X(num() - 1) + margin().right();
+    }
+    int x(size_t i) const
+    {
+      Q_ASSERT(i < num());
+      return x_begin[i];
+    }
+    int X(size_t i) const
+    {
+      Q_ASSERT(i < num());
+      return x_end[i];
+    }
+    int caretWidth() const
+    {
+      return 3;
+      //return byteMargin_.left() + charWidth();
+    }
+    int caretHeight() const
+    {
+      return byteHeight();
+    }
+    int width()
+    {
+      return byteWidth() * num() + margin().left() + margin().right();
+    }
+    //int drawableLines(int height) const;
+    int XToPos(int x) const;  // -1, 0..N => N + 1 patterns
+    int YToLine(int y) const;  // -1, 0..N
+    void update();
 
-		public:
-			XIterator operator++()
-			{
-				return *this += 1;
-			}
+    class XIterator
+    {
+    private:
+      const HexConfig &conf;
+      int pos_;
+      bool next_flag_;
+    public:
+      XIterator(const HexConfig &conf, int pos)
+        : conf(conf)
+        , pos_(pos)
+        , next_flag_(false)
+      {
+      }
 
-			XIterator &operator+=(uint i)
-			{
-				const int old = pos_;
-				pos_ = (pos_ + i) % conf.num();
-				setNext(pos_ < old);
-				return *this;
-			}
+    public:
+      XIterator operator++()
+      {
+        return *this += 1;
+      }
 
-			void operator++(int)
-			{
-				*this += 1;
-			}
+      XIterator &operator+=(uint i)
+      {
+        const int old = pos_;
+        pos_ = (pos_ + i) % conf.num();
+        setNext(pos_ < old);
+        return *this;
+      }
 
-			int operator*() const
-			{
-				return pos_;
-			}
+      void operator++(int)
+      {
+        *this += 1;
+      }
 
-			int screenX() const
-			{
-				return conf.x(pos_);
-			}
+      int operator*() const
+      {
+        return pos_;
+      }
 
-			int textX() const
-			{
-				return conf.x(pos_) + conf.byteMargin().left();
-			}
+      int screenX() const
+      {
+        return conf.x(pos_);
+      }
 
-			bool isNext() const
-			{
-				return next_flag_;
-			}
+      int textX() const
+      {
+        return conf.x(pos_) + conf.byteMargin().left();
+      }
 
-			void setNext(bool t)
-			{
-				next_flag_ = t;
-			}
-		};
+      bool isNext() const
+      {
+        return next_flag_;
+      }
 
-		class YIterator
-		{
-		private:
-			const HexConfig &conf;
-			int pos_;
-		public:
-			YIterator(const HexConfig &conf, int pos)
-				: conf(conf)
-				, pos_(pos)
-			{
-			}
+      void setNext(bool t)
+      {
+        next_flag_ = t;
+      }
+    };
 
-		public:
-			YIterator operator++()
-			{
-				pos_ += conf.byteHeight();
-				return *this;
-			}
+    class YIterator
+    {
+    private:
+      const HexConfig &conf;
+      int pos_;
+    public:
+      YIterator(const HexConfig &conf, int pos)
+        : conf(conf)
+        , pos_(pos)
+      {
+      }
 
-			void operator++(int)
-			{
-				pos_ += conf.byteHeight();
-			}
+    public:
+      YIterator operator++()
+      {
+        pos_ += conf.byteHeight();
+        return *this;
+      }
 
-			int operator*() const
-			{
-				return pos_;
-			}
+      void operator++(int)
+      {
+        pos_ += conf.byteHeight();
+      }
 
-			int screenY() const
-			{
-				return pos_ + conf.byteMargin_.top();
-			}
-		};
+      int operator*() const
+      {
+        return pos_;
+      }
 
-		XIterator createXIterator() const
-		{
-			return XIterator(*this, 0);
-		}
+      int screenY() const
+      {
+        return pos_ + conf.byteMargin_.top();
+      }
+    };
 
-		YIterator createYIterator(int pos) const
-		{
-			return YIterator(*this, pos);
-		}
-	};
+    XIterator createXIterator() const
+    {
+      return XIterator(*this, 0);
+    }
 
-	class HexView : public View
-	{
-		Q_OBJECT
+    YIterator createYIterator(int pos) const
+    {
+      return YIterator(*this, pos);
+    }
+  };
 
-	public:
-		HexView(QWidget *parent, Global *global);
-		~HexView();
+  class HexView : public View
+  {
+    Q_OBJECT
 
-		HexConfig &config()
-		{
-			return config_;
-		}
+  public:
+    HexView(QWidget *parent, Global *global);
+    ~HexView();
 
-		Caret &caret()
-		{
-			return caret_;
-		}
+    HexConfig &config()
+    {
+      return config_;
+    }
 
-		Cursor &cursor() const
-		{
-			return *cursor_;
-		}
+    Caret &caret()
+    {
+      return caret_;
+    }
 
-		CaretDrawer * createCaretWidget();
+    Cursor &cursor() const
+    {
+      return *cursor_;
+    }
 
-	private:
-		void paintEvent(QPaintEvent*);
-		void mousePressEvent(QMouseEvent*);
-		void mouseMoveEvent(QMouseEvent*);
-		void mouseReleaseEvent(QMouseEvent*);
-		void keyPressEvent(QKeyEvent *);
+    CaretDrawer * createCaretWidget();
 
-		void redrawSelection(quint64 begin, quint64 end);
+  private:
+    void paintEvent(QPaintEvent*);
+    void mousePressEvent(QMouseEvent*);
+    void mouseMoveEvent(QMouseEvent*);
+    void mouseReleaseEvent(QMouseEvent*);
+    void keyPressEvent(QKeyEvent *);
 
-	public:
-		//void movePosition(quint64 pos, bool sel, bool holdViewPos);
-		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
+    void redrawSelection(quint64 begin, quint64 end);
 
-	public:
-		// TODO change signal
-		void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
+  public:
+    //void movePosition(quint64 pos, bool sel, bool holdViewPos);
+    void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
 
-	public:
-		//void drawViewAfter(quint64 pos);
+  public:
+    // TODO change signal
+    void drawView(DrawMode mode = DRAW_ALL, int = 0, int = 0);
 
-	private:
+  public:
+    //void drawViewAfter(quint64 pos);
 
-		void drawLines(QPainter &painter, quint64 top, int y, int x_begin, int x_end, uint size);
+  private:
 
-		void drawText(QPainter &painter, const QString &hex, int x, int y);
+    void drawLines(QPainter &painter, quint64 top, int y, int x_begin, int x_end, uint size);
 
-	private:
+    void drawText(QPainter &painter, const QString &hex, int x, int y);
 
-		static void byteToHex(uchar c, QString &h);
-		quint64 posAt(const QPoint &pos) const;
+  private:
+
+    static void byteToHex(uchar c, QString &h);
+    quint64 posAt(const QPoint &pos) const;
 
 
-	private slots:
-		void inserted(quint64 pos, quint64 len);
-		void removed(quint64 pos, quint64 len);
+  private slots:
+    void inserted(quint64 pos, quint64 len);
+    void removed(quint64 pos, quint64 len);
 
-		// cursor changed
-		void topChanged(quint64);
-		void positionChanged(quint64, quint64);
-		void insertChanged(bool);
-		void selectionUpdate(quint64, quint64);
+    // cursor changed
+    void topChanged(quint64);
+    void positionChanged(quint64, quint64);
+    void insertChanged(bool);
+    void selectionUpdate(quint64, quint64);
 
-	private:
-		// Main components
-		Global *global_;
-		::Document *document_;
-		HexConfig config_;
-		Cursor *cursor_;
-		Caret caret_;
-		HexCaretDrawer *caret_drawer_;
-		Keyboard *keyboard_;
-		std::vector<uchar> buff_;
-	};
+  private:
+    // Main components
+    Global *global_;
+    ::Document *document_;
+    HexConfig config_;
+    Cursor *cursor_;
+    Caret caret_;
+    HexCaretDrawer *caret_drawer_;
+    Keyboard *keyboard_;
+    std::vector<uchar> buff_;
+  };
 
 }
-
-

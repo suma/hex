@@ -1,4 +1,3 @@
-
 #include "color.h"
 
 namespace Color {
@@ -9,4 +8,4 @@ const QString kSelectBackground = "SelectBackground";
 const QString kSelectText = "SelectText";
 const QString kCaretBackground = "CaretBackground";
 
-}	// namespace
+}  // namespace

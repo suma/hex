@@ -10,16 +10,16 @@ class View;
 class Control
 {
 protected:
-	Document *doc_;
-	typedef QMap<int, Cursor*> CursorMap;
-	CursorMap curs_;
+  Document *doc_;
+  typedef QMap<int, Cursor*> CursorMap;
+  CursorMap curs_;
 
 public:
-	Control(Document *doc);
-	~Control();
+  Control(Document *doc);
+  ~Control();
 
-	bool AddCursor(int id, Cursor *cur);
-	bool AddView(int id, View *view);
+  bool AddCursor(int id, Cursor *cur);
+  bool AddView(int id, View *view);
 
 };
 

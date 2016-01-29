@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <QtGlobal>
@@ -8,10 +7,8 @@ namespace Standard {
 class TextKeyboard
 {
 public:
-	void keyPressEvent(QKeyEvent *);
+  void keyPressEvent(QKeyEvent *);
 
 };
 
-
-}	// namespace
-
+}  // namespace

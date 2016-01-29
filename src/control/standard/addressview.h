@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <QWidget>
@@ -10,125 +9,124 @@ class ScrollBar;
 
 namespace Standard {
 
-	class Global;
-	class HexView;
-	class TextView;
-	class Cursor;
-	class LayeredWidget;
+  class Global;
+  class HexView;
+  class TextView;
+  class Cursor;
+  class LayeredWidget;
 
-	class AddressConfig : public QObject, public LocalConfig
-	{
-		Q_OBJECT
+  class AddressConfig : public QObject, public LocalConfig
+  {
+    Q_OBJECT
 
-	private:
-		QRect byteMargin_;
+  private:
+    QRect byteMargin_;
 
-		// FIXME: separete 3 attributes 
-		//  line
-		//  column(depends hex, text)
-		//  hex/text height
+    // FIXME: separete 3 attributes 
+    //  line
+    //  column(depends hex, text)
+    //  hex/text height
 
-		bool column_visible_;
-		bool line_visible_;
+    bool column_visible_;
+    bool line_visible_;
 
-	public:
-		AddressConfig(Global *global);
-		~AddressConfig();
+  public:
+    AddressConfig(Global *global);
+    ~AddressConfig();
 
-		QRect margin() const;
-		QRect byteMargin() const;
+    QRect margin() const;
+    QRect byteMargin() const;
 
-		int drawableLines(int height) const;
-		int top() const;
+    int drawableLines(int height) const;
+    int top() const;
 
-		int columnHeight() const;
+    int columnHeight() const;
 
-		bool columnVisible() const;
-		bool lineVisible() const;
-		void setColumnVisible(bool);
-		void setLineVisible(bool);
+    bool columnVisible() const;
+    bool lineVisible() const;
+    void setColumnVisible(bool);
+    void setLineVisible(bool);
 
-	signals:
-		void fontChanged(QFont);
-		void numChanged(uint);
-		//void styleChanged();
+  signals:
+    void fontChanged(QFont);
+    void numChanged(uint);
+    //void styleChanged();
 
-	};
+  };
 
-	class AddressView : public QWidget
-	{
-		Q_OBJECT
+  class AddressView : public QWidget
+  {
+    Q_OBJECT
 
-	public:
-		AddressView(QWidget *parent, Global *global);
-		~AddressView();
+  public:
+    AddressView(QWidget *parent, Global *global);
+    ~AddressView();
 
-		AddressConfig &config()
-		{
-			return config_;
-		}
+    AddressConfig &config()
+    {
+      return config_;
+    }
 
-		void connect(Cursor *cursor);
-		void paintEvent(QPaintEvent*);
-		void drawColumn();
-		void drawLine();
+    void connect(Cursor *cursor);
+    void paintEvent(QPaintEvent*);
+    void drawColumn();
+    void drawLine();
 
-		void setHexView(HexView *hex);
-		void setTextView(TextView *text);
+    void setHexView(HexView *hex);
+    void setTextView(TextView *text);
 
-		void addHex(QWidget*);
-		void addHexUnder(QWidget*);
-		void addText(QWidget*);
-		void addTextUnder(QWidget*);
+    void addHex(QWidget*);
+    void addHexUnder(QWidget*);
+    void addText(QWidget*);
+    void addTextUnder(QWidget*);
 
-		HexView *hexView() const;
-		TextView *textView() const;
+    HexView *hexView() const;
+    TextView *textView() const;
 
-		//LayeredWidget *hexLayer() const;
-		//LayeredWidget *textLayer() const;
+    //LayeredWidget *hexLayer() const;
+    //LayeredWidget *textLayer() const;
 
-	protected:
+  protected:
 
-		void childEvent(QChildEvent *);
-		void resizeEvent(QResizeEvent*);
-		void focusInEvent(QFocusEvent*);
+    void childEvent(QChildEvent *);
+    void resizeEvent(QResizeEvent*);
+    void focusInEvent(QFocusEvent*);
 
-		bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event);
 
-		// x
-		int hexPos() const;
-		int textPos() const;
-		// y
-		int y() const;
+    // x
+    int hexPos() const;
+    int textPos() const;
+    // y
+    int y() const;
 
-		void refreshScrollbarInfo();
-	
-	private slots:
-		void topChanged(quint64);
-		void positionChanged(quint64, quint64);
+    void refreshScrollbarInfo();
+  
+  private slots:
+    void topChanged(quint64);
+    void positionChanged(quint64, quint64);
 
-		// ScrollBar
-		void valueChanged(qint64 value);
+    // ScrollBar
+    void valueChanged(qint64 value);
 
-		// Document event
-		void documentChanged();
+    // Document event
+    void documentChanged();
 
-	protected:
-		AddressConfig config_;
-		Global *global_;
-		::ScrollBar *scrollbar_;
-		::Document *document_;
-		Cursor *cursor_;
-		QWidget *last_focus_;
-		HexView *hex_;
-		TextView *text_;
-		LayeredWidget *hex_layer_;
-		LayeredWidget *text_layer_;
+  protected:
+    AddressConfig config_;
+    Global *global_;
+    ::ScrollBar *scrollbar_;
+    ::Document *document_;
+    Cursor *cursor_;
+    QWidget *last_focus_;
+    HexView *hex_;
+    TextView *text_;
+    LayeredWidget *hex_layer_;
+    LayeredWidget *text_layer_;
 
-		bool column_visible_;
-		bool line_visible_;
-	
-	};
+    bool column_visible_;
+    bool line_visible_;
 
-}	// namespace Standard
+  };
 
+}  // namespace Standard

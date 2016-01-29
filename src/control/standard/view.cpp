@@ -1,11 +1,9 @@
-
-
 #include "view.h"
 
 namespace Standard {
 
 View::View(QWidget *parent)
-	: LayeredWidget(parent)
+  : LayeredWidget(parent)
 {
 }
 
@@ -13,18 +11,14 @@ View::~View()
 {
 }
 
-
 void View::focusInEvent(QFocusEvent*)
 {
-	emit focusIn();
+  emit focusIn();
 }
 
 void View::focusOutEvent(QFocusEvent*)
 {
-	emit focusOut();
+  emit focusOut();
 }
 
-
-
-}	// namespace
-
+}  // namespace

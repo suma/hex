@@ -5,12 +5,8 @@
 
 class HexApp : public QApplication
 {
-	Q_OBJECT
+  Q_OBJECT
 public:
-	HexApp(int argc, char *argv[]);
-	~HexApp();
-
-
-
+  HexApp(int argc, char *argv[]);
+  ~HexApp();
 };
-

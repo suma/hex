@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <QFont>
@@ -14,276 +13,274 @@
 class Document;
 
 namespace Standard {
-	class TextDecodeHelper;
-	class CaretDrawer;
-	class TextCaretDrawer;
+  class TextDecodeHelper;
+  class CaretDrawer;
+  class TextCaretDrawer;
 
-	class TextConfig : public LocalConfig
-	{
-	private:
-		QRect byteMargin_;
+  class TextConfig : public LocalConfig
+  {
+  private:
+    QRect byteMargin_;
 
-		std::vector<int> x_begin;	// pos of value
-		std::vector<int> x_end;		// pos of end
-		std::vector<int> x_area;
-	
-	private:
-		uint numV() const
-		{
-			return global_->config().num() + 1;
-		}
+    std::vector<int> x_begin;  // pos of value
+    std::vector<int> x_end;    // pos of end
+    std::vector<int> x_area;
 
-	public:
-		TextConfig(Global *global);
+  private:
+    uint numV() const
+    {
+      return global_->config().num() + 1;
+    }
 
-		uint num() const
-		{
-			return global_->config().num();
-		}
+  public:
+    TextConfig(Global *global);
 
-		int byteWidth() const
-		{
-			return charWidth(1);
-		}
-		const QRect &margin() const
-		{
-			return global_->config().margin();
-		}
-		const QRect &byteMargin() const
-		{
-			return byteMargin_;
-		}
-		int maxWidth() const
-		{
-			return X(x_begin.size() - 1) + margin().right();
-		}
-		int x(size_t i) const
-		{
-			Q_ASSERT(i < x_begin.size());
-			return margin().left() + x_begin[i];
-		}
-		int X(size_t i) const
-		{
-			Q_ASSERT(i < x_end.size());
-			return margin().left() + x_end[i];
-		}
-		int x_(size_t i) const
-		{
-			Q_ASSERT(i < x_begin.size());
-			return x_begin[i];
-		}
-		int X_(size_t i) const
-		{
-			Q_ASSERT(i < x_end.size());
-			return x_end[i];
-		}
-		int posWidth(size_t begin)
-		{
-			return x_end[begin] - x_begin[begin];
-		}
-		int posWidth(size_t begin, size_t end)
-		{
-			return x_end[end] - x_begin[begin];
-		}
-		int caretWidth() const
-		{
-			return 3;
-			//return byteMargin_.left() + charWidth();
-		}
-		int caretHeight() const
-		{
-			return byteHeight();
-		}
-		int width()
-		{
-			return charWidth(numV()) + margin().left() + margin().right();
-		}
-		//int drawableLines(int height) const;
-		int XToPos(int x) const;	// -1, 0..N => N + 2 patterns
-		int YToLine(int y) const;	// -1, 0..N
-		void update();
+    uint num() const
+    {
+      return global_->config().num();
+    }
 
-		class XIterator
-		{
-		private:
-			const TextConfig &conf;
-			int pos_;
+    int byteWidth() const
+    {
+      return charWidth(1);
+    }
+    const QRect &margin() const
+    {
+      return global_->config().margin();
+    }
+    const QRect &byteMargin() const
+    {
+      return byteMargin_;
+    }
+    int maxWidth() const
+    {
+      return X(x_begin.size() - 1) + margin().right();
+    }
+    int x(size_t i) const
+    {
+      Q_ASSERT(i < x_begin.size());
+      return margin().left() + x_begin[i];
+    }
+    int X(size_t i) const
+    {
+      Q_ASSERT(i < x_end.size());
+      return margin().left() + x_end[i];
+    }
+    int x_(size_t i) const
+    {
+      Q_ASSERT(i < x_begin.size());
+      return x_begin[i];
+    }
+    int X_(size_t i) const
+    {
+      Q_ASSERT(i < x_end.size());
+      return x_end[i];
+    }
+    int posWidth(size_t begin)
+    {
+      return x_end[begin] - x_begin[begin];
+    }
+    int posWidth(size_t begin, size_t end)
+    {
+      return x_end[end] - x_begin[begin];
+    }
+    int caretWidth() const
+    {
+      return 3;
+      //return byteMargin_.left() + charWidth();
+    }
+    int caretHeight() const
+    {
+      return byteHeight();
+    }
+    int width()
+    {
+      return charWidth(numV()) + margin().left() + margin().right();
+    }
+    //int drawableLines(int height) const;
+    int XToPos(int x) const;  // -1, 0..N => N + 2 patterns
+    int YToLine(int y) const;  // -1, 0..N
+    void update();
 
-			// 次の行を描画するか表すフラグ
-			bool next_flag_;
-		public:
-			XIterator(const TextConfig &conf, int pos)
-				: conf(conf)
-				, pos_(pos)
-				, next_flag_(false)
-			{
-			}
+    class XIterator
+    {
+    private:
+      const TextConfig &conf;
+      int pos_;
 
-		public:
-			XIterator operator++()
-			{
-				return *this += 1;
-			}
+      // 次の行を描画するか表すフラグ
+      bool next_flag_;
+    public:
+      XIterator(const TextConfig &conf, int pos)
+        : conf(conf)
+        , pos_(pos)
+        , next_flag_(false)
+      {
+      }
 
-			XIterator &operator+=(uint i)
-			{
-				const int old = pos_;
-				pos_ = (pos_ + i) % conf.num();
-				setNext(pos_ < old);
-				return *this;
-			}
+    public:
+      XIterator operator++()
+      {
+        return *this += 1;
+      }
 
-			void operator++(int)
-			{
-				*this += 1;
-			}
+      XIterator &operator+=(uint i)
+      {
+        const int old = pos_;
+        pos_ = (pos_ + i) % conf.num();
+        setNext(pos_ < old);
+        return *this;
+      }
 
-			int operator*() const
-			{
-				return pos_;
-			}
+      void operator++(int)
+      {
+        *this += 1;
+      }
 
-			int textX() const
-			{
-				return conf.x(pos_);
-			}
+      int operator*() const
+      {
+        return pos_;
+      }
 
-			bool isNext() const
-			{
-				return next_flag_;
-			}
+      int textX() const
+      {
+        return conf.x(pos_);
+      }
 
-			void setNext(bool t)
-			{
-				next_flag_ = t;
-			}
-		};
+      bool isNext() const
+      {
+        return next_flag_;
+      }
 
-		class YIterator
-		{
-		private:
-			const TextConfig &conf;
-			int pos_;
-		public:
-			YIterator(const TextConfig &conf, int pos)
-				: conf(conf)
-				, pos_(pos)
-			{
-			}
+      void setNext(bool t)
+      {
+        next_flag_ = t;
+      }
+    };
 
-		public:
-			YIterator operator++()
-			{
-				pos_ += conf.byteHeight();
-				return *this;
-			}
+    class YIterator
+    {
+    private:
+      const TextConfig &conf;
+      int pos_;
+    public:
+      YIterator(const TextConfig &conf, int pos)
+        : conf(conf)
+        , pos_(pos)
+      {
+      }
 
-			void operator++(int)
-			{
-				pos_ += conf.byteHeight();
-			}
+    public:
+      YIterator operator++()
+      {
+        pos_ += conf.byteHeight();
+        return *this;
+      }
 
-			int operator*() const
-			{
-				return pos_;
-			}
+      void operator++(int)
+      {
+        pos_ += conf.byteHeight();
+      }
 
-			int screenY() const
-			{
-				return pos_ + conf.byteMargin().top();
-			}
-		};
+      int operator*() const
+      {
+        return pos_;
+      }
 
-		XIterator createXIterator() const
-		{
-			return XIterator(*this, 0);
-		}
+      int screenY() const
+      {
+        return pos_ + conf.byteMargin().top();
+      }
+    };
 
-		YIterator createYIterator(int pos) const
-		{
-			return YIterator(*this, pos);
-		}
-	};
+    XIterator createXIterator() const
+    {
+      return XIterator(*this, 0);
+    }
 
-	class TextView : public View
-	{
-		Q_OBJECT
+    YIterator createYIterator(int pos) const
+    {
+      return YIterator(*this, pos);
+    }
+  };
 
-	public:
-		TextView(QWidget *parent, Global *global);
-		~TextView();
+  class TextView : public View
+  {
+    Q_OBJECT
 
-		TextConfig &config()
-		{
-			return config_;
-		}
+  public:
+    TextView(QWidget *parent, Global *global);
+    ~TextView();
 
-		Caret &caret()
-		{
-			return caret_;
-		}
+    TextConfig &config()
+    {
+      return config_;
+    }
 
-		Cursor &cursor()
-		{
-			return *cursor_;
-		}
+    Caret &caret()
+    {
+      return caret_;
+    }
 
-		CaretDrawer *createCaretWidget();
+    Cursor &cursor()
+    {
+      return *cursor_;
+    }
 
-	private:
-		void paintEvent(QPaintEvent*);
-		void mousePressEvent(QMouseEvent*);
-		void mouseMoveEvent(QMouseEvent*);
-		void mouseReleaseEvent(QMouseEvent*);
-		void keyPressEvent(QKeyEvent *);
+    CaretDrawer *createCaretWidget();
 
-		void inputMethodEvent(QInputMethodEvent *);
-		//QVariant inputMethodQuery(Qt::InputMethodQuery query) const;
+  private:
+    void paintEvent(QPaintEvent*);
+    void mousePressEvent(QMouseEvent*);
+    void mouseMoveEvent(QMouseEvent*);
+    void mouseReleaseEvent(QMouseEvent*);
+    void keyPressEvent(QKeyEvent *);
 
-		void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
-		void redrawSelection(quint64 begin, quint64 end);
+    void inputMethodEvent(QInputMethodEvent *);
+    //QVariant inputMethodQuery(Qt::InputMethodQuery query) const;
 
-	public slots:
-		// TODO change signal
-		void drawView();
+    void moveRelativePosition(qint64 pos, bool sel, bool holdViewPos);
+    void redrawSelection(quint64 begin, quint64 end);
 
-	private:
+  public slots:
+    // TODO change signal
+    void drawView();
 
-		void drawLines(QPainter &painter, quint64 top, int y, uint size);
-		void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
-		void drawText(QPainter &painter, const QString &str, int x, int y);
+  private:
 
-	private:
+    void drawLines(QPainter &painter, quint64 top, int y, uint size);
+    void drawText(QPainter &painter, const QString &hex, int x, int y, int charwidth);
+    void drawText(QPainter &painter, const QString &str, int x, int y);
 
-		quint64 posAt(const QPoint &pos) const;
+  private:
 
-		void caretDrawEvent(QPainter *painter);
+    quint64 posAt(const QPoint &pos) const;
 
-	private:
-		void removeData(quint64 pos, quint64 len);
+    void caretDrawEvent(QPainter *painter);
 
-	private slots:
-		void inserted(quint64 pos, quint64 len);
-		void removed(quint64 pos, quint64 len);
-		
-		// cursor changed
-		void topChanged(quint64);
-		void positionChanged(quint64, quint64);
-		void insertChanged(bool);
-		void selectionUpdate(quint64, quint64);
+  private:
+    void removeData(quint64 pos, quint64 len);
 
-	private:
-		// Main components
-		Global *global_;
-		::Document *document_;
-		TextConfig config_;
-		Cursor *cursor_;
-		TextCaretDrawer *caret_drawer_;
-		TextDecodeHelper *decode_helper_;
-		Caret caret_;
-		std::vector<uchar> buff_;
-	};
+  private slots:
+    void inserted(quint64 pos, quint64 len);
+    void removed(quint64 pos, quint64 len);
+    
+    // cursor changed
+    void topChanged(quint64);
+    void positionChanged(quint64, quint64);
+    void insertChanged(bool);
+    void selectionUpdate(quint64, quint64);
+
+  private:
+    // Main components
+    Global *global_;
+    ::Document *document_;
+    TextConfig config_;
+    Cursor *cursor_;
+    TextCaretDrawer *caret_drawer_;
+    TextDecodeHelper *decode_helper_;
+    Caret caret_;
+    std::vector<uchar> buff_;
+  };
 
 }
-
-

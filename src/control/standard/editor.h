@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <QWidget>
@@ -8,35 +7,35 @@ class Document;
 
 namespace Standard {
 
-	class Global;
-	class AddressView;
+  class Global;
+  class AddressView;
 
-	class Editor : public QWidget
-	{
-		Q_OBJECT
-	public:
-		Editor(QWidget *parent = NULL);
-		Editor(QWidget *parent, ::Document *document);
+  class Editor : public QWidget
+  {
+    Q_OBJECT
+  public:
+    Editor(QWidget *parent = NULL);
+    Editor(QWidget *parent, ::Document *document);
 
-		::Document *document() const
-		{
-			return global_->document();
-		}
+    ::Document *document() const
+    {
+      return global_->document();
+    }
 
-	protected:
+  protected:
 
-		void initView();
+    void initView();
 
-		void resizeEvent(QResizeEvent*);
-		void paintEvent(QPaintEvent *ev);
-		void focusInEvent(QFocusEvent*);
+    void resizeEvent(QResizeEvent*);
+    void paintEvent(QPaintEvent *ev);
+    void focusInEvent(QFocusEvent*);
 
-	protected:
+  protected:
 
-		Global *global_;
-		AddressView *view_;
+    Global *global_;
+    AddressView *view_;
 
-	};
+  };
 
 
-}	// namespace Standard
+}  // namespace Standard
