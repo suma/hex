@@ -25,9 +25,9 @@ MainForm::MainForm()
 
   editor->setFocus(Qt::ActiveWindowFocusReason);
 
-    connect(ui.actionNew_N, SIGNAL(triggered()), this, SLOT(newDocument()));
-    connect(ui.actionOpen_O, SIGNAL(triggered()), this, SLOT(open()));
-    connect(ui.actionSave_As, SIGNAL(triggered()), this, SLOT(saveAs()));
+  connect(ui.actionNew_N, SIGNAL(triggered()), this, SLOT(newDocument()));
+  connect(ui.actionOpen_O, SIGNAL(triggered()), this, SLOT(open()));
+  connect(ui.actionSave_As, SIGNAL(triggered()), this, SLOT(saveAs()));
 }
 
 MainForm::~MainForm()
@@ -158,7 +158,7 @@ Document *MainForm::saveFile(QString path, Document *document)
 
   bool reopen_doc = false;
   WriteFileOperation operation(this, path, document, reopen_doc);
-  
+
   if (!operation.wasCanceled() && !operation.success()) {
     // TODO: show error message
   }

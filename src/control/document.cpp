@@ -44,7 +44,6 @@ protected:
   // mapped offset and size
   mutable quint64 offset_;
   mutable quint64 size_;
-  
 
 public:
   FileOriginal(QFile *file, size_t buffer_size = Document::DEFAULT_BUFFER_SIZE)

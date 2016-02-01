@@ -149,14 +149,14 @@ void ScrollBar::paintEvent(QPaintEvent *)
     // absolute bar(down side)
 
     // relative bar(upper side)
-  
+
   }
 
   if (orientation_ == Qt::Vertical) {
     //qDebug() << "paint pos:" << pos << " size:" << draw_bar_size;
     // absolute bar(right side)
     painter.fillRect(bar_size, pos, bar_size, draw_bar_size, QBrush(QColor(255, 255, 0, 160)));
-    
+
     // relative bar(left side)
   }
 }

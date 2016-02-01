@@ -36,8 +36,6 @@ public:
 
 protected:
   DocumentMap documents_;
-
 };
-
 
 #endif

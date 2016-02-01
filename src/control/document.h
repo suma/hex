@@ -197,5 +197,4 @@ protected:
   QFile *file_;
   QUndoStack *undo_stack_;
   Buffer buffer_;
-
 };
