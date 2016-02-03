@@ -2,7 +2,7 @@
 TEMPLATE = subdirs
 LANGUAGE = C++
 EXTRAS = control app tests
-CONFIG += x86_64 ordered debug
+CONFIG += x86_64 ordered debug c++14
 QMAKE_CXXFLAGS += -std=c++14
 
 for(dir, EXTRAS) {
