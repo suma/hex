@@ -308,8 +308,7 @@ void HexView::redrawSelection(quint64 begin, quint64 end)
   const int endLine   = qMax(end, cursor_->top()) - cursor_->top();
 
   //qDebug("redrawSelection %d, %d, Top:%llu", beginLine, endLine, Top);
-//  drawView(DRAW_RANGE, beginLine, endLine + 1);
-  update();
+  drawView(DRAW_RANGE, beginLine, endLine + 1);
 }
 
 void HexView::inserted(quint64 pos, quint64 len)
