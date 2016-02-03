@@ -103,7 +103,7 @@ int ScrollBar::drawBarSize() const
   return qMax(static_cast<int>(clientSize() * ratio), bar_size);
 }
 
-int ScrollBar::sliderPositionFromValue(qint64 logicalValue, int span, bool upsideDown) const
+int ScrollBar::sliderPositionFromValue(qint64 logicalValue, int span, bool /*upsideDown*/) const
 {
   // fix client size using barsize
   const int fix_client_size = qMax(clientSize() - span, 0);
@@ -118,7 +118,7 @@ int ScrollBar::sliderPositionFromValue(qint64 logicalValue, int span, bool upsid
   return qMin(static_cast<int>(fix_client_size * screen_pos_ratio), fix_client_size);
 }
 
-qint64 ScrollBar::sliderValueFromPosition(int position, int span, bool upsideDown)
+qint64 ScrollBar::sliderValueFromPosition(int position, int span, bool /*upsideDown*/)
 {
   // fix client size using barsize
   const int fix_client_size = qMax(clientSize() - span, 0);

@@ -65,7 +65,7 @@ void Editor::initView()
   hex->setFocus(Qt::OtherFocusReason);
 }
 
-void Editor::paintEvent(QPaintEvent *ev)
+void Editor::paintEvent(QPaintEvent */*ev*/)
 {
   // FIXME: set background
   //QPainter painter(this);

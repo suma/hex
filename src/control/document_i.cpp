@@ -88,6 +88,7 @@ uint DocumentImpl::move(qint64 pos, qint64 to, ulint length)
   split(pos);
   split(pos+length);
 
+  uint dst = needsInsert ? documents_.findNode(to) : 0;
   ulint dstPos = to;
 
   uint x = documents_.findNode(pos);

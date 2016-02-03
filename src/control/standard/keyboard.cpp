@@ -100,7 +100,7 @@ void Keyboard::keyPressEvent(QKeyEvent *ev)
   }
 }
 
-void Keyboard::keyInputEvent(QString str)
+void Keyboard::keyInputEvent(QString /*str*/)
 {
 }
 
