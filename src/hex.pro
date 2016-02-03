@@ -3,6 +3,7 @@ TEMPLATE = subdirs
 LANGUAGE = C++
 EXTRAS = control app tests
 CONFIG += x86_64 ordered debug
+QMAKE_CXXFLAGS += -std=c++14
 
 for(dir, EXTRAS) {
 	exists($$dir) {
