@@ -71,8 +71,6 @@ uint DocumentImpl::insert_data(ulint pos, ulint bufPos, ulint length, quint8 typ
 uint DocumentImpl::remove_data(qint64 pos, ulint length)
 {
   Q_ASSERT(pos >= 0 && pos+length <= documents_.length());
-
-  uint x = documents_.findNode(pos);
   return move(pos, -1, length);
 }
 
