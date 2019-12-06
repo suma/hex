@@ -32,3 +32,6 @@ This project is closed.
  * ./src/control/qfragmentmap\_p.hpp
 * Shuzo's original code are under New BSD License(3-clause BSD License)
 
+## Screen shot
+
+![hex editor screenshot](https://gyazo.com/48607d1eb62e0058d0a10a29fc6fac5e/raw)
